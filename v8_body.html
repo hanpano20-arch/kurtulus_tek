@@ -1,0 +1,440 @@
+<div class="app">
+<div class="app-header">
+  <div class="logo">
+    <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#534AB7" stroke-width="1.5"/><path d="M5 8h6M8 5v6" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </div>
+  <div>
+    <div class="app-title">Kolon Prompt Builder</div>
+    <div class="app-sub">Covering Design · 6/60 & 6/90 · Tek Analiz Motoru · Final Birleşik</div>
+  </div>
+  <span class="badge-ver">v6.8 FINAL</span>
+</div>
+
+<div class="quick-guide">
+  <b>Nasıl kullanılır?</b> 1) Sayı havuzunu yaz. 2) <b>Toplam / tek-çift / bölge kota paketlerini</b> ayarla. 3) <b>Sayısal Tablo Bölgesi</b> ve diğer filtreleri seç. 4) <b>Analiz Et</b> butonuna bas. 5) Kota toplamları, aday sayısı ve Jaccard raporunu kontrol et. 6) <b>Paketli Üretim</b> bölümünde 40/12/8 stratejisini ayarla. 7) Kırmızı uyarı yoksa <b>Prompt oluştur</b>.
+</div>
+
+<div class="persist-panel">
+  <div class="persist-head">
+    <div class="step-dot new">S</div>
+    <span class="persist-title">Otomatik Kayıt ve Yedekleme</span>
+    <span class="persist-status" id="autosave-status">Hazırlanıyor…</span>
+  </div>
+  <div class="persist-note">
+    Ayarlar tarayıcıya otomatik kaydedilir. Sayfayı yanlışlıkla yenilersen veya kapatıp açarsan son ayarların geri yüklenir. Ek güvenlik için “Yedek indir” ile ayar dosyası alabilirsin.
+  </div>
+  <div class="persist-grid">
+    <button class="btn small" onclick="manualSaveSettings()">Şimdi kaydet</button>
+    <button class="btn small" onclick="exportSettingsJson()">Yedek indir</button>
+    <button class="btn small" onclick="document.getElementById('settings-import-file').click()">Yedekten yükle</button>
+    <button class="btn small" onclick="clearSavedSettings()">Kaydı sıfırla</button>
+  </div>
+  <input type="file" id="settings-import-file" accept="application/json,.json" style="display:none" onchange="importSettingsJson(this)">
+</div>
+
+<!-- SKOR PANELİ -->
+<div class="score-panel">
+  <div class="score-header">
+    <span class="score-title">Kural Sıkılık Skoru</span>
+    <span class="score-badge score-warn" id="score-badge">Analiz bekleniyor</span>
+  </div>
+  <div class="card" id="v73-control-card">
+        <div class="card-head"><div class="step-dot new">K</div><span class="card-title">Kontrol Kolonu Analizi</span><span class="new-badge">v7.3.1</span><span class="card-note">backtest sonucu nerede kaldı?</span></div>
+        <div class="section-note purple">Backtest modunda girilen gerçek sonuç / kontrol kolonu üretime zorunlu eklenmez. Bu panel, o kolonun aktif kesin kurallardan geçip geçmediğini, skordan sonra kalıp kalmadığını ve final Jaccard seçimine girip girmediğini gösterir.</div>
+        <div class="v73-mini-grid">
+          <div class="v73-mini-box"><div class="v" id="v73-ctrl-combo">—</div><div class="l">Kontrol kolonu</div></div>
+          <div class="v73-mini-box"><div class="v" id="v73-ctrl-valid">—</div><div class="l">Kesin kurallar</div></div>
+          <div class="v73-mini-box"><div class="v" id="v73-ctrl-score">—</div><div class="l">Skor / risk</div></div>
+          <div class="v73-mini-box"><div class="v" id="v73-ctrl-passed">—</div><div class="l">Uç/skor sonrası</div></div>
+          <div class="v73-mini-box"><div class="v" id="v73-ctrl-final">—</div><div class="l">Final seçim</div></div>
+        </div>
+        <textarea id="v73-control-output" class="elim-output" readonly style="margin-top:10px;min-height:150px" placeholder="Backtest modunda kontrol kolonu gir ve Analiz Et butonuna bas."></textarea>
+      </div>
+  <div class="score-grid">
+    <div class="score-card"><div class="val" id="sc-valid">—</div><div class="lbl">Geçerli kombinasyon</div><div class="sub">tüm kurallar sonrası</div></div>
+    <div class="score-card"><div class="val" id="sc-ratio">—</div><div class="lbl">Havuzdan geçen oran</div><div class="sub">C(v,k) içinden</div></div>
+    <div class="score-card"><div class="val" id="sc-spread">—</div><div class="lbl">Frekans açıklığı</div><div class="sub">max/min oranı</div></div>
+    <div class="score-card"><div class="val" id="sc-outvalid">—</div><div class="lbl">Uçtan sonra kalan</div><div class="sub">skor filtresi sonrası</div></div>
+    <div class="score-card"><div class="val" id="sc-outavg">—</div><div class="lbl">Ortalama uç skor</div><div class="sub">0 iyi · 100 uç</div></div>
+    <div class="score-card"><div class="val" id="sc-outrej">—</div><div class="lbl">Elenen uç kolon</div><div class="sub">aday içinden</div></div>
+    <div class="score-card"><div class="val" id="sc-jaccfit">—</div><div class="lbl">Jaccard sonrası</div><div class="sub">seçilebilir / hedef</div></div>
+    <div class="score-card"><div class="val" id="sc-jaccstatus">—</div><div class="lbl">Üretilebilirlik</div><div class="sub">greedy simülasyon</div></div>
+    <div class="score-card"><div class="val" id="sc-jaccmax">—</div><div class="lbl">Seçilen max ortak</div><div class="sub">ortak / Jaccard</div></div>
+  </div>
+  <div class="warn-list" id="warn-list"><div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">Havuzu gir ve "Analiz Et" butonuna bas.</div></div>
+  <div id="freq-area"></div>
+  <button class="btn analyze" onclick="runAnalysis()" style="margin-top:12px;width:100%;padding:.55rem" id="analyze-btn">Analiz Et ↗</button>
+</div>
+
+<!-- ELEME RAPORU -->
+<div class="card" id="elim-report-card">
+  <div class="card-head">
+    <div class="step-dot new">R</div>
+    <span class="card-title">Eleme Raporu</span>
+    <span class="new-badge">Final</span>
+    <span class="card-note">elenen kolonları gör</span>
+  </div>
+  <div class="section-note purple">
+    Analizden sonra burada <b>uç skor filtresinin elediği kolonlar</b>, skordan geçen ama riskli kalan kolonlar ve en dengeli adaylar listelenir. Liste kolon, skor ve eleme nedenini gösterir.
+  </div>
+  <div class="outlier-mini-grid">
+    <div class="outlier-mini"><div class="val" id="elim-count">—</div><div class="lbl">Listelenen kolon</div></div>
+    <div class="outlier-mini"><div class="val" id="elim-total">—</div><div class="lbl">Toplam ilgili aday</div></div>
+    <div class="outlier-mini"><div class="val" id="elim-topreason">—</div><div class="lbl">En sık neden</div></div>
+  </div>
+  <div class="elim-toolbar">
+    <select id="elim-mode" class="elim-select" onchange="renderElimReport()">
+      <option value="rejected">Uç skoruyla elenen kolonlar</option>
+      <option value="passed_risky">Skordan geçen ama riskli olanlar</option>
+      <option value="passed_best">Skordan geçen en dengeli kolonlar</option>
+      <option value="all_scored">Tüm geçerli adayların skor tablosu</option>
+    </select>
+    <input id="elim-search" class="elim-input" placeholder="Ara: sayı veya neden" oninput="renderElimReport()">
+    <input id="elim-limit" class="elim-input" type="number" value="200" min="20" max="5000" step="20" onchange="renderElimReport()">
+  </div>
+  <div class="reason-tags" id="elim-reasons"></div>
+  <textarea id="elim-output" class="elim-output" readonly placeholder="Önce Analiz Et butonuna bas. Sonra elenen kolonlar burada görünecek."></textarea>
+  <div class="btn-row">
+    <button class="btn" onclick="copyElimReport()">Listeyi kopyala</button>
+    <button class="btn" onclick="downloadElimCsv()">CSV indir</button>
+  </div>
+  <div class="elim-help">Not: Bu rapor, kesin kurallardan geçip <b>uç skor filtresine takılan</b> kolonları gösterir. Kesin kurallara daha başta takılan ham kombinasyonlar çok fazla olabileceği için burada listelenmez.</div>
+
+</div>
+
+<!-- KURAL TEST PANELİ v7.13 -->
+<div class="card" id="rule-test-card">
+  <div class="card-head">
+    <div class="step-dot new">?</div>
+    <span class="card-title">Kural Test Paneli</span>
+    <span class="new-badge">v7.13</span>
+    <span class="card-note">Hangi kurala takıldı?</span>
+  </div>
+  <div class="section-note purple">
+    Sayıları girerek hangi kurala takıldığını anında gör. Sayı girdikçe kurallar canlı kontrol edilir — tüm 6 sayıyı girmene gerek yok, 2–6 sayı arası test yapabilirsin. Havuzda var mı kontrolü de gösterilir.
+  </div>
+  <div class="row" style="gap:8px;flex-wrap:wrap;align-items:center;">
+    <input id="rtp-input" class="elim-input" style="flex:1;min-width:200px;" placeholder="Test sayıları gir (örn: 13 18 35 45 46 50)" oninput="runRuleTest()">
+    <button class="btn" onclick="document.getElementById('rtp-input').value='';runRuleTest()">Temizle</button>
+  </div>
+  <div id="rtp-result" style="margin-top:10px;font-size:13px;line-height:1.7;"></div>
+</div>
+
+<!-- JACCARD ÜRETİLEBİLİRLİK RAPORU -->
+<div class="card" id="v712-start-end-card"></div>
+  <div class="card" id="jaccard-report-card">
+  <div class="card-head">
+    <div class="step-dot new">J</div>
+    <span class="card-title">Jaccard Üretilebilirlik Raporu</span>
+    <span class="new-badge">Final</span>
+    <span class="card-note">60 kolon seçilebilir mi?</span>
+  </div>
+  <div class="section-note purple">
+    Analizden sonra burada <b>uç skordan geçen adaylardan</b> Jaccard / max ortak sayı kuralıyla kaç kolon seçilebildiği görünür. Bu kontrol, gerçek üretimden önce “60 kolon çıkar mı?” sorusuna erken uyarı verir.
+  </div>
+  <div class="outlier-mini-grid">
+    <div class="outlier-mini"><div class="val" id="jacc-target">—</div><div class="lbl">Hedef kolon</div></div>
+  <div class="card" id="v73-band-card">
+        <div class="card-head"><div class="step-dot new">B</div><span class="card-title">Skor Bandı Karışım Modu</span><span class="new-badge">v7.3.1</span><span class="card-note">Jaccard seçimi skor uçlarına yığılmasın</span></div>
+        <div class="section-note purple">Bu mod Jaccard seçiminde yalnız skor 0 ve yüksek skor uçlarının baskın olmasını azaltır. Önce skor bantlarından minimum pay alınır, sonra Jaccard / max ortak / frekans öncelikleriyle tamamlanır.</div>
+        <div class="row"><div class="row-lbl">Skor bandı kotası<div class="row-sub">aktifse final seçim skor bantlarından karışık yapılır</div></div><label class="check-wrap"><input type="checkbox" id="p-band-active" checked>Aktif</label></div>
+        <table class="v73-band-table">
+          <thead><tr><th>Skor bandı</th><th>Minimum</th><th>Maksimum</th></tr></thead>
+          <tbody>
+            <tr><td>0–5 düşük skor</td><td><input type="number" id="p-band-0-5-min" value="12" min="0" max="300"></td><td><input type="number" id="p-band-0-5-max" value="20" min="0" max="300"></td></tr>
+            <tr><td>6–10 orta düşük</td><td><input type="number" id="p-band-6-10-min" value="8" min="0" max="300"></td><td><input type="number" id="p-band-6-10-max" value="18" min="0" max="300"></td></tr>
+            <tr><td>11–15 orta</td><td><input type="number" id="p-band-11-15-min" value="8" min="0" max="300"></td><td><input type="number" id="p-band-11-15-max" value="18" min="0" max="300"></td></tr>
+            <tr><td>16–20 orta risk</td><td><input type="number" id="p-band-16-20-min" value="8" min="0" max="300"></td><td><input type="number" id="p-band-16-20-max" value="18" min="0" max="300"></td></tr>
+            <tr><td>21+ yüksek risk</td><td><input type="number" id="p-band-21-min" value="0" min="0" max="300"></td><td><input type="number" id="p-band-21-max" value="8" min="0" max="300"></td></tr>
+          </tbody>
+        </table>
+        <div class="section-note" id="v73-band-status">Analiz sonrası seçilen kolonların skor bandı dağılımı burada raporlanır.</div>
+      </div>
+  <div class="card" id="v76-final-selection-card">
+      <div class="card-head"><div class="step-dot new">F</div><span class="card-title">Final Seçim Gelişmiş Ayarlar</span><span class="new-badge">v7.6</span><span class="card-note">kaçan temiz kolonları koru</span></div>
+      <div class="section-note purple">Bu bölüm aktif kesin kuralları değiştirmez. Sadece kurallardan geçen adaylar içinden final 60 kolonun seçimini dengeler: aynı 3'lü çekirdeğe yığılmayı azaltır, skor 0 temiz kolonlara temsil verir ve omurga benzerliğini kontrol eder. v7.10 ile paketli modda her paket kendi uç skor sınırına kilitlenir; paket kotası başka pakete taşmaz.</div>
+      <div class="row"><div class="row-lbl">Final seçim gelişmiş modu<div class="row-sub">Kurallar aynı kalır; seçim motoru çeşitlilik ve temsil önceliğiyle çalışır.</div></div><label class="check-wrap"><input type="checkbox" id="p-v76-final-active" checked>Aktif</label></div>
+      <div class="v76-final-grid">
+        <div class="v76-final-box"><label><input type="checkbox" id="p-v76-core-active" checked> 3'lü çekirdek tekrar limiti</label><input type="number" id="p-v76-core-max" value="5" min="1" max="30"></div>
+        <div class="v76-final-box"><label><input type="checkbox" id="p-v76-score0-active" checked> Skor 0 temsil zorunluluğu</label><input type="number" id="p-v76-score0-min" value="10" min="0" max="60"></div>
+        <div class="v76-final-box"><label><input type="checkbox" id="p-v76-backbone-active" checked> Omurga benzerlik limiti</label><select id="p-v76-backbone-pct"><option value="0.50">%50</option><option value="0.66" selected>%66</option><option value="0.75">%75</option><option value="1">Kapalı gibi</option></select></div>
+        <div class="v76-final-box"><label><input type="checkbox" id="p-v76-rotation-active" checked> Çekirdek rotasyon modu</label><select id="p-v76-rotation-mode"><option value="on" selected>Açık</option><option value="soft">Yumuşak</option></select></div>
+      </div>
+      <div class="v76-mini-status" id="v76-final-status">Aktif: Final seçim, iyi kolonları sadece skor/Jaccard yüzünden dışarıda bırakmadan daha dengeli temsil etmeye çalışır.</div></div>
+    <div class="outlier-mini"><div class="val" id="jacc-selected">—</div><div class="lbl">Seçilebilen</div></div>
+    <div class="outlier-mini"><div class="val" id="jacc-status">—</div><div class="lbl">Durum</div></div>
+  </div>
+  <textarea id="jacc-output" class="elim-output" readonly placeholder="Önce Analiz Et butonuna bas. Jaccard üretilebilirlik raporu burada görünecek."></textarea>
+  <div class="btn-row">
+    <button class="btn" onclick="copyJaccardReport()">Jaccard raporunu kopyala</button>
+    <button class="btn primary" onclick="copyJaccardSelectedExcel()">Seçilen kolonları Excel için kopyala</button>
+  </div>
+  <textarea id="jacc-excel-output" class="elim-output" readonly style="min-height:160px;margin-top:8px" placeholder="Analizden sonra 'Seçilen kolonları Excel için kopyala' butonuna bas. Burada sadece 6 sayı TAB ayrımlı, sıra no/açıklama olmadan görünür."></textarea>
+
+  <!-- BATCH ÇEKİM PANELİ v7.13 -->
+  <div style="border:1px solid var(--color-border);border-radius:8px;padding:12px;margin-top:12px;background:var(--color-surface-2);">
+    <div style="font-weight:600;font-size:13px;margin-bottom:8px;color:var(--color-text);">🔄 Seri Batch Çekim — Havuzdan 60'ar Kolon Al</div>
+    <div class="section-note purple" style="margin-bottom:10px;">
+      Her "Sonraki Seriyi Al" basışında, önceki serilerde seçilen kolonlar dışlanarak havuzdan bir sonraki en çeşitli 60 kolon seçilir. Seri numaralı Excel çıktısı verir. Sıfırla butonu tüm dışlama listesini temizler.
+    </div>
+    <div id="batch-status" style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;">
+      Seri: — &nbsp;|&nbsp; Dışlanan: 0 kolon &nbsp;|&nbsp; Havuzda kalan: —
+    </div>
+    <div class="btn-row" style="flex-wrap:wrap;gap:6px;">
+      <button class="btn primary" onclick="batchNextSeries()">▶ Sonraki Seriyi Al</button>
+      <button class="btn" onclick="batchCopyExcel()">📋 Bu Seriyi Excel için Kopyala</button>
+      <button class="btn" onclick="batchReset()" style="color:var(--color-red,#e53);">✕ Sıfırla</button>
+    </div>
+    <textarea id="batch-excel-output" class="elim-output" readonly style="min-height:120px;margin-top:8px" placeholder="'Sonraki Seriyi Al' butonuna bas. Her seri öncekilerden farklı kolonlar üretir."></textarea>
+  </div>
+
+  <div class="elim-help">Not: Bu kontrol greedy tabanlı simülasyondur. Kırmızı uyarı verirse Jaccard veya max ortak sayı kuralı pratikte fazla sıkı demektir.</div>
+</div>
+
+<!-- 1. HAVUZ -->
+<div class="card">
+  <div class="card-head"><div class="step-dot">1</div><span class="card-title">Sayı havuzu</span><span class="card-note" id="pool-count">— sayı</span></div>
+  <textarea class="pool-input" id="poolInput" oninput="parsePool()" placeholder="Virgül veya boşlukla gir...">10, 12, 14, 16, 17, 18, 20, 32, 34, 38, 46, 48, 51, 60, 62, 63, 64, 68, 70</textarea>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-n" id="s-total">—</div><div class="stat-l">Toplam</div></div>
+    <div class="stat"><div class="stat-n" id="s-odd">—</div><div class="stat-l">Tek</div></div>
+    <div class="stat"><div class="stat-n" id="s-even">—</div><div class="stat-l">Çift</div></div>
+    <div class="stat"><div class="stat-n" id="s-prime">—</div><div class="stat-l">Asal ★</div></div>
+    <div class="stat"><div class="stat-n" id="s-low">—</div><div class="stat-l">1–45</div></div>
+    <div class="stat"><div class="stat-n" id="s-high">—</div><div class="stat-l">46–90</div></div>
+  </div>
+  <div class="tags" id="tagArea"></div>
+  <div class="legend">
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#E6F1FB;border:0.5px solid #85B7EB"></span>Tek</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#EAF3DE;border:0.5px solid #97C459"></span>Çift</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FAEEDA;border:0.5px solid #EF9F27"></span>★ Asal</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;outline:2px solid #D4537E;outline-offset:1px"></span>1–45</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;outline:2px solid #1D9E75;outline-offset:1px"></span>46–90</span>
+  </div>
+</div>
+
+<!-- 2. TEMEL -->
+<div class="card">
+  <div class="card-head"><div class="step-dot">2</div><span class="card-title">Temel parametreler</span></div>
+  <div class="row"><div class="row-lbl">Oyun tipi<div class="row-sub" id="game-lbl">6/90 · sayı aralığı 1–90</div></div>
+  <div class="card" id="v74-general-card">
+      <div class="card-head"><div class="step-dot new">G</div><span class="card-title">Genel Üretim Ayarları</span><span class="new-badge">v7.4</span><span class="card-note">paketli mod pasifken geçerli tek merkez</span></div>
+      <div class="section-note purple">Paketli üretim <b>pasif</b> olduğunda bu karttaki genel kolon / t / Jaccard / max ortak / uç skor değerleri kullanılır. Paketli üretim aktifse bu genel değerler promptta devre dışı yazılır; paket kartlarındaki değerler geçerli olur.</div>
+      <div class="v74-general-grid">
+        <div class="v74-general-box"><label>Genel kolon sayısı</label><input type="number" id="v74-g-cols" min="1" max="300"></div>
+        <div class="v74-general-box"><label>Genel t seviyesi</label><input type="number" id="v74-g-t" min="3" max="6"></div>
+        <div class="v74-general-box"><label>Genel Jaccard</label><input type="number" id="v74-g-jaccard" min="0.1" max="0.95" step="0.05"></div>
+        <div class="v74-general-box"><label>Genel max ortak</label><input type="number" id="v74-g-maxcommon" min="1" max="5"></div>
+        <div class="v74-general-box"><label>Genel uç skor</label><input type="number" id="v74-g-outmax" min="0" max="100"></div>
+      </div>
+      <div class="row" style="border-bottom:none;margin-top:6px"><div class="row-lbl">Genel uç skor filtresi<div class="row-sub">Paketli üretim pasifse genel uç skor için kullanılır</div></div><label class="check-wrap"><input type="checkbox" id="v74-g-outactive">Aktif</label></div>
+      <div class="v74-note" id="v74-general-status">Durum hazırlanıyor.</div></div><select class="num-in" id="p-game" style="width:120px" onchange="setGameType(this.value)"><option value="90" selected>6/90</option><option value="60">6/60</option></select></div>
+  <div class="row"><div class="row-lbl">Kolon boyutu (k)</div><input class="num-in" type="number" id="p-k" value="6" min="4" max="10" oninput="updateEven()"></div>
+  <div class="row"><div class="row-lbl">Tutma seviyesi (t)</div><input class="num-in" type="number" id="p-t" value="4" min="3" max="6"></div>
+  <div class="row"><div class="row-lbl">Kolon sayısı</div><input class="num-in" type="number" id="p-cols" value="60" min="1" max="300"></div>
+  <div class="row"><div class="row-lbl">Banko sayılar</div><input class="num-in" id="p-banko" placeholder="YOK" style="width:120px"></div>
+</div>
+
+<!-- 3. TOPLAM KOTALARI -->
+<div class="card">
+  <div class="card-head"><div class="step-dot">3</div><span class="card-title">Toplam aralığı kota paketleri</span><span class="new-badge">Final</span></div>
+  <div class="section-note purple">4 ayrı toplam aralığı tanımlayabilirsin. Aralıklar üst üste binebilir; bu bilinçli tercih sayılır ve çakışma uyarısı verilmez. Sadece kolon adetlerinin toplamı kontrol edilir.</div>
+  <table class="quota-table">
+    <thead><tr><th>Paket</th><th>Min toplam</th><th>Max toplam</th><th>Kolon adedi</th></tr></thead>
+    <tbody>
+      <tr><td>Toplam Paketi 1</td><td><input type="number" id="p-sumq-1-min" value="220" oninput="updateQuotaStatus()"></td><td><input type="number" id="p-sumq-1-max" value="265" oninput="updateQuotaStatus()"></td><td><input class="count-in" type="number" id="p-sumq-1-count" value="60" min="0" max="300" oninput="updateQuotaStatus()"></td></tr>
+      <tr><td>Toplam Paketi 2</td><td><input type="number" id="p-sumq-2-min" value="0" oninput="updateQuotaStatus()"></td><td><input type="number" id="p-sumq-2-max" value="0" oninput="updateQuotaStatus()"></td><td><input class="count-in" type="number" id="p-sumq-2-count" value="0" min="0" max="300" oninput="updateQuotaStatus()"></td></tr>
+      <tr><td>Toplam Paketi 3</td><td><input type="number" id="p-sumq-3-min" value="0" oninput="updateQuotaStatus()"></td><td><input type="number" id="p-sumq-3-max" value="0" oninput="updateQuotaStatus()"></td><td><input class="count-in" type="number" id="p-sumq-3-count" value="0" min="0" max="300" oninput="updateQuotaStatus()"></td></tr>
+      <tr><td>Toplam Paketi 4</td><td><input type="number" id="p-sumq-4-min" value="0" oninput="updateQuotaStatus()"></td><td><input type="number" id="p-sumq-4-max" value="0" oninput="updateQuotaStatus()"></td><td><input class="count-in" type="number" id="p-sumq-4-count" value="0" min="0" max="300" oninput="updateQuotaStatus()"></td></tr>
+    </tbody>
+  </table>
+  <div class="quota-status" id="sumq-status">Toplam kotası analiz bekliyor.</div>
+</div>
+
+<!-- 4. ASAL -->
+<div class="card">
+  <div class="card-head"><div class="step-dot">4</div><span class="card-title">Asal sayı limitleri</span></div>
+  <div class="row"><div class="row-lbl">Minimum asal<div class="row-sub">0 = asal olmayabilir</div></div><input class="num-in" type="number" id="p-primemin" value="0" min="0" max="6"></div>
+  <div class="row"><div class="row-lbl">Maksimum asal</div><input class="num-in" type="number" id="p-primemax" value="1" min="0" max="6"></div>
+</div>
+
+<!-- 5. TEK / ÇİFT KOTALARI -->
+<div class="card">
+  <div class="card-head"><div class="step-dot">5</div><span class="card-title">Tek / çift dağılım kotası</span><span class="new-badge">Final</span></div>
+  <div class="section-note">Her satırdan kaç kolon üretileceğini yaz. Seçilmeyen dağılımlar 0 kalabilir. Toplam hedef kolon sayısına eşit olmalı.</div>
+  <table class="quota-table">
+    <thead><tr><th>Dağılım</th><th>Kolon adedi</th></tr></thead>
+    <tbody id="odd-quota-body"></tbody>
+  </table>
+  <div class="quota-status" id="oddq-status">Tek/çift kotası analiz bekliyor.</div>
+</div>
+
+<!-- 6. BÖLGE KOTALARI -->
+<div class="card">
+  <div class="card-head"><div class="step-dot">6</div><span class="card-title">Alt / üst bölge dağılım kotası</span><span class="new-badge">Final</span></div>
+  <div class="section-note">Alt/Üst bölge seçeneklerinden kaç kolon istediğini yaz. 6/90 için Alt=1–45, Üst=46–90; 6/60 için Alt=1–30, Üst=31–60. Toplam hedef kolon sayısına eşit olmalı.</div>
+  <table class="quota-table">
+    <thead><tr><th>Dağılım</th><th>Kolon adedi</th></tr></thead>
+    <tbody id="region-quota-body"></tbody>
+  </table>
+  <div class="quota-status" id="regionq-status">Bölge kotası analiz bekliyor.</div>
+</div>
+
+<!-- 7. SAYISAL TABLO BÖLGESİ -->
+<div class="card">
+  <div class="card-head"><div class="step-dot">7</div><span class="card-title">Sayısal Tablo Bölgesi filtresi</span><span class="new-badge">Final</span></div>
+  <div class="section-note purple">Bu filtre seçilen oyun tablosuna göre çalışır. 6/90 için 1–10 ... 81–90; 6/60 için 1–10 ... 51–60. Aynı yatay tablo bölgesinden bir kolonda en fazla kaç sayı gelebileceğini sınırlar.</div>
+  <div class="row">
+    <div class="row-lbl">Aynı Sayısal Tablo Bölgesi max<div class="row-sub">örn: 4, 6, 8 → hepsi 1–10 bölgesi · 12 ve 20 → 11–20 bölgesi</div></div>
+    <input class="num-in" type="number" id="p-dec" value="2" min="1" max="6">
+  </div>
+</div>
+
+<!-- 8. YATAY KOMŞU FARK -->
+<div class="card">
+  <div class="card-head"><div class="step-dot">8</div><span class="card-title">Yatay fark kuralı</span><span class="new-badge">Final</span><span class="card-note">varsayılan: komşu fark</span></div>
+  <div class="section-note purple">
+    <b>Komşu seçili fark modu:</b> Aynı yatay sayı dizilimi içinde seçilen sayılar küçükten büyüğe dizilir; sadece arka arkaya gelen seçili sayılar arasındaki fark kontrol edilir. Örn: 62-64-70 varsa 62-64 ve 64-70 kontrol edilir; 62-70 ayrıca kontrol edilmez.
+  </div>
+  <div class="row">
+    <div class="row-lbl">Yatay kontrol tipi<div class="row-sub">Kesin mod: sadece aynı yatay hatta arka arkaya gelen seçili sayılar kontrol edilir.</div></div>
+    <select class="num-in" id="p-hmode" style="width:190px" disabled>
+      <option value="neighbor" selected>Komşu seçili fark</option>
+    </select>
+  </div>
+  <div id="adj-rules"></div>
+</div>
+
+<!-- 9. DİKEY KOMŞU FARK -->
+<div class="card">
+  <div class="card-head"><div class="step-dot">9</div><span class="card-title">Dikey fark kuralı</span><span class="new-badge">Final</span><span class="card-note">varsayılan: komşu fark</span></div>
+  <div class="section-note purple">
+    <b>Komşu seçili fark modu:</b> Aynı dikey sayı dizilimi içinde seçilen sayılar küçükten büyüğe dizilir; sadece arka arkaya gelen seçili sayılar arasındaki fark kontrol edilir. Örn: 10-30-50 varsa 10-30 ve 30-50 kontrol edilir; 10-50 ayrıca kontrol edilmez.
+  </div>
+  <div class="row">
+    <div class="row-lbl">Dikey kontrol tipi<div class="row-sub">Kesin mod: sadece aynı dikey hatta arka arkaya gelen seçili sayılar kontrol edilir.</div></div>
+    <select class="num-in" id="p-vmode" style="width:190px" disabled>
+      <option value="neighbor" selected>Komşu seçili fark</option>
+    </select>
+  </div>
+  <div id="vert-rules"></div>
+</div>
+
+<!-- 9. ÖZEL ÇİFT YASAĞI — YENİ -->
+<div class="card">
+  <div class="card-head">
+    <div class="step-dot new">10</div>
+    <span class="card-title">Özel çift yasağı</span>
+    <span class="new-badge">Final</span>
+    <span class="card-note">belirli sayı çiftleri</span>
+  </div>
+  <div class="section-note purple">
+    Burada yasakladığın çift <b>sadece o iki sayı</b> için geçerlidir. Örn: {10,20} yasak → sadece bu ikisi aynı kolonda bulunamaz. Farkı 10 olan diğer çiftler (38→48, 60→70) <b>serbesttir</b>.
+  </div>
+  <input class="pair-search" id="pair-search" placeholder="Filtrele: sayı ara... (örn: 10)" oninput="filterPairs()">
+  <div class="pair-filter-row" id="pair-filter-row">
+    <span class="filter-btn active" onclick="setPairFilter('all',this)">Tümü</span>
+    <span class="filter-btn" onclick="setPairFilter('banned',this)">Yasaklılar</span>
+    <span class="filter-btn" onclick="setPairFilter('diff4',this)">Fark≤4</span>
+    <span class="filter-btn" onclick="setPairFilter('diff10',this)">Fark=10,20,30</span>
+    <span class="filter-btn" onclick="setPairFilter('same_dec',this)">Aynı onlar</span>
+  </div>
+  <div class="pair-grid" id="pair-grid"><div style="font-size:12px;color:var(--color-text-secondary)">Havuz girdikten sonra çiftler otomatik listelenir...</div></div>
+  <div class="banned-summary" id="banned-summary">Yasaklı çift seçilmedi.</div>
+</div>
+
+<!-- 10. ARİTMETİK -->
+<div class="card">
+  <div class="card-head"><div class="step-dot">11</div><span class="card-title">Aritmetik dizi filtresi</span><span class="card-note">kolon içi · TÜM çiftler</span></div>
+  <div class="section-note">⚠ Bu kural aynı adımla giden tüm zincirleri etkiler. Belirli çiftler için Bölüm 9'u kullan.</div>
+  <div id="arith-area"><div style="font-size:12px;color:var(--color-text-secondary);padding:8px 0">Havuz girdikten sonra otomatik hesaplanır...</div></div>
+</div>
+
+<!-- 11. FREKANS -->
+<div class="card">
+  <div class="card-head"><div class="step-dot">12</div><span class="card-title">Frekans dengesi</span></div>
+  <div class="row"><div class="row-lbl">Min kolon<div class="row-sub">Sadece kullanılabilir aktif sayılar için geçerli · 0 = zorunluluk yok</div></div><input class="num-in" type="number" id="p-freqmin" value="2" min="0" max="60"></div>
+  <div class="row"><div class="row-lbl">Max kolon<div class="row-sub">Banko sayılar muaf · pasif sayılar min zorunluluğuna dahil edilmez</div></div><input class="num-in" type="number" id="p-freqmax" value="36" min="1" max="60"></div>
+</div>
+
+<!-- 12. BENZERLİK -->
+<div class="card">
+  <div class="card-head"><div class="step-dot">13</div><span class="card-title">Kolonlar arası benzerlik</span></div>
+  <div class="row"><div class="row-lbl">Jaccard üst sınırı<div class="row-sub">önerilen: 0.4–0.6</div></div><input class="num-in" type="number" id="p-jaccard" value="0.6" min="0.1" max="0.9" step="0.05"></div>
+  <div class="row"><div class="row-lbl">Max ortak sayı</div><input class="num-in" type="number" id="p-maxcommon" value="4" min="1" max="5"></div>
+</div>
+
+<!-- 13. UÇ KOLON KONTROLÜ -->
+<div class="card">
+  <div class="card-head"><div class="step-dot new">13</div><span class="card-title">Uç kolon kontrolü</span><span class="new-badge">Final</span><span class="card-note">risk skoru</span></div>
+  <div class="section-note purple">Bu bölüm kesin kurallardan geçen kolonlara ikinci bir kalite kontrolü uygular. Amaç mekanik, aşırı sıkışık, aşırı dağınık veya görsel olarak uç kolonları azaltmaktır.</div>
+  <div class="row"><div class="row-lbl">Uç kolon skor filtresi<div class="row-sub">aktifse skor limiti aşan adaylar seçime alınmaz</div></div><label class="check-wrap"><input type="checkbox" id="p-out-active" checked>Aktif</label></div>
+  <div class="row"><div class="row-lbl">Maksimum uç skor<div class="row-sub">Ana paket için 35–40, risk paketi için 50–55</div></div><input class="num-in" type="number" id="p-out-max" value="40" min="0" max="100"></div>
+  <div class="row"><div class="row-lbl">Toplam merkez skoru<div class="row-sub">toplam aralığının dip/tepe noktalarına puan ekler</div></div><label class="check-wrap"><input type="checkbox" id="p-out-center" checked>Aktif</label></div>
+  <div class="row"><div class="row-lbl">Aynı birler basamağı kontrolü<div class="row-sub">örn: 10,20,60 gibi aynı son rakam yoğunluğu</div></div><label class="check-wrap"><input type="checkbox" id="p-out-unit-active" checked>Aktif</label><input class="num-in" type="number" id="p-out-unitmax" value="2" min="1" max="6"></div>
+  <div class="row"><div class="row-lbl">Gap / büyük sıçrama kontrolü<div class="row-sub">sıralı kolonda büyük farkların fazlalığına puan ekler</div></div><label class="check-wrap"><input type="checkbox" id="p-out-gap-active" checked>Aktif</label></div>
+  <div class="row"><div class="row-lbl">Büyük sıçrama eşiği</div><input class="num-in" type="number" id="p-out-largegap" value="20" min="6" max="60"></div>
+  <div class="row"><div class="row-lbl">Maksimum büyük sıçrama sayısı</div><input class="num-in" type="number" id="p-out-maxlarge" value="2" min="0" max="5"></div>
+  <div class="row"><div class="row-lbl">Mekanik kolon kontrolü<div class="row-sub">aynı fark tekrarı, aritmetik üçlü, dikey yoğunluk</div></div><label class="check-wrap"><input type="checkbox" id="p-out-mech-active" checked>Aktif</label></div>
+  <div class="row"><div class="row-lbl">Aynı fark tekrarı maksimum</div><input class="num-in" type="number" id="p-out-repeatmax" value="2" min="1" max="5"></div>
+  <div class="outlier-mini-grid">
+    <div class="outlier-mini"><div class="val" id="out-preview-count">—</div><div class="lbl">Filtre sonrası aday</div></div>
+    <div class="outlier-mini"><div class="val" id="out-preview-best">—</div><div class="lbl">En düşük skor</div></div>
+    <div class="outlier-mini"><div class="val" id="out-preview-worst">—</div><div class="lbl">En yüksek skor</div></div>
+  </div>
+</div>
+
+<!-- 14. PAKETLİ ÜRETİM STRATEJİSİ -->
+<div class="card">
+  <div class="card-head"><div class="step-dot new">15</div><span class="card-title">Paketli üretim stratejisi</span><span class="new-badge">Final</span><span class="card-note">40 / 12 / 8</span></div>
+  <div class="section-note purple">Bu bölüm 60 kolonu tek stratejiyle değil, üç farklı amaçla seçtirmek içindir: ana kapsama, 5 bilen destek, kontrollü risk. Kesin kurallar yine tüm paketler için aynen geçerlidir.</div>
+  <div class="row"><div class="row-lbl">Paketli üretim modu<div class="row-sub">aktifse prompt 40 + 12 + 8 paket talimatı üretir</div></div><label class="check-wrap"><input type="checkbox" id="p-pack-active" checked>Aktif</label></div>
+  <div class="package-grid">
+    <div class="package-card">
+      <div class="pkg-title">Ana dengeli paket</div>
+      <div class="package-row"><span>Kolon</span><input type="number" id="p-pack-main-cols" value="40" min="0" max="300"></div>
+      <div class="package-row"><span>t seviyesi</span><input type="number" id="p-pack-main-t" value="4" min="2" max="6"></div>
+      <div class="package-row"><span>Jaccard</span><input type="number" id="p-pack-main-j" value="0.60" min="0.1" max="0.9" step="0.05"></div>
+      <div class="package-row"><span>Max ortak</span><input type="number" id="p-pack-main-c" value="4" min="1" max="5"></div>
+      <div class="package-row"><span>Uç skor</span><input type="number" id="p-pack-main-out" value="40" min="0" max="100"></div>
+      <div class="package-note">Amaç: 2–3–4 bilen istikrarı ve geniş t=4 kapsama.</div>
+    </div>
+    <div class="package-card">
+      <div class="pkg-title">t=5 destek paketi</div>
+      <div class="package-row"><span>Kolon</span><input type="number" id="p-pack-deep-cols" value="12" min="0" max="300"></div>
+      <div class="package-row"><span>t seviyesi</span><input type="number" id="p-pack-deep-t" value="5" min="2" max="6"></div>
+      <div class="package-row"><span>Jaccard</span><input type="number" id="p-pack-deep-j" value="0.75" min="0.1" max="0.9" step="0.05"></div>
+      <div class="package-row"><span>Max ortak</span><input type="number" id="p-pack-deep-c" value="5" min="1" max="5"></div>
+      <div class="package-row"><span>Uç skor</span><input type="number" id="p-pack-deep-out" value="45" min="0" max="100"></div>
+      <div class="package-note">Amaç: 5 bilen yaklaşımı için çekirdek yoğunlaşma.</div>
+    </div>
+    <div class="package-card">
+      <div class="pkg-title">Kontrollü risk paketi</div>
+      <div class="package-row"><span>Kolon</span><input type="number" id="p-pack-risk-cols" value="8" min="0" max="300"></div>
+      <div class="package-row"><span>t seviyesi</span><input type="number" id="p-pack-risk-t" value="3" min="2" max="6"></div>
+      <div class="package-row"><span>Jaccard</span><input type="number" id="p-pack-risk-j" value="0.75" min="0.1" max="0.9" step="0.05"></div>
+      <div class="package-row"><span>Max ortak</span><input type="number" id="p-pack-risk-c" value="5" min="1" max="5"></div>
+      <div class="package-row"><span>Uç skor</span><input type="number" id="p-pack-risk-out" value="55" min="0" max="100"></div>
+      <div class="package-row"><span>Riskli aday kotası</span><input type="number" id="p-risk-min-cols" value="8" min="0" max="60"></div>
+      <div class="package-row"><span>Risk skor eşiği</span><input type="number" id="p-risk-score-threshold" value="14" min="0" max="100"></div>
+      <label class="check-wrap" style="margin-top:8px"><input type="checkbox" id="p-risk-quota-active" checked>Riskli ama geçerli aday kotası aktif</label>
+      <div class="package-note">Amaç: ana paketin kaçırabileceği ama hâlâ kabul edilebilir riskli dizilimlere küçük pay. Risk kotası aktifse bu paket en temiz adaylardan değil, aktif kesin kuralları geçen riskli adaylardan zorunlu seçim yapar.</div>
+    </div>
+  </div>
+  <div class="section-note" style="margin-top:10px">Not: Paket etiketi çıktı satırlarına yazılmaz. Çıktı yine sadece 60 satır ve TAB ayrımlı sayılardan oluşur.</div>
+</div>
+
+<div class="prompt-output-card" id="prompt-output-card">
+  <div class="prompt-output-head">
+    <span>Oluşturulan Prompt</span>
+    <button class="mini-btn" onclick="selectPromptText()">Tümünü seç</button>
+  </div>
+  <textarea id="prompt-output" readonly placeholder="Prompt burada görünecek. Önce 'Prompt oluştur' butonuna bas."></textarea>
+</div>
+
+<div class="btn-row">
+  <button class="btn primary" onclick="buildAndSend()">Prompt oluştur</button>
+  <button class="btn" id="copybtn" onclick="copyPrompt()">Promptu kopyala</button>
+</div>
+</div>
+

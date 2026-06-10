@@ -1,0 +1,197 @@
+function runAnalysis(){
+  const btn=document.getElementById('analyze-btn');
+  btn.textContent='Hesaplanıyor...';btn.disabled=true;
+  setTimeout(()=>{
+    const p=getParams();
+    if(pool.length<p.k){
+      document.getElementById('warn-list').innerHTML='<div class="warn-item"><div class="warn-dot red"></div><div>Havuzda yeterli sayı yok.</div></div>';
+      btn.textContent='Analiz Et ↗';btn.disabled=false;return;
+    }
+    const all=comb(pool,p.k);
+    const valid=all.filter(c=>checkCombo(c,p));
+    const validCount=valid.length;
+    const ratio=(validCount/all.length*100).toFixed(1);
+    const out=getOutlierParams();
+    const scored=valid.map(c=>({combo:c,...outlierScore(c,p,out)}));
+    const outValid=out.active ? scored.filter(x=>x.score<=out.maxScore).map(x=>x.combo) : valid;
+    const outRejected=out.active ? validCount-outValid.length : 0;
+    const outAvg=scored.length ? (scored.reduce((a,x)=>a+x.score,0)/scored.length) : 0;
+    const outBest=scored.length ? Math.min(...scored.map(x=>x.score)) : 0;
+    const outWorst=scored.length ? Math.max(...scored.map(x=>x.score)) : 0;
+    const effective=out.active ? outValid : valid;
+    const activeNumbersForFreq=getActiveNumbersFromCombos(effective);
+    p.activeNumbers=activeNumbersForFreq;
+    const rejected=out.active ? scored.filter(x=>x.score>out.maxScore).sort((a,b)=>b.score-a.score) : [];
+    const passed=out.active ? scored.filter(x=>x.score<=out.maxScore).sort((a,b)=>b.score-a.score) : scored.slice().sort((a,b)=>b.score-a.score);
+    const similarityPool = out.active ? scored.filter(x=>x.score<=out.maxScore) : scored;
+    const jaccardReport = jaccardFeasibilityCheck(similarityPool,p);
+    const jaccardAdvice = buildJaccardSuggestionReport(jaccardReport.bestCount,p.cols,p.jaccard,p.maxCommon,outValid.length,validCount);
+    lastAnalysisData={scored, rejected, passed, validCount, outValidCount:outValid.length, outRejected, params:p, out, jaccardReport, jaccardAdvice};
+    renderElimReport();
+    renderJaccardReport();
+
+    document.getElementById('sc-valid').textContent=validCount.toLocaleString();
+    document.getElementById('sc-ratio').textContent=ratio+'%';
+    document.getElementById('sc-outvalid').textContent=out.active ? outValid.length.toLocaleString() : 'Pasif';
+    document.getElementById('sc-outavg').textContent=scored.length ? outAvg.toFixed(1) : '—';
+    document.getElementById('sc-outrej').textContent=out.active ? outRejected.toLocaleString() : '—';
+    document.getElementById('sc-jaccfit').textContent=jaccardReport.bestCount.toLocaleString()+'/'+p.cols;
+    document.getElementById('sc-jaccstatus').textContent=jaccardReport.ok ? 'UYGUN' : jaccardAdvice.level;
+    document.getElementById('sc-jaccmax').textContent=jaccardReport.stats ? (jaccardReport.stats.maxCommon+'/'+jaccardReport.stats.maxJ.toFixed(2)) : '—';
+    document.getElementById('out-preview-count').textContent=out.active ? outValid.length.toLocaleString() : 'Pasif';
+    document.getElementById('out-preview-best').textContent=scored.length ? outBest : '—';
+    document.getElementById('out-preview-worst').textContent=scored.length ? outWorst : '—';
+
+    const freq={};pool.forEach(n=>freq[n]=0);
+    effective.forEach(c=>c.forEach(n=>freq[n]++));
+    const activeFreqVals=[...activeNumbersForFreq].map(n=>freq[n]||0);
+    const freqVals=activeFreqVals.length?activeFreqVals:Object.values(freq);
+    const maxFreq=Math.max(...freqVals)||1;
+    const minFreq=Math.min(...freqVals);
+    const spreadRatio=(maxFreq/Math.max(1,minFreq)).toFixed(1);
+    document.getElementById('sc-spread').textContent=spreadRatio+'x';
+
+    const lowThr=maxFreq*0.30,highThr=maxFreq*0.90;
+    const primesInPool=pool.filter(n=>PR.has(n));
+    const isPrimeConstrained=p.primeMax<=1&&primesInPool.length>1;
+    const warns=[];
+    warns.push(...getRuleWarnings(p));
+    const inactiveFreqNums=getInactiveNumbersForFrequency(p);
+    if(inactiveFreqNums.length){
+      warns.push({type:'blue',msg:`Frekans min muafiyeti: aktif kurallarla hiç kullanılamayan ${inactiveFreqNums.length} sayı min frekans şartından muaf: ${inactiveFreqNums.join(', ')}.`});
+    }
+
+    if(validCount===0){warns.push({type:'red',msg:'Geçerli kombinasyon YOK. Kurallar çok sıkı.'});}
+    else if(validCount<p.cols){warns.push({type:'red',msg:`Geçerli kombinasyon (${validCount}) hedef kolon sayısından (${p.cols}) az.`});}
+    else if(out.active && outValid.length<p.cols){warns.push({type:'red',msg:`Uç skor filtresinden sonra kalan aday (${outValid.length}) hedef kolon sayısından (${p.cols}) az. Skor limitini yükselt veya bazı uç kontrollerini gevşet.`});}
+    else if(out.active && outRejected/Math.max(1,validCount)>0.60){warns.push({type:'amber',msg:`Uç kolon filtresi adayların %${Math.round(outRejected/Math.max(1,validCount)*100)} kadarını eliyor. Bu çok agresif olabilir.`});}
+    else if(validCount<p.cols*2){warns.push({type:'amber',msg:`Kombinasyon (${validCount}) yeterli ama çeşitlilik kısıtlı.`});}
+    else{warns.push({type:'green',msg:`${validCount.toLocaleString()} geçerli kombinasyon. ${p.cols} kolon için yeterli.`});}
+    if(out.active && scored.length){
+      const reasonStats=summarizeOutlierReasons(scored.filter(x=>x.score>out.maxScore));
+      if(reasonStats.length){warns.push({type:'blue',msg:`Uç skorunda en sık görülen nedenler: ${reasonStats.map(([r,c])=>r+' ('+c+')').join(', ')}.`});}
+      warns.push({type:'purple',msg:`Uç kolon skoru aktif. Limit ${out.maxScore}; kalan aday ${outValid.length.toLocaleString()}, elenen ${outRejected.toLocaleString()}.`});
+    }
+
+    if(jaccardReport.bestCount>=p.cols){
+      warns.push({type:'green',msg:`Jaccard/ortak sayı üretilebilirlik kontrolü geçti: ${jaccardReport.bestCount}/${p.cols} kolon seçilebiliyor.`});
+    }else{
+      warns.push({type:'red',msg:`Jaccard/ortak sayı ${jaccardAdvice.level}: ${jaccardReport.bestCount}/${p.cols} kolonda kaldı. Çözüm: ${jaccardAdvice.primaryAction}`});
+      (jaccardAdvice.hints||[]).slice(0,2).forEach(h=>warns.push({type:'amber',msg:h}));
+    }
+
+    addFreqMaxFeasibilityWarnings(warns,p,jaccardReport);
+
+    if(bannedPairs.size>0){
+      warns.push({type:'purple',msg:`${bannedPairs.size} özel çift yasaklandı. Bu çiftler sadece o iki sayıya özel — adım bazlı kural değil.`});
+    }
+    if(isPrimeConstrained){
+      warns.push({type:'blue',msg:`Asal kısıtı aktif. [${primesInPool.join(', ')}] yapısal olarak az geçer — bu normaldir.`});
+    }
+    const realLow=pool.filter(n=>activeNumbersForFreq.has(n)&&freq[n]<lowThr&&!(isPrimeConstrained&&PR.has(n)));
+    if(realLow.length>0)warns.push({type:'amber',msg:`Düşük frekanslı aktif sayılar: ${realLow.map(n=>n+'('+freq[n]+')').join(', ')}`});
+
+    lastAnalysisData.analysisWarnings=warns;
+    lastAnalysisData.analysisBlockers=warns.filter(w=>w.type==='red');
+
+    document.getElementById('warn-list').innerHTML=warns.map(w=>
+      `<div class="warn-item"><div class="warn-dot ${w.type}"></div><div>${w.msg}</div></div>`
+    ).join('');
+
+    const badge=document.getElementById('score-badge');
+    const effCount=effective.length;
+    if(validCount===0){badge.textContent='Kritik';badge.className='score-badge score-bad';}
+    else if(effCount<p.cols){badge.textContent='Yetersiz';badge.className='score-badge score-bad';}
+    else if(jaccardReport.bestCount<p.cols){badge.textContent='Jaccard: '+jaccardAdvice.level;badge.className='score-badge score-bad';}
+    else if(effCount<p.cols*2){badge.textContent='Sıkı';badge.className='score-badge score-warn';}
+    else{badge.textContent='Dengeli';badge.className='score-badge score-ok';}
+
+    renderFreqBars(freq,maxFreq,lowThr,isPrimeConstrained,activeNumbersForFreq);
+    btn.textContent='Analiz Et ↗';btn.disabled=false;
+  },30);
+}
+
+function renderFreqBars(freq,maxFreq,lowThr,isPrimeConstrained,activeSet){
+  const area=document.getElementById('freq-area');
+  let html=`<div class="freq-section"><div class="freq-section-title">Frekans dağılımı</div>
+  <div style="display:flex;gap:16px;font-size:11px;color:var(--color-text-secondary);margin-bottom:8px;flex-wrap:wrap">
+    <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:8px;border-radius:2px;background:#534AB7"></span>Normal</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:8px;border-radius:2px;background:#EF9F27"></span>Asal kısıtı</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:8px;border-radius:2px;background:#E24B4A"></span>Gerçek sorun</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:8px;border-radius:2px;background:#9AA0A6"></span>Pasif / min muaf</span>
+  </div>`;
+  pool.forEach(n=>{
+    const v=freq[n],pct=Math.round(v/maxFreq*100);
+    const isPrime=PR.has(n);
+    const isInactive=activeSet instanceof Set ? !activeSet.has(n) : false;
+    const isPrimeLow=!isInactive&&isPrimeConstrained&&isPrime&&v<lowThr;
+    const isRealLow=!isInactive&&!isPrimeLow&&v<lowThr;
+    const barColor=isInactive?'#9AA0A6':isPrimeLow?'#EF9F27':isRealLow?'#E24B4A':'#534AB7';
+    const flagText=isInactive?'min muaf':isPrimeLow?'asal kısıtı':isRealLow?'düşük ⚠':'';
+    const flagClass=isInactive?'flag-low-prime':isPrimeLow?'flag-low-prime':isRealLow?'flag-low-real':'flag-ok';
+    html+=`<div class="freq-row">
+      <div class="freq-num">${n}</div>
+      <div class="freq-badge ${isPrime?'fb-prime':'fb-normal'}">${isPrime?'★':''}</div>
+      <div class="freq-bar-bg"><div class="freq-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      <div class="freq-val">${v}</div>
+      <div class="freq-pct">${pct}%</div>
+      <div class="freq-flag ${flagClass}">${flagText}</div>
+    </div>`;
+  });
+  html+='</div>';
+  area.innerHTML=html;
+}
+
+/* removed buildPrompt */
+
+
+// ─── v5.0 KOTA PAKETLERİ OVERRIDE ───
+function sayisalTabloBolgesi(n){ return Math.ceil(n/10); } // 1–10=1, 11–20=2, ..., 81–90=9
+function dikeyHatNo(n){ return ((n-1)%10)+1; } // 1,11,21... aynı hat; 10,20,30... aynı hat
+function getSelectVal(id,def){const el=document.getElementById(id);return el?el.value:def;}
+function hasBannedNeighborDiff(s, states, mode, groupFn){
+  // v7.1 KESİN MANTIK: Aynı yatay/dikey hatta seçilen sayılar sıralanır;
+  // yalnız arka arkaya gelen SEÇİLİ sayılar arasındaki fark kontrol edilir.
+  // Arada başka seçili sayı varsa uçtaki iki sayı ayrıca kontrol edilmez.
+  const groups={};
+  s.forEach(n=>{const g=groupFn(n); if(!groups[g]) groups[g]=[]; groups[g].push(n);});
+  for(const arr of Object.values(groups)){
+    arr.sort((a,b)=>a-b);
+    for(let i=0;i<arr.length-1;i++){
+      const d=arr[i+1]-arr[i];
+      if(states[d]==='yasak') return true;
+    }
+  }
+  return false;
+}
+function getNumVal(id,def=0){ const el=document.getElementById(id); const v=el?parseFloat(el.value):NaN; return isNaN(v)?def:v; }
+function getIntVal(id,def=0){ return Math.trunc(getNumVal(id,def)); }
+function getBankoList(){
+  const raw=(document.getElementById('p-banko')?.value||'').trim();
+  if(!raw || raw.toUpperCase()==='YOK') return [];
+  return [...new Set(raw.split(/[\s,;]+/).map(Number).filter(n=>n>0&&n<=gameMax()))].sort((a,b)=>a-b);
+}
+function renderQuotaBodies(){
+  const oddBody=document.getElementById('odd-quota-body');
+  if(oddBody && !oddBody.dataset.done){
+    oddBody.innerHTML='';
+    for(let odd=0; odd<=6; odd++){
+      const even=6-odd, val=(odd===1?60:0);
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${odd}T / ${even}Ç</td><td><input class="count-in" type="number" id="p-oddq-${odd}" value="${val}" min="0" max="300" oninput="updateQuotaStatus()"></td>`;
+      oddBody.appendChild(tr);
+    }
+    oddBody.dataset.done='1';
+  }
+  const regBody=document.getElementById('region-quota-body');
+  if(regBody && !regBody.dataset.done){
+    regBody.innerHTML='';
+    for(let low=0; low<=6; low++){
+      const high=6-low, val=(low===3?60:0);
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${low}D / ${high}Y</td><td><input class="count-in" type="number" id="p-regq-${low}" value="${val}" min="0" max="300" oninput="updateQuotaStatus()"></td>`;
+      regBody.appendChild(tr);
+    }
+    regBody.dataset.done='1';
+  }
+}

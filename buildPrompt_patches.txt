@@ -1,0 +1,342 @@
+--- buildPrompt 0 ---
+function buildPrompt(){
+  const p=getParams();
+  const banko=document.getElementById('p-banko').value.trim()||'YOK';
+  const jaccard=document.getElementById('p-jaccard').value;
+  const maxCommon=document.getElementById('p-maxcommon').value;
+  const out=getOutlierParams();
+  const pkg=getPackageParams();
+  const primes=pool.filter(n=>PR.has(n));
+  const lowPool=pool.filter(n=>n<=45);
+  const highPool=pool.filter(n=>n>45);
+  const adjLines=adjDiffs.map(d=>`• Fark = ${d} → ${adjState[d].toUpperCase()}`).join('\n');
+  const vertLines=activeVertDiffs().map(d=>`• Fark = ${d} → ${vertState[d].toUpperCase()}`).join('\n');
+  const arithEntries=Object.entries(arithState).filter(([,v])=>v==='yasak');
+  let arithLines='• Tüm aritmetik diziler serbest';
+  if(arithEntries.length){
+    const byStep={};
+    arithEntries.forEach(([key])=>{const[,step,len]=key.split('_');if(!byStep[step])byStep[step]={};byStep[step][len]='YASAK';});
+    arithLines=Object.entries(byStep).map(([step,rules])=>`• Adım +${step}: 2'li: ${rules['2']||'SERBEST'}, 3'lü: ${rules['3']||'SERBEST'}`).join('\n');
+  }
+
+  // Özel çift yasağı
+
+  let packageLines='• Paketli üretim modu: PASİF\n• Tüm kolonlar tek stratejiyle seçilecek.';
+  if(pkg.active){
+    const totalPkg=packageTotal(pkg);
+    packageLines=`• Paketli üretim modu: AKTİF
+• Paket kolon toplamı: ${totalPkg} / ${p.cols}
+
+1) ANA DENGELİ PAKET
+• Kolon sayısı: ${pkg.main.cols}
+• Hedef: ${pkg.main.purpose}
+• Paket t seviyesi: ${pkg.main.t}
+• Paket Jaccard üst sınırı: ${pkg.main.jaccard}
+• Paket max ortak sayı: ${pkg.main.maxCommon}
+• Paket uç skor limiti: ${pkg.main.outMax}
+• Seçim önceliği: maksimum yeni ${pkg.main.t}'lü grup + düşük benzerlik + frekans dengesi
+
+2) t=5 DESTEK / ÇEKİRDEK YOĞUNLAŞMA PAKETİ
+• Kolon sayısı: ${pkg.deep.cols}
+• Hedef: ${pkg.deep.purpose}
+• Paket t seviyesi: ${pkg.deep.t}
+• Paket Jaccard üst sınırı: ${pkg.deep.jaccard}
+• Paket max ortak sayı: ${pkg.deep.maxCommon}
+• Paket uç skor limiti: ${pkg.deep.outMax}
+• Seçim önceliği: yeni 5'li grup kapsaması + sonuç adayı çekirdeklerde kontrollü yoğunlaşma
+
+3) KONTROLLÜ RİSK PAKETİ
+• Kolon sayısı: ${pkg.risk.cols}
+• Hedef: ${pkg.risk.purpose}
+• Paket t seviyesi: ${pkg.risk.t}
+• Paket Jaccard üst sınırı: ${pkg.risk.jaccard}
+• Paket max ortak sayı: ${pkg.risk.maxCommon}
+• Paket uç skor limiti: ${pkg.risk.outMax}
+• Seçim önceliği: ana paket dışında kalan ama kesin kurallardan geçen makul alternatif yapılar
+
+PAKET KURALLARI:
+• Tüm paketlerde kesin kurallar aynen uygulanacak.
+• Aynı kolon iki pakette tekrar edilmeyecek.
+• Paketler tamamlandıktan sonra 60 kolonun tamamı birlikte frekans, Jaccard ve max ortak sayı son kontrolünden geçirilecek.
+• Paket adı, satır numarası veya açıklama çıktıya yazılmayacak; çıktı sadece sayılardan oluşacak.`;
+  }
+
+  let pairLines='• Özel çift yasağı yok';
+  if(bannedPairs.size>0){
+    const pairs=[...bannedPairs].sort().map(k=>`{${k.replace(',','–')}}`);
+    pairLines=`• Aşağıdaki sayı çiftleri aynı kolonda KESİNLİKLE bulunamaz:\n`+
+      pairs.map(p=>`  ${p} → sadece bu iki sayıya özel yasak, fark bazlı kural değildir`).join('\n');
+  }
+
+  return `KONU: Gelişmiş Sayı Analizi, Covering Design ve Optimizasyon ile Kolon Üretimi
+
+ROLÜN:
+Bir veri bilimci, kombinatorik uzmanı ve olasılık analisti gibi davran.
+Bu rastgele üretim DEĞİLDİR. Tüm kurallar %100 uygulanacaktır.
+
+════════════════════════════════════════
+1. GİRDİLER
+════════════════════════════════════════
+• Oyun tipi                 : ${gameName()}
+• Sayı Havuzu (v=${pool.length})   : [${pool.join(', ')}]
+• Kolon Boyutu (k)         : ${p.k}
+• Hedef Tutma Seviyesi (t) : ${document.getElementById('p-t').value}
+• Üretilecek Kolon Sayısı  : ${p.cols}
+• Banko Sayılar            : ${banko}
+  → Asal sayılar  : [${primes.join(', ')}]
+  → ${lowRegionLabel()} grubu    : [${lowPool.join(', ')}]
+  → ${highRegionLabel()} grubu   : [${highPool.join(', ')}]
+
+════════════════════════════════════════
+2. KESİN KURALLAR
+════════════════════════════════════════
+• Toplam Aralığı   : ${p.sumMin} ≤ toplam ≤ ${p.sumMax}
+• Tek/Çift Oranı   : Tam olarak ${p.oddCnt} tek, ${p.k-p.oddCnt} çift
+• Asal Sayı Limiti : Minimum ${p.primeMin}, Maksimum ${p.primeMax} asal
+
+════════════════════════════════════════
+3. BÖLGE KURALLARI
+════════════════════════════════════════
+• 1–45 aralığından  : Tam olarak ${p.low} sayı
+• 46–90 aralığından : Tam olarak ${p.high} sayı
+
+════════════════════════════════════════
+4. BASAMAK FİLTRESİ
+════════════════════════════════════════
+• Aynı onlar basamağı : Kolonda maksimum ${p.dec} adet
+
+════════════════════════════════════════
+5. KOLON İÇİ ARDIŞIK YASAĞI (TÜM ÇİFTLER)
+════════════════════════════════════════
+${adjLines}
+Kontrol tipi: ${p.hMode==='neighbor'?'Sadece aynı Sayısal Tablo Bölgesi içinde arka arkaya gelen seçili sayılar kontrol edilecek.':'Farkı X olan tüm sayı çiftleri kontrol edilecek.'}
+Örnek: 4-6-8 varsa komşu modda 4-6 ve 6-8 kontrol edilir; 4-8 ayrıca kontrol edilmez.
+
+════════════════════════════════════════
+6. KOLON İÇİ DİKEY İLİŞKİ (TÜM ÇİFTLER)
+════════════════════════════════════════
+${vertLines}
+Kontrol tipi: ${p.vMode==='neighbor'?'Sadece aynı dikey hatta arka arkaya gelen seçili sayılar kontrol edilecek.':'Farkı X olan tüm sayı çiftleri kontrol edilecek.'}
+Örnek: 10-30-50 varsa komşu modda 10-30 ve 30-50 kontrol edilir; 10-50 ayrıca kontrol edilmez.
+
+════════════════════════════════════════
+7. ÖZEL ÇİFT YASAĞI (SADECE BELİRTİLEN ÇİFTLER)
+════════════════════════════════════════
+${pairLines}
+ÖNEMLI NOT: Bu bölümdeki yasaklar SADECE belirtilen iki sayıya özgüdür.
+Fark değeri aynı olsa bile diğer sayı çiftleri bu kuraldan ETKİLENMEZ.
+Örn: {10–20} yasak ise → 38 ve 48 (fark=10) aynı kolonda BULUNABİLİR.
+
+════════════════════════════════════════
+8. ARİTMETİK DİZİ FİLTRESİ (TÜM ZİNCİRLER)
+════════════════════════════════════════
+${arithLines}
+NOT: Bu kural aynı adımla giden TÜM zincirleri etkiler.
+
+════════════════════════════════════════
+9. FREKANS DENGESİ
+════════════════════════════════════════
+• Her sayı minimum ${p.freqMin}, maksimum ${p.freqMax} kolona girecek
+
+════════════════════════════════════════
+10. KOLONLAR ARASI BENZERLİK
+════════════════════════════════════════
+• Jaccar
+• Kolonlar arası max ortak sayı : ${maxCommon}d üst sınırı            : ${jaccard}
+
+════════════════════════════════════════
+11. UÇ KOLON KONTROLÜ
+════════════════════════════════════════
+• Uç kolon skor filtresi : ${out.active ? 'AKTİF' : 'PASİF'}
+• Maksimum uç skor       : ${out.maxScore}
+• Toplam merkez skoru    : ${out.centerActive ? 'AKTİF' : 'PASİF'}
+• Aynı birler kontrolü   : ${out.unitActive ? 'AKTİF' : 'PASİF'} · maksimum ${out.unitMax} adet
+• Gap kontrolü           : ${out.gapActive ? 'AKTİF' : 'PASİF'} · büyük sıçrama eşiği ≥ ${out.largeGap}, maksimum ${out.maxLarge} adet
+• Mekanik kolon kontrolü : ${out.mechActive ? 'AKTİF' : 'PASİF'} · aynı fark tekrarı maksimum ${out.repeatMax}
+NOT: Uç skor limiti aşan aday kolonlar seçime alınmayacak. Bu bölüm mekanik, aşırı sıkışık veya aşırı dağınık kolonları azaltmak içindir.
+
+════════════════════════════════════════
+12. PAKETLİ ÜRETİM STRATEJİSİ
+════════════════════════════════════════
+${packageLines}
+
+════════════════════════════════════════
+13. MATEMATİKSEL MODEL
+════════════════════════════════════════
+• Covering Design: C(v=${pool.length}, k=${p.k}, t=${document.getElementById('p-t').value})
+• Algoritma: Paketli Greedy — önce kesin kurallar, sonra paket hedefleri uygulanır
+• Ana mantık: t=4 ana kapsama + t=5 destek/çekirdek + kontrollü risk paketi
+• Öncelik: Kesin kurallar → uç skor filtresi → paket seçimi → kapsama optimizasyonu → frekans/Jaccard dengesi
+
+════════════════════════════════════════
+14. ÜRETİM ÖNCESİ KONTROL
+════════════════════════════════════════
+[ ] Toplam ${p.sumMin}–${p.sumMax} arasında mı?
+[ ] Tam ${p.oddCnt} tek, ${p.k-p.oddCnt} çift mi?
+[ ] Asal sayı ${p.primeMin}–${p.primeMax} aralığında mı?
+[ ] ${lowRegionLabel()}'ten ${p.low}, ${highRegionLabel()}'dan ${p.high} sayı mı?
+[ ] Yatay/dikey fark kuralları seçilen kontrol tipine göre geçiyor mu?
+[ ] Özel yasaklı çiftler aynı kolonda yok mu?
+[ ] Aynı onlar basamağı ≤ ${p.dec} mü?
+[ ] Yasaklı aritmetik diziler yok mu?
+[ ] Her sayı ${p.freqMin}–${p.freqMax} kolon aralığında mı?
+[ ] Jaccard ≤ ${jaccard}, ortak sayı ≤ ${maxCommon} mü?
+[ ] Uç kolon skoru ${out.active ? 'aktifse her kolon ≤ '+out.maxScore+' mi?' : 'pasif mi?'}
+Tüm maddeler geçilmeden kolon kabul edilmeyecek.
+
+════════════════════════════════════════
+14. ÇIKTI FORMATI
+════════════════════════════════════════
+• Her satır: ${p.k} sayı, TAB ile ayrılmış
+• Toplam ${p.cols} satır, kod bloğu içinde
+• Sayılar küçükten büyüğe sıralı · Satır numarası ekleme`;
+}
+
+--- buildPrompt 1 ---
+function buildPrompt(){
+  const p=getParams();
+  const banko=(p.bankoList&&p.bankoList.length)?p.bankoList.join(', '):'YOK';
+  const jaccard=document.getElementById('p-jaccard').value, maxCommon=document.getElementById('p-maxcommon').value;
+  const out=getOutlierParams(), pkg=getPackageParams();
+  const primes=pool.filter(n=>PR.has(n)), lowPool=pool.filter(n=>n<=regionSplit()), highPool=pool.filter(n=>n>regionSplit());
+  const adjLines=adjDiffs.map(d=>`• Fark = ${d} → ${adjState[d].toUpperCase()}`).join('\n');
+  const vertLines=activeVertDiffs().map(d=>`• Fark = ${d} → ${vertState[d].toUpperCase()}`).join('\n');
+  const arithEntries=Object.entries(arithState).filter(([,v])=>v==='yasak');
+  let arithLines='• Tüm aritmetik diziler serbest';
+  if(arithEntries.length){const byStep={}; arithEntries.forEach(([key])=>{const[,step,len]=key.split('_');if(!byStep[step])byStep[step]={};byStep[step][len]='YASAK';}); arithLines=Object.entries(byStep).map(([step,rules])=>`• Adım +${step}: 2'li: ${rules['2']||'SERBEST'}, 3'lü: ${rules['3']||'SERBEST'}`).join('\n');}
+  let pairLines='• Özel çift yasağı yok';
+  if(bannedPairs.size>0){const pairs=[...bannedPairs].sort().map(k=>`{${k.replace(',','–')}}`); pairLines=`• Aşağıdaki sayı çiftleri aynı kolonda KESİNLİKLE bulunamaz:\n`+pairs.map(p=>`  ${p} → sadece bu iki sayıya özel yasak, fark bazlı kural değildir`).join('\n');}
+  let packageLines='• Paketli üretim modu: PASİF\n• Tüm kolonlar tek stratejiyle seçilecek.';
+  if(pkg.active){const totalPkg=packageTotal(pkg); packageLines=`• Paketli üretim modu: AKTİF\n• Paket kolon toplamı: ${totalPkg} / ${p.cols}\n\n1) ANA DENGELİ PAKET\n• Kolon sayısı: ${pkg.main.cols}\n• Hedef: ${pkg.main.purpose}\n• Paket t seviyesi: ${pkg.main.t}\n• Paket Jaccard üst sınırı: ${pkg.main.jaccard}\n• Paket max ortak sayı: ${pkg.main.maxCommon}\n• Paket uç skor limiti: ${pkg.main.outMax}\n\n2) t=5 DESTEK / ÇEKİRDEK YOĞUNLAŞMA PAKETİ\n• Kolon sayısı: ${pkg.deep.cols}\n• Hedef: ${pkg.deep.purpose}\n• Paket t seviyesi: ${pkg.deep.t}\n• Paket Jaccard üst sınırı: ${pkg.deep.jaccard}\n• Paket max ortak sayı: ${pkg.deep.maxCommon}\n• Paket uç skor limiti: ${pkg.deep.outMax}\n\n3) KONTROLLÜ RİSK PAKETİ\n• Kolon sayısı: ${pkg.risk.cols}\n• Hedef: ${pkg.risk.purpose}\n• Paket t seviyesi: ${pkg.risk.t}\n• Paket Jaccard üst sınırı: ${pkg.risk.jaccard}\n• Paket max ortak sayı: ${pkg.risk.maxCommon}\n• Paket uç skor limiti: ${pkg.risk.outMax}\n\nPAKET KURALLARI:\n• Tüm paketlerde kesin kurallar aynen uygulanacak.\n• Aynı kolon iki pakette tekrar edilmeyecek.\n• Paketler tamamlandıktan sonra 60 kolonun tamamı birlikte frekans, Jaccard ve max ortak sayı son kontrolünden geçirilecek.\n• Paket adı, satır numarası veya açıklama çıktıya yazılmayacak.`;}
+  return `KONU: Gelişmiş Sayı Analizi, Covering Design ve Optimizasyon ile Kolon Üretimi
+
+ROLÜN:
+Bir veri bilimci, kombinatorik uzmanı ve olasılık analisti gibi davran.
+Bu rastgele üretim DEĞİLDİR. Tüm kurallar %100 uygulanacaktır.
+
+════════════════════════════════════════
+1. GİRDİLER
+════════════════════════════════════════
+• Oyun tipi                 : ${gameName()}
+• Sayı Havuzu (v=${pool.length})   : [${pool.join(', ')}]
+• Kolon Boyutu (k)         : ${p.k}
+• Hedef Tutma Seviyesi (t) : ${document.getElementById('p-t').value}
+• Üretilecek Kolon Sayısı  : ${p.cols}
+• Banko Sayılar            : ${banko}
+  → Asal sayılar  : [${primes.join(', ')}]
+  → ${lowRegionLabel()} grubu    : [${lowPool.join(', ')}]
+  → ${highRegionLabel()} grubu   : [${highPool.join(', ')}]
+
+════════════════════════════════════════
+2. KESİN KURALLAR
+════════════════════════════════════════
+• Asal Sayı Limiti : Minimum ${p.primeMin}, Maksimum ${p.primeMax} asal
+• Banko sayılar varsa her kolonda bulunacak ve frekans üst sınırından muaf kabul edilecek.
+
+════════════════════════════════════════
+3. TOPLAM ARALIĞI KOTA PAKETLERİ
+════════════════════════════════════════
+${quotaLinesSum(p)}
+NOT: Toplam paketleri birbirinden bağımsızdır; aralıkların üst üste binmesi çakışma değildir.
+
+════════════════════════════════════════
+4. TEK / ÇİFT DAĞILIM KOTASI
+════════════════════════════════════════
+${quotaLinesOdd(p)}
+
+════════════════════════════════════════
+5. BÖLGE DAĞILIM KOTASI
+════════════════════════════════════════
+${quotaLinesRegion(p)}
+
+════════════════════════════════════════
+6. SAYISAL TABLO BÖLGESİ FİLTRESİ
+════════════════════════════════════════
+• Aynı Sayısal Tablo Bölgesi : Kolonda maksimum ${p.dec} adet
+• Grup yapısı: ${tableRegionLabels().join(', ')}
+
+════════════════════════════════════════
+7. YATAY FARK KURALI
+════════════════════════════════════════
+${adjLines}
+Kontrol tipi: ${p.hMode==='neighbor'?'Sadece aynı Sayısal Tablo Bölgesi içinde arka arkaya gelen seçili sayılar kontrol edilecek.':'Farkı X olan tüm sayı çiftleri kontrol edilecek.'}
+Örnek: 4-6-8 varsa komşu modda 4-6 ve 6-8 kontrol edilir; 4-8 ayrıca kontrol edilmez.
+
+════════════════════════════════════════
+8. DİKEY FARK KURALI
+════════════════════════════════════════
+${vertLines}
+Kontrol tipi: ${p.vMode==='neighbor'?'Sadece aynı dikey hatta arka arkaya gelen seçili sayılar kontrol edilecek.':'Farkı X olan tüm sayı çiftleri kontrol edilecek.'}
+Örnek: 10-30-50 varsa komşu modda 10-30 ve 30-50 kontrol edilir; 10-50 ayrıca kontrol edilmez.
+
+════════════════════════════════════════
+9. ÖZEL ÇİFT YASAĞI (SADECE BELİRTİLEN ÇİFTLER)
+════════════════════════════════════════
+${pairLines}
+ÖNEMLI NOT: Bu bölümdeki yasaklar SADECE belirtilen iki sayıya özgüdür.
+
+════════════════════════════════════════
+10. ARİTMETİK DİZİ FİLTRESİ (TÜM ZİNCİRLER)
+════════════════════════════════════════
+${arithLines}
+NOT: Bu kural aynı adımla giden TÜM zincirleri etkiler.
+
+════════════════════════════════════════
+11. FREKANS DENGESİ
+════════════════════════════════════════
+• Banko olmayan ve aktif kurallara göre kullanılabilir her sayı minimum ${p.freqMin}, maksimum ${p.freqMax} kolona girecek
+• Tek/çift, asal, bölge, kota veya kesin kurallar nedeniyle hiç kullanılamayan sayılar minimum frekans şartından muaftır.
+• Banko sayılar frekans üst sınırından muaftır.
+
+════════════════════════════════════════
+12. KOLONLAR ARASI BENZERLİK
+════════════════════════════════════════
+• Jaccard üst sınırı            : ${jaccard}
+• Kolonlar arası max ortak sayı : ${maxCommon}
+
+════════════════════════════════════════
+13. UÇ KOLON KONTROLÜ
+════════════════════════════════════════
+• Uç kolon skor filtresi : ${out.active ? 'AKTİF' : 'PASİF'}
+• Maksimum uç skor       : ${out.maxScore}
+• Toplam merkez skoru    : ${out.centerActive ? 'AKTİF' : 'PASİF'}
+• Aynı birler kontrolü   : ${out.unitActive ? 'AKTİF' : 'PASİF'} · maksimum ${out.unitMax} adet
+• Gap kontrolü           : ${out.gapActive ? 'AKTİF' : 'PASİF'} · büyük sıçrama eşiği ≥ ${out.largeGap}, maksimum ${out.maxLarge} adet
+• Mekanik kolon kontrolü : ${out.mechActive ? 'AKTİF' : 'PASİF'} · aynı fark tekrarı maksimum ${out.repeatMax}
+
+════════════════════════════════════════
+14. PAKETLİ ÜRETİM STRATEJİSİ
+════════════════════════════════════════
+${packageLines}
+
+════════════════════════════════════════
+15. MATEMATİKSEL MODEL
+════════════════════════════════════════
+• Covering Design: C(v=${pool.length}, k=${p.k}, t=${document.getElementById('p-t').value})
+• Algoritma: Paketli Greedy — kesin kurallar → kota paketleri → uç skor filtresi → paket hedefleri → frekans/Jaccard dengesi
+
+════════════════════════════════════════
+16. ÜRETİM ÖNCESİ KONTROL
+════════════════════════════════════════
+[ ] Toplam kota paketleri toplamı ${p.cols} kolon ediyor mu?
+[ ] Tek/çift kota toplamı ${p.cols} kolon ediyor mu?
+[ ] Bölge kota toplamı ${p.cols} kolon ediyor mu?
+[ ] Her kolon aktif kota paketlerinden en az bir toplam aralığına uyuyor mu?
+[ ] Her kolon aktif tek/çift dağılım kotasına uyuyor mu?
+[ ] Her kolon aktif bölge dağılım kotasına uyuyor mu?
+[ ] Asal sayı ${p.primeMin}–${p.primeMax} aralığında mı?
+[ ] Sayısal Tablo Bölgesi ≤ ${p.dec} mi?
+[ ] Yasaklı ardışık/dikey farklar ve özel çiftler yok mu?
+[ ] Kullanılabilir aktif sayılar ${p.freqMin}–${p.freqMax} kolon aralığında mı?
+[ ] Kurallar nedeniyle kullanılamayan pasif sayılar frekans minimumundan muaf mı? Bankolar üst sınırdan muaf mı?
+[ ] Jaccard ≤ ${jaccard}, ortak sayı ≤ ${maxCommon} mü?
+[ ] Uç kolon skoru ${out.active ? 'aktifse her kolon ≤ '+out.maxScore+' mi?' : 'pasif mi?'}
+Tüm maddeler geçilmeden kolon kabul edilmeyecek.
+
+════════════════════════════════════════
+17. ÇIKTI FORMATI
+════════════════════════════════════════
+• Her satır: ${p.k} sayı, TAB ile ayrılmış
+• Toplam ${p.cols} satır, kod bloğu içinde
+• Sayılar küçükten büyüğe sıralı · Satır numarası ekleme`;
+}
