@@ -1,0 +1,59 @@
+==== OPTİMİZASYON TAMAMLANDI ====
+Test Edilen Çekiliş: 100, Havuz Büyüklüğü: 30
+
+🏆 EN İYİ 5 PARAMETRE KOMBİNASYONU:
+1. Başarı Ortalaması: 2.0700
+{
+  "puan_komsu_1": 15,
+  "puan_komsu_2": 2,
+  "puan_ivme": 10,
+  "puan_kuraklik_carpan": 1.0,
+  "olum_cezasi_sure": 20,
+  "ceza_cifte_tekrar": -50,
+  "yuzde_tarihsel": 20
+}
+------------------------------
+2. Başarı Ortalaması: 2.0700
+{
+  "puan_komsu_1": 15,
+  "puan_komsu_2": 2,
+  "puan_ivme": 10,
+  "puan_kuraklik_carpan": 1.0,
+  "olum_cezasi_sure": 20,
+  "ceza_cifte_tekrar": -100,
+  "yuzde_tarihsel": 20
+}
+------------------------------
+3. Başarı Ortalaması: 2.0700
+{
+  "puan_komsu_1": 15,
+  "puan_komsu_2": 2,
+  "puan_ivme": 10,
+  "puan_kuraklik_carpan": 1.0,
+  "olum_cezasi_sure": 30,
+  "ceza_cifte_tekrar": -50,
+  "yuzde_tarihsel": 20
+}
+------------------------------
+4. Başarı Ortalaması: 2.0700
+{
+  "puan_komsu_1": 15,
+  "puan_komsu_2": 2,
+  "puan_ivme": 10,
+  "puan_kuraklik_carpan": 1.0,
+  "olum_cezasi_sure": 30,
+  "ceza_cifte_tekrar": -100,
+  "yuzde_tarihsel": 20
+}
+------------------------------
+5. Başarı Ortalaması: 2.0700
+{
+  "puan_komsu_1": 15,
+  "puan_komsu_2": 2,
+  "puan_ivme": 20,
+  "puan_kuraklik_carpan": 1.0,
+  "olum_cezasi_sure": 20,
+  "ceza_cifte_tekrar": -50,
+  "yuzde_tarihsel": 20
+}
+------------------------------
