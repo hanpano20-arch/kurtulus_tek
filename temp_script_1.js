@@ -1232,14 +1232,14 @@
           document.getElementById('warn-list').innerHTML = '<div class="warn-item"><div class="warn-dot red"></div><div>Havuzda yeterli sayı yok.</div></div>';
           btn.textContent = 'Analiz Et ↗'; btn.disabled = false; return;
         }
-        
+
         const totalCombos = mathCombCount(pool.length, p.k);
         const valid = [];
         const iter = getCombIterator(pool, p.k);
-        
+
         let processed = 0;
         const chunkSize = 100000;
-        
+
         function processChunk() {
           const { chunk, done } = iter.nextChunk(chunkSize);
           for (let i = 0; i < chunk.length; i++) {
@@ -1249,17 +1249,17 @@
             }
           }
           processed += chunk.length;
-          
+
           if (done || processed >= totalCombos) {
             finishAnalysis(valid, totalCombos, p, btn);
             return;
           }
-          
+
           const pct = Math.floor((processed / totalCombos) * 100);
           btn.textContent = `Hesaplanıyor... %${pct}`;
           setTimeout(processChunk, 0);
         }
-        
+
         setTimeout(processChunk, 0);
       }, 30);
     }
@@ -1369,13 +1369,13 @@
       setTimeout(() => {
         try {
           if (typeof postAnalyzeFix === 'function') postAnalyzeFix();
-        } catch(e) {}
+        } catch (e) { }
         try {
           if (typeof renderControlPanel === 'function') renderControlPanel();
-        } catch(e) {}
+        } catch (e) { }
         try {
           if (window.renderJaccardReport) window.renderJaccardReport();
-        } catch(e) {}
+        } catch (e) { }
       }, 50);
     }
 
