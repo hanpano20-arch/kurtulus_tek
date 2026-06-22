@@ -1,0 +1,22 @@
+H.savePuanAyarlari = function (btn) {
+        if (!window.HavuzMotoru) return;
+        
+        const allIds = [
+          'TARIHSEL_CARPAN', 'GUNCEL_CARPAN',
+          'K1_PUAN', 'K2_PUAN', 'K3_PUAN', 'K4_PUAN', 'K5_PUAN',
+          'K6_PUAN', 'K7_PUAN', 'K8_PUAN', 'K9_PUAN', 'K10_PUAN',
+          'K11_PUAN', 'K12_PUAN', 'K13_PUAN', 'K14_PUAN_4', 'K14_PUAN_8',
+          'K14_PUAN_12', 'K14_PUAN_16', 'K15_PUAN', 'K16_PUAN', 'K17_PUAN', 'K18_PUAN',
+          'OLUM_CEZASI_SINIRI'
+        ];
+        
+        allIds.forEach(id => {
+          let baseEl = document.getElementById('base_' + id);
+          if (baseEl && !isNaN(parseFloat(baseEl.value))) {
+             window.HavuzMotoru.mult_config[id] = parseFloat(baseEl.value);
+          }
+        });
+
+        try {
+          localStorage.setItem('hm_mult_config', JSON.stringify(window.HavuzMotoru.mult_config));
+        } catch (e) { }

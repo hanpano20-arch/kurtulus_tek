@@ -1,0 +1,400 @@
+function computeAll(entries, w, wh, wr, maxN) {
+        const draws = entries.map(e => e.nums);
+        const joks = entries.map(e => e.joker);
+        const N = draws.length;
+        const s = sd();
+        const fo = s.fo || {};   // follow matrisi
+        const nfo = s.nfo || {}; // komşu follow
+        const rp = s.rp || {};   // bölge geçiş prob
+        const ag = s.ag || {};   // avg gap
+
+        // Son 15 aktif sayılar (joker dahil)
+        const hist15 = draws.slice(0, 15);
+        const jok15 = joks.slice(0, 15);
+        const prev15 = new Set(hist15.flat());
+        jok15.forEach(j => { if (j) prev15.add(j); });
+
+        // Bölge aktivitesi — son 15
+        const rgnCnt = {};
+        for (let r = 0; r < 9; r++)rgnCnt[r] = 0;
+        hist15.forEach(d => d.forEach(n => { rgnCnt[rgn(n)] = (rgnCnt[rgn(n)] || 0) + 1; }));
+        jok15.forEach(j => { if (j) rgnCnt[rgn(j)] = (rgnCnt[rgn(j)] || 0) + 0.5; });
+        const sortedRgn = Object.entries(rgnCnt).sort((a, b) => b[1] - a[1]);
+        const top3Rgn = new Set(sortedRgn.slice(0, 3).map(x => parseInt(x[0])));
+
+        // Bir sonraki çekilişte beklenen bölgeler (geçiş matrisi)
+        const nextRgnScore = {};
+        for (let r = 0; r < 9; r++)nextRgnScore[r] = 0;
+        Object.entries(rgnCnt).forEach(([r, cnt]) => {
+          const row = rp[r] || {};
+          Object.entries(row).forEach(([nr, p]) => {
+            nextRgnScore[parseInt(nr)] = (nextRgnScore[parseInt(nr)] || 0) + p * cnt;
+          });
+        });
+
+        const res = {};
+        for (let n = 1; n <= maxN; n++) {
+          // ── TARİHSEL KATMAN ──────────────────────────────────────
+          // K1: Follow skoru — prev15 sayılarının n'i izleme geçmişi
+          let followSc = 0;
+          prev15.forEach(p => { followSc += (fo[String(p)]?.(String(n)) || 0); });
+          followSc = followSc / Math.max(prev15.size, 1) * 4;
+
+          // K2: Komşu follow
+          let nbfSc = 0;
+          prev15.forEach(p => { nbfSc += (nfo[String(p)]?.(String(n)) || 0); });
+          nbfSc = nbfSc / Math.max(prev15.size, 1) * 2;
+
+          // K3: Kuraklık (joker dahil azaltma)
+          let drought = 0;
+          for (const d of draws) { if (d.includes(n)) break; drought++; }
+          let effDrought = drought;
+          for (let i = 0; i < Math.min(drought, joks.length); i++) {
+            if (joks[i] === n) { effDrought = Math.max(0, drought - i * 0.5); break; }
+          }
+          const droughtSc = Math.min(effDrought, 30) * w.drought;
+
+          // K4: Frekans eksiği (son 50 çekiliş)
+          const freq50 = draws.slice(0, 50).filter(d => d.includes(n)).length;
+          const exp50 = Math.min(N, 50) * 6 / maxN;
+          const freqSc = Math.max(0, exp50 - freq50) * w.freq;
+
+          // K5: Gecikme (avg gap'e göre)
+          const avgG = parseFloat(ag[String(n)] || '15');
+          const gapSc = Math.max(0, drought - avgG * 0.7) * 1.2;
+
+          const histScore = followSc + nbfSc + droughtSc + freqSc + gapSc;
+
+          // ── GÜNCEL KATMAN ─────────────────────────────────────────
+          // K6: Kupon komşu ısısı (son 5)
+          const nbList = nbs(n, maxN);
+          const hot5 = nbList.filter(x => hist15.slice(0, 5).some(d => d.includes(x))).length;
+          const nbSc = hot5 * w.nb;
+
+          // K7: Bölge geçiş tahmini
+          const rgnSc = (nextRgnScore[rgn(n)] || 0) * 1.5;
+
+          // K8: Son 3'te ana çekilişte ceza
+          const rec3 = hist15.slice(0, 3).filter(d => d.includes(n)).length;
+          const pen = rec3 * (-w.pen);
+
+          // K9: Joker son 2'de ceza
+          const jrec2 = jok15.slice(0, 2).filter(j => j === n).length;
+          const jpen = jrec2 * (-w.jpen);
+
+          const recScore = nbSc + rgnSc + pen + jpen;
+
+          // ── BİRLEŞİK SKOR ────────────────────────────────────────
+          const combined = histScore * wh + recScore * wr;
+
+          // Manuel override
+          const ms = loadMS();
+          const manual = ms[String(n)] !== undefined ? parseFloat(ms[String(n)]) : null;
+
+          res[n] = {
+            n, freq50, drought, effDrought: +effDrought.toFixed(1), hot5,
+            followSc: +followSc.toFixed(1), droughtSc: +droughtSc.toFixed(1),
+            freqSc: +freqSc.toFixed(1), gapSc: +gapSc.toFixed(1),
+            nbSc: +nbSc.toFixed(1), rgnSc: +rgnSc.toFixed(1),
+            pen: +pen.toFixed(1), jpen: +jpen.toFixed(1),
+            histScore: +histScore.toFixed(1), recScore: +recScore.toFixed(1),
+            combined: +combined.toFixed(1), manual, final: 0 // Will override below
+          };
+        }
+
+        // --- AKILLI MOTOR (HavuzMotoru) ENTEGRASYONU ---
+        // Eski "Sayı Listesi" görünümünün hesapladığı puanı eziyor ve güncel motorun puanlarını veriyoruz
+        try {
+          window.HavuzMotoru.updateConfigFromUI();
+          const hm_sc = window.HavuzMotoru.puanlari_hesapla(draws, maxN, joks);
+          for (let n = 1; n <= maxN; n++) {
+            res[n].final = hm_sc[n] !== undefined ? hm_sc[n] : 0; res[n].hm_details = {}; res[n].hm_ceza = 0;
+          }
+        } catch (e) { console.error("HavuzMotoru puan hesaplama hatası:", e); }
+
+        return res;
+      }
+
+      function mkGroups(sc, maxN) {
+        const ranked = [...Array(maxN).keys()].map(i => i + 1)
+          .map(n => {
+            const entry = sc[n] || {};
+            const score = (typeof entry.final === 'number' && !isNaN(entry.final)) ? entry.final : 0;
+            const base = (typeof entry.base === 'number' && !isNaN(entry.base)) ? entry.base : score;
+            return { n, score, base, hm_details: entry.hm_details || {} };
+          })
+          .sort((a, b) => b.score - a.score);
+        const q1 = ranked[Math.floor(ranked.length * .25)].score || 0;
+        const q2 = ranked[Math.floor(ranked.length * .50)].score || 0;
+        const q3 = ranked[Math.floor(ranked.length * .75)].score || 0;
+        return {
+          hot: ranked.filter(x => x.score > q1), warm: ranked.filter(x => x.score > q2 && x.score <= q1),
+          cold: ranked.filter(x => x.score > q3 && x.score <= q2), out: ranked.filter(x => x.score <= q3),
+          th: { q1: +q1.toFixed(1), q2: +q2.toFixed(1), q3: +q3.toFixed(1) }
+        };
+      }
+
+      let _sc = {}, _sel = new Set(), _ephemeral_ms = {};
+      const H = window.H = {};
+
+      // ── TAB ──────────────────────────────────────────────────────────────
+      H.tab = function (t) {
+        ['db', 'score', 'list'].forEach(id => {
+          const btn = $$('htab-' + id);
+          const ct = document.getElementById('hc-' + id);
+          if (btn) btn.classList.toggle('active', id === t);
+          if (ct) ct.style.display = id === t ? 'block' : 'none';
+        });
+        if (t === 'db') H.renderDB();
+        else if (t === 'score') {
+          if (!Object.keys(_sc).length) { const w = getW(); _ephemeral_ms = {}; _sc = computeAll(loadDB().entries, w, w.wh / 100, 1 - w.wh / 100, mx()); }
+          H.renderScore();
+        }
+        else if (t === 'list') H.renderList();
+      };
+
+      // ── DB ───────────────────────────────────────────────────────────────
+      H.renderDB = function () {
+        const db = loadDB();
+        const list = $$('h-db-list'), cnt = $$('h-db-cnt');
+        if (cnt) cnt.textContent = db.entries.length + ' kayıt (6/' + gm() + ' modu)';
+        if (!list) return;
+        const is90 = gm() === '90';
+        const editingIndex = window.H._editingIndex;
+        list.innerHTML = db.entries.map((e, i) => {
+          const isSelected = editingIndex === i;
+          const styleAttr = isSelected ? 'background:rgba(83,240,219,0.2);border-color:#53f0db;cursor:pointer;' : (window.H._editingMode ? 'cursor:pointer;' : '');
+          return '<div class="h-row" style="' + styleAttr + '" onclick="H.selectForEdit(' + i + ', event)">' +
+            '<span class="h-row-date">' + e.date + '</span>' +
+            '<span class="h-row-nums">' + e.nums.join(' - ') + '</span>' +
+            (is90 && e.joker ? '<span class="h-row-j">J:' + e.joker + '</span>' : '') +
+            '<span class="h-row-del" onclick="H.del(' + i + ', event)">✕</span></div>';
+        }).join('');
+      };
+
+      H.del = function (i, event) {
+        if (event) event.stopPropagation();
+        if (!confirm('Sil?')) return;
+        const db = loadDB(); db.entries.splice(i, 1); saveDB(db); H.renderDB();
+      };
+
+      H.saveNew = function () {
+        const maxN = mx(), is90 = gm() === '90';
+        const dateVal = ($$('h-new-date') || {}).value || '';
+        const numsRaw = ($$('h-new-nums') || {}).value || '';
+        const jokerRaw = is90 ? (($$('h-new-joker') || {}).value || '') : '';
+        const nums = [...new Set(numsRaw.split(/[^0-9]+/).map(x => parseInt(x, 10))
+          .filter(n => !isNaN(n) && n >= 1 && n <= maxN))].slice(0, 6).sort((a, b) => a - b);
+        if (nums.length !== 6) { alert('Tam 6 sayı gir (1-' + maxN + ')'); return; }
+        if (!dateVal) { alert('Tarih gir'); return; }
+        const joker = jokerRaw ? parseInt(jokerRaw, 10) || null : null;
+
+        const isEditing = window.H._editingIndex !== null && window.H._editingIndex !== undefined;
+        const confirmMsg = isEditing ? 'Çekilişi güncellemek istediğinizden emin misiniz?' : 'Çekilişi kaydetmek istediğinizden emin misiniz?';
+        if (!confirm(confirmMsg)) return;
+
+        const db = loadDB();
+        if (isEditing) {
+          db.entries[window.H._editingIndex] = { date: dateVal, nums, joker };
+          window.H._editingIndex = null;
+          H.toggleEditingMode();
+        } else {
+          db.entries.unshift({ date: dateVal, nums, joker });
+        }
+        saveDB(db);
+        const ni = $$('h-new-nums'); const di = $$('h-new-date'); const ji = $$('h-new-joker');
+        if (ni) ni.value = ''; if (ji) ji.value = '';
+        H.renderDB();
+      };
+
+      H.updateGameModeUI = function () {
+        const is90 = gm() === '90';
+        const jokerInput = $$('h-new-joker');
+        if (jokerInput) {
+          jokerInput.style.display = is90 ? 'block' : 'none';
+        }
+      };
+
+      H.toggleEditingMode = function () {
+        window.H._editingMode = !window.H._editingMode;
+        // Slider'ları yükle
+        window.HavuzMotoru.updateConfigFromUI(); const db = loadDB(); const maxN = mx(); const hm_sc = window.HavuzMotoru.puanlari_hesapla(db.entries.map(e => e.nums), maxN, db.entries.map(e => e.joker));
+        _sc = {}; _ephemeral_ms = {};
+        const ms = loadMS();
+        for (let i = 1; i <= maxN; i++) {
+          let mVal = ms[String(i)] !== undefined ? parseFloat(ms[String(i)]) : 0;
+          let baseScore = hm_sc[i] || 0;
+          _sc[i] = { n: i, final: baseScore + mVal, base: baseScore, hm_details: {} };
+          if (mVal !== 0) _ephemeral_ms[i] = mVal;
+        }
+        // Skor tablosunu önceden doldur ki Manuel sekmesi açılınca dolu gelsin
+        setTimeout(() => { H.renderScore(); }, 100);
+
+        // p-game değişince güncelle
+        const btn = $$('h-btn-edit-mode');
+        if (btn) {
+          if (window.H._editingMode) {
+            btn.textContent = '✍️ Düzenleme Aktif (Çekiliş Seçin)';
+            btn.style.background = 'rgba(83, 240, 219, 0.2)';
+            btn.style.color = '#53f0db';
+            btn.style.borderColor = '#53f0db';
+          } else {
+            btn.textContent = '✍️ Geçmiş Çekilişi Düzenle';
+            btn.style.background = '';
+            btn.style.color = '';
+            btn.style.borderColor = '';
+            window.H._editingIndex = null;
+            const saveBtn = document.querySelector('#h-entry-form button');
+            if (saveBtn) saveBtn.textContent = '+ Kaydet';
+            document.querySelectorAll('#h-db-list .h-row').forEach(row => {
+              row.style.background = '';
+              row.style.borderColor = '';
+            });
+          }
+        }
+      };
+
+      H.selectForEdit = function (i, event) {
+        if (!window.H._editingMode) return;
+        const db = loadDB();
+        const entry = db.entries[i];
+        if (!entry) return;
+
+        const di = $$('h-new-date'); if (di) di.value = entry.date;
+        const ni = $$('h-new-nums'); if (ni) ni.value = entry.nums.join(' ');
+        const ji = $$('h-new-joker'); if (ji) ji.value = entry.joker || '';
+
+        window.H._editingIndex = i;
+
+        document.querySelectorAll('#h-db-list .h-row').forEach((row, idx) => {
+          row.style.background = idx === i ? 'rgba(83,240,219,0.2)' : '';
+          row.style.borderColor = idx === i ? '#53f0db' : '';
+        });
+
+        const saveBtn = document.querySelector('#h-entry-form button');
+        if (saveBtn) saveBtn.textContent = '💾 Güncelle';
+
+        alert('Seçilen çekiliş bilgileri yukarıdaki forma yüklendi. Düzenledikten sonra Kaydet/Güncelle butonuna basın.');
+      };
+
+      H.importExcel = function (input) {
+        const file = input.files && input.files[0];
+        if (!file) return;
+
+        if (typeof XLSX === 'undefined') {
+          const script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+          script.onload = () => processFile(file);
+          document.head.appendChild(script);
+        } else {
+          processFile(file);
+        }
+
+        function processFile(file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            try {
+              const data = new Uint8Array(e.target.result);
+              const workbook = XLSX.read(data, { type: 'array' });
+              const sheet = workbook.Sheets[workbook.SheetNames[0]];
+              const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+              if (rows.length < 2) {
+                alert('Excel dosyasında yeterli veri bulunamadı.');
+                return;
+              }
+
+              const maxN = mx();
+              const is90 = gm() === '90';
+              const parsedEntries = [];
+
+              for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length < 7) continue;
+
+                const nums = [];
+                for (let col = 1; col <= 6; col++) {
+                  const val = parseInt(row[col], 10);
+                  if (!isNaN(val) && val >= 1 && val <= maxN) {
+                    nums.push(val);
+                  }
+                }
+                nums.sort((a, b) => a - b);
+
+                if (nums.length !== 6) continue;
+
+                let joker = null;
+                const son_15_donem = df.slice(0, 15);
+                const son_11_donem = df.slice(0, 11);
+                const son_7_donem = df.slice(0, 7);
+                const son_3_donem = df.slice(0, 3);
+                const toplam_cekilis = df.length;
+
+                // 🃏 YENİ KURAL: Joker Etkisi
+                let dateStr = '';
+
+                if (is90) {
+                  joker = parseInt(row[7], 10) || null;
+                  dateStr = String(row[8] || '').trim();
+                } else {
+                  dateStr = String(row[7] || '').trim();
+                }
+
+                if (dateStr && !isNaN(dateStr)) {
+                  const dateObj = new Date((Number(dateStr) - 25569) * 86400 * 1000);
+                  if (!isNaN(dateObj.getTime())) {
+                    dateStr = dateObj.toISOString().slice(0, 10);
+                  }
+                } else if (dateStr) {
+                  const d = new Date(dateStr);
+                  if (!isNaN(d.getTime())) {
+                    dateStr = d.toISOString().slice(0, 10);
+                  }
+                }
+
+                if (!dateStr) dateStr = new Date().toISOString().slice(0, 10);
+
+                parsedEntries.push({ date: dateStr, nums, joker });
+              }
+
+              if (parsedEntries.length === 0) {
+                alert('Geçerli çekiliş verisi ayrıştırılamadı. Excel sütun yapısını kontrol edin.');
+                return;
+              }
+
+              if (!confirm(parsedEntries.length + ' adet çekiliş verisi bulundu. Veritabanına aktarmak istediğinize emin misiniz? (Mevcut veriler güncellenecektir)')) {
+                return;
+              }
+
+              const db = { entries: parsedEntries };
+              saveDB(db);
+              H.renderDB();
+              alert('Excel verisi başarıyla entegre edildi!');
+            } catch (err) {
+              alert('Hata oluştu: ' + err.message);
+            } finally {
+              input.value = '';
+            }
+          };
+          reader.readAsArrayBuffer(file);
+        }
+      };
+
+      H.transfer15 = function () {
+        const db = loadDB(); const last15 = db.entries.slice(0, 15);
+        if (!last15.length) { alert('DB boş'); return; }
+        const draws = Array.from({ length: 15 }, () => []);
+        last15.forEach((e, i) => { if (i < 15) draws[i] = e.nums.slice(); });
+        try {
+          const key = (typeof getDrawKey === 'function') ? getDrawKey() : 'cpb_draws_90_v714';
+          localStorage.setItem(key, JSON.stringify(draws));
+          if (typeof renderDrawMap === 'function') renderDrawMap();
+          last15.forEach((e, i) => {
+            const inp = document.getElementById('v74-draw-input-' + i);
+            if (inp) { inp.value = e.nums.join(' '); inp.dispatchEvent(new Event('input', { bubbles: true })); }
+          });
+          alert('Son ' + last15.length + ' çekiliş haritaya aktarıldı!');
+        } catch (ex) { alert('Hata: ' + ex.message); }
+      };
+
+      

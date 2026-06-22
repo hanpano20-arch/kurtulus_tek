@@ -1,0 +1,282 @@
+extractDetailsForUI(x.n, draws, joks);
+            let man = _ephemeral_ms[x.n] || 0;
+            let rawFinal = (typeof x.base === 'number' && !isNaN(x.base)) ? x.base : x.score;
+            let finalScore = rawFinal + (isNaN(man) ? 0 : man);
+
+            res += '<tr class="' + rowClass + '" id="dst-row-' + x.n + '">';
+            res += '<td class="dst-num" style="color:#58a6ff !important; font-weight:bold; font-size:22px;">' + x.n + '</td>';
+            res += '<td class="final-score" id="dst-final-' + x.n + '" style="color:#00ff88 !important; text-shadow:0 0 10px rgba(0,255,136,0.6); font-size:22px;"><b>' + finalScore + '</b></td>';
+            res += '<td class="' + groupCss + '" style="font-size:16px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">' + rank + '<br><span style="font-size:13px;">' + groupName + '</span></td>';
+
+                        let fmt = function(v, label) {
+                let vStr = (v !== undefined && v !== null) ? v.toString() : '0';
+                let stripped = vStr.replace(/<[^>]+>/g, '');
+                let n = parseFloat(stripped) || 0;
+                let txt = stripped + (label ? label : '');
+                if (n > 0) return '<td class="score-pos">' + txt + '</td>';
+                if (n < 0) return '<td class="score-neg">' + txt + '</td>';
+                return '<td class="score-zero">' + txt + '</td>';
+            };
+
+            res += fmt(details.historical);
+            res += fmt(details.recent);
+            res += fmt(details.k1);
+            res += fmt(details.k2);
+            res += fmt(details.k3);
+            res += fmt(details.k4);
+            res += fmt(details.k5);
+            res += fmt(details.k6);
+            res += fmt(details.k7);
+            res += fmt(details.k8);
+            res += fmt(details.k9);
+            res += fmt(details.k10);
+            res += fmt(details.k11);
+            res += fmt(details.k12);
+            res += fmt(details.k13);
+            res += fmt(details.k14, details.doygunlukLabel);
+            res += fmt(details.k15);
+            res += fmt(details.k16);
+            res += fmt(details.k17);
+            res += fmt(details.k18);
+            res += fmt(details.k19);
+            res += fmt(details.k20);
+            res += fmt(details.k21);
+
+            res += '<td style="position:relative; white-space:nowrap; display:flex; align-items:center; justify-content:center; gap:8px; border-bottom:none;">';
+            res += '<button onclick="let i=this.nextElementSibling; i.value=parseFloat(i.value||0)-1; i.dispatchEvent(new Event(\'change\'));" style="background:#ff4444; color:#fff; border:none; border-radius:4px; width:38px; height:34px; cursor:pointer; font-weight:bold; font-size:22px; display:flex; align-items:center; justify-content:center; transition:0.2s; box-shadow:0 0 5px rgba(255,68,68,0.5);">-</button>';
+            res += '<input type="number" step="0.1" class="dst-manual-input" data-n="' + x.n + '" value="' + man + '" ';
+            res += 'oninput="if(this.nextElementSibling.nextElementSibling) this.nextElementSibling.nextElementSibling.style.display=\'inline-block\';" ';
+            res += 'onchange="H.updateEphemeralManual(' + x.n + ', this.value); document.getElementById(\'dst-final-\' + ' + x.n + ').innerHTML = \'<b>\' + (' + rawFinal + ' + parseFloat(this.value || 0)) + \'</b>\';" style="width:55px; text-align:center; padding:4px; font-size:18px; font-weight:bold; border-radius:4px; border:1px solid #555; background:#111; color:#fff;">';
+            res += '<button onclick="let i=this.previousElementSibling; i.value=parseFloat(i.value||0)+1; i.dispatchEvent(new Event(\'change\'));" style="background:#39d353; color:#fff; border:none; border-radius:4px; width:38px; height:34px; cursor:pointer; font-weight:bold; font-size:22px; display:flex; align-items:center; justify-content:center; transition:0.2s; box-shadow:0 0 5px rgba(57,211,83,0.5);">+</button>';
+            res += '<button class="inline-save-btn" style="display:none; margin-left:4px; background:#53f0db; color:#0b0f14; border:none; padding:3px 6px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer; vertical-align:middle;" onclick="H.saveAndSortDetailedTable()">Kaydet</button>';
+            res += '</td>';
+            res += '</tr>';
+          });
+          return res;
+        }
+
+        let c_hot = grp.hot ? grp.hot.length : 0;
+        let c_warm = grp.warm ? grp.warm.length : 0;
+        let c_cold = grp.cold ? grp.cold.length : 0;
+
+        html += renderRows(grp.hot, 'dst-hot', 'SICAK', 'rank-sicak', 1);
+        html += renderRows(grp.warm, 'dst-warm', 'ILIK', 'rank-ilik', 1 + c_hot);
+        html += renderRows(grp.cold, 'dst-cold', 'SOĞUK', 'rank-soguk', 1 + c_hot + c_warm);
+        html += renderRows(grp.out, 'dst-out', 'DIŞI', 'rank-disi', 1 + c_hot + c_warm + c_cold);
+
+        html += '</table></div></div>';
+        return html;
+      };
+
+      H.renderList = function () {
+        try {
+          const maxN = (typeof gameMax === 'function') ? gameMax() : 90;
+          const db = loadDB() || { entries: [] };
+
+          if (!Object.keys(_sc).length) {
+            const w = getW(); const wh = w.wh / 100;
+            if (window.HavuzMotoru && window.HavuzMotoru.updateConfigFromUI) {
+              window.HavuzMotoru.updateConfigFromUI();
+            }
+            let hm_sc = {}; _ephemeral_ms = {};
+            if (window.HavuzMotoru && window.HavuzMotoru.puanlari_hesapla) {
+              hm_sc = window.HavuzMotoru.puanlari_hesapla(
+                db.entries.map(e => e.nums),
+                maxN,
+                db.entries.map(e => e.joker)
+              );
+            }
+            _sc = {}; _ephemeral_ms = {};
+            const ms = loadMS();
+            for (let i = 1; i <= maxN; i++) {
+              let mVal = ms[String(i)] !== undefined ? parseFloat(ms[String(i)]) : 0;
+              let baseScore = hm_sc[i] || 0;
+              _sc[i] = { n: i, final: baseScore + mVal, base: baseScore, hm_details: {} };
+              if (mVal !== 0) _ephemeral_ms[i] = mVal;
+            }
+          } else {
+            // Ephemeral (manuel) skorların var olan _sc üzerine uygulanması
+            for (let i = 1; i <= maxN; i++) {
+              if (_sc[i] && _ephemeral_ms[i] !== undefined) {
+                _sc[i].final = (_sc[i].base !== undefined ? _sc[i].base : _sc[i].final) + _ephemeral_ms[i];
+              }
+            }
+          }
+
+          const grp = mkGroups(_sc, maxN);
+          const is90 = ((typeof gameMax === 'function' ? gameMax() : 90) == 90);
+          const jSet = new Set(is90 ? db.entries.slice(0, 10).map(e => e.joker).filter(Boolean) : []);
+          const box = document.getElementById('h-group-box');
+
+          if (!box) {
+            console.error("h-group-box bulunamadi!");
+            return;
+          }
+
+          function chips(arr, cls) {
+            if (!arr || !arr.length) return '';
+            return arr.map(x => {
+              const isJ = jSet.has(x.n);
+              const selCls = _sel.has(x.n) ? ' sel' : '';
+              const jCls = isJ ? ' chip-joker' : '';
+              const jBadge = isJ ? '<span class="joker-pill-badge">J</span>' : '';
+              const scoreText = (x.score !== undefined && x.score !== null && !isNaN(x.score)) ? Number(x.score).toFixed(0) : '0';
+              return '<span class="h-chip ' + cls + selCls + jCls + '" data-n="' + x.n + '" onclick="H.toggleChip(' + x.n + ',this)" style="display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;gap:2px;min-width:60px; min-height:40px;">' +
+                '<span style="font-size:14px;font-weight:bold;line-height:1;display:flex;align-items:center;gap:2px;">' + x.n + jBadge + '</span>' +
+                '<small style="font-size:11px;font-weight:bold;line-height:1;opacity:1;">' + scoreText + 'p</small></span>';
+            }).join('');
+          }
+
+          box.innerHTML =
+            '<div class="h-grp-box"><div class="h-grp-title" style="color:#ff6b6b">🔴 SICAK (' + (grp.hot ? grp.hot.length : 0) + ') &gt;' + (grp.th.q1 || 0) + '</div><div class="h-chips">' + chips(grp.hot, 'chip-hot') + '</div></div>' +
+            '<div class="h-grp-box" style="margin-top:6px"><div class="h-grp-title" style="color:#ffd93d">🟡 ILIK (' + (grp.warm ? grp.warm.length : 0) + ') &gt;' + (grp.th.q2 || 0) + '</div><div class="h-chips">' + chips(grp.warm, 'chip-warm') + '</div></div>' +
+            '<div class="h-grp-box" style="margin-top:6px"><div class="h-grp-title" style="color:#6bcb77">🟢 SOĞUK (' + (grp.cold ? grp.cold.length : 0) + ')</div><div class="h-chips">' + chips(grp.cold, 'chip-cold') + '</div></div>' +
+            '<div class="h-grp-box" style="margin-top:6px"><div class="h-grp-title" style="color:#888">⚫ İHTİMAL DIŞI (' + (grp.out ? grp.out.length : 0) + ')</div><div class="h-chips">' + chips(grp.out, 'chip-out') + '</div></div>' +
+            '<div style="margin-top:8px;font-size:11px">Seçilen: <b id="h-sel-cnt">' + (_sel ? _sel.size : 0) + '</b> sayı</div>' +
+            (is90 ? '<div style="margin-top:4px;font-size:10px;color:var(--color-text-secondary)">🃏 = son 10 çekilişte joker olarak çıktı</div>' : '');
+
+          // Explicit force display block to ensure visibility
+
+          box.innerHTML += H.renderDetailedTable(grp);
+          const ct = document.getElementById('hc-list');
+
+          if (ct) ct.style.display = 'block';
+
+        } catch (e) {
+          console.error("renderList hatasi:", e);
+          alert("Sayı listesi çizilirken hata oluştu: " + e.message);
+        }
+      };
+
+
+      H.toggleChip = function (n, el) {
+        if (_sel.has(n)) { _sel.delete(n); el.classList.remove('sel'); }
+        else { _sel.add(n); el.classList.add('sel'); }
+        const cnt = $$('h-sel-cnt'); if (cnt) cnt.textContent = _sel.size;
+      };
+
+      H.selGrp = function (g) {
+        const maxN = mx(); const db = loadDB();
+        if (!Object.keys(_sc).length) { const w = getW(); _ephemeral_ms = {}; _sc = computeAll(db.entries, w, w.wh / 100, 1 - w.wh / 100, maxN); }
+        const grp = mkGroups(_sc, maxN);
+        const src = g === 'hot' ? grp.hot : g === 'warm' ? grp.warm : g === 'cold' ? grp.cold : grp.out;
+        src.forEach(x => _sel.add(x.n)); H.renderList();
+      };
+
+      H.addPool = function () {
+        if (_sel.size === 0) { alert('Havuz için sayı seçmediniz!'); return; }
+        const poolInput = document.getElementById('poolInput');
+        if (poolInput) {
+          const arr = Array.from(_sel).sort((a, b) => a - b);
+          poolInput.value = arr.join(', ');
+          try { if (typeof parsePool === 'function') parsePool(); } catch (e) { console.error(e); }
+          try { if (typeof renderGrid === 'function') renderGrid(); } catch (e) { }
+          alert('Seçilen ' + arr.length + ' sayı ana havuza başarıyla aktarıldı!\\nSayılar: ' + arr.join(', '));
+        } else {
+          alert('Ana havuz giriş alanı bulunamadı!');
+        }
+      };
+      H.desel = function () { _sel.clear(); H.renderList(); };
+      H.applyPoolSelection = function (puanlar, havuz, maxN) {
+        try {
+          _sc = {}; _ephemeral_ms = {};
+          for (let n = 1; n <= maxN; n++) {
+            _sc[n] = { n: n, final: puanlar[n] || 0, hm_details: {} };
+          }
+          _sel.clear();
+          havuz.forEach(n => _sel.add(n));
+
+          // Switch tab explicitly natively!
+          if (typeof H.tab === 'function') {
+            H.tab('list');
+          } else {
+            document.getElementById('htab-db').classList.remove('active');
+            document.getElementById('htab-score').classList.remove('active');
+            document.getElementById('htab-list').classList.add('active');
+            document.getElementById('hc-db').style.display = 'none';
+            document.getElementById('hc-score').style.display = 'none';
+            document.getElementById('hc-list').style.display = 'block';
+            H.renderScore();
+            H.renderList();
+          }
+        } catch (e) {
+          console.error("applyPoolSelection error:", e);
+          alert("Hata: " + e.message);
+        }
+      };
+
+      function updateBadge() {
+        const b = $$('h-mode-badge'); if (!b) return;
+        const m = gm(); b.textContent = '6/' + m;
+        b.className = 'h-mode-badge ' + (m === '60' ? 'badge-60' : 'badge-90');
+        const is90 = m === '90';
+        ['w-row-jdrt', 'w-row-jpen'].forEach(id => { const el = $$(id); if (el) el.style.display = is90 ? '' : 'none'; });
+        const th = $$('h-th-jfr'); if (th) th.style.display = is90 ? '' : 'none';
+        const ji = $$('h-new-joker'); if (ji) ji.parentElement.style.display = is90 ? '' : 'none';
+      }
+
+      // TOOLTIP YARDIMCI FONKSİYONLARI (MAVİ YUVARLAK İÇİN)
+      H.showTip = function (el) {
+        let tip = document.getElementById('slider-tip');
+        if (!tip) {
+          tip = document.createElement('div');
+          tip.id = 'slider-tip';
+          tip.style.position = 'fixed';
+          tip.style.background = '#0a84ff'; // Mavi renk
+          tip.style.color = '#fff';
+          tip.style.padding = '4px 10px';
+          tip.style.borderRadius = '6px';
+          tip.style.fontSize = '14px';
+          tip.style.fontWeight = 'bold';
+          tip.style.pointerEvents = 'none';
+          tip.style.zIndex = '99999';
+          tip.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+          tip.style.transform = 'translate(-50%, -100%)';
+          tip.style.marginTop = '-12px';
+          document.body.appendChild(tip);
+        }
+        tip.style.display = 'block';
+        H.updateTip(el);
+      };
+      H.hideTip = function () {
+        let tip = document.getElementById('slider-tip');
+        if (tip) tip.style.display = 'none';
+      };
+      H.updateTip = function (el) {
+        let tip = document.getElementById('slider-tip');
+        if (tip && tip.style.display !== 'none') {
+          tip.textContent = el.value;
+          const rect = el.getBoundingClientRect();
+          const percent = (el.value - el.min) / (el.max - el.min);
+          const thumbX = rect.left + (percent * rect.width);
+          tip.style.left = thumbX + 'px';
+          tip.style.top = rect.top + 'px';
+        }
+      };
+
+      // ── INIT ──────────────────────────────────────────────────────────────
+      function init() {
+        const di = $$('h-new-date');
+        if (di) { const now = new Date(); di.value = now.toISOString().slice(0, 10); }
+        const w = loadW();
+        // Slider'ları yükle
+        ['freq', 'drt', 'jdrt', 'nb', 'reg', 'gap', 'pen', 'jpen'].forEach(k => {
+          const s = $$('ws-' + k); if (!s) return;
+          const wk = k === 'drt' ? 'drought' : k === 'nb' ? 'nb' : k === 'pen' ? 'pen' : k === 'jpen' ? 'jpen' : k;
+          if (w[wk] !== undefined) s.value = w[wk];
+          const v1 = $$('wlb-' + k); const v2 = $$('wv-' + k);
+          const sign = (k === 'pen' || k === 'jpen') ? '-' : '';
+          if (v1) v1.textContent = sign + s.value; if (v2) v2.textContent = sign + s.value;
+          s.addEventListener('input', () => {
+            if (v1) v1.textContent = sign + s.value; if (v2) v2.textContent = sign + s.value;
+          });
+        });
+        // Oran slider
+        const ws = $$('ws-wh'); if (ws) { ws.value = w.wh || 40; H.ratioSync(ws.value); }
+
+        updateBadge(); H.updateGameModeUI(); H.renderDB();
+        // Arka planda hesapla ve tabloyu doldur
+        const db = loadDB(); const ww = getW();
+        window.HavuzMotoru.updateConfigFromUI(); const hm_sc = window.HavuzMotoru.puanlari_hesapla(db.entries.map(e => e.nums), mx(), db.entries.map(e => e.joker)); _sc = {}; _ephemeral_ms = {}; for (let i = 1; i <= mx(); i++) _sc[i] = { n: i, final: hm_sc[i] !== undefined ? hm_sc[i] : 0, hm_details: {} };
+        // Skor tablosunu önceden doldur ki Manuel sekmesi açılınca dolu gelsin
+        setTimeout(() => { H.renderScore(); 

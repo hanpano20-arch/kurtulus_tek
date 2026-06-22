@@ -1,0 +1,276 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+p{margin:0}
+.tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:0}
+.tab-btn{padding:8px 16px;font-size:13px;font-weight:500;color:var(--color-text-secondary);background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s}
+.tab-btn.active{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary)}
+.tab-btn:hover:not(.active){color:var(--color-text-primary)}
+.panel{display:none}.panel.active{display:block}
+.sec-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin:0 0 12px}
+.sec-sub{font-size:12px;color:var(--color-text-secondary);margin-bottom:16px;line-height:1.6}
+.rule-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px;margin-bottom:8px}
+.rule-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.k-badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;flex-shrink:0}
+.k-green{background:#EAF3DE;color:#27500A}
+.k-amber{background:#FAEEDA;color:#633806}
+.k-red{background:#FCEBEB;color:#A32D2D}
+.k-blue{background:#E6F1FB;color:#0C447C}
+.rule-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.rule-val{margin-left:auto;font-size:12px;font-family:var(--font-mono);color:var(--color-text-secondary)}
+.rule-desc{font-size:12px;color:var(--color-text-secondary);line-height:1.55}
+code{font-size:11px;font-family:var(--font-mono);background:var(--color-background-secondary);padding:1px 5px;border-radius:3px;color:var(--color-text-primary)}
+.divider{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:20px 0}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:20px}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;text-align:center}
+.metric .val{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.metric .lbl{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
+.bug-card{border-radius:var(--border-radius-md);padding:12px 14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start}
+.bug-crit{background:#FCEBEB;border-left:3px solid #E24B4A;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0}
+.bug-warn{background:#FAEEDA;border-left:3px solid #EF9F27;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0}
+.bug-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.bug-crit .bug-icon{color:#A32D2D}
+.bug-warn .bug-icon{color:#633806}
+.bug-title{font-size:13px;font-weight:500;margin-bottom:4px}
+.bug-crit .bug-title{color:#A32D2D}
+.bug-warn .bug-title{color:#633806}
+.bug-desc{font-size:12px;color:var(--color-text-secondary);line-height:1.6}
+.param-section{margin-bottom:20px}
+.param-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:8px}
+.param-row{display:grid;grid-template-columns:1fr 70px 28px 1fr 80px;gap:8px;align-items:center;margin-bottom:6px}
+.pr-name{font-size:12px;font-family:var(--font-mono);color:var(--color-text-primary)}
+.pr-cur{font-size:12px;text-align:center;padding:4px 0;background:var(--color-background-secondary);border-radius:4px;color:var(--color-text-secondary);font-family:var(--font-mono)}
+.pr-arrow{text-align:center;color:var(--color-text-tertiary);font-size:14px}
+.pr-inp{width:100%}
+.pr-why{font-size:11px;color:var(--color-text-tertiary);line-height:1.4}
+.apply-btn{margin-top:16px;padding:10px 20px;font-size:13px;font-weight:500;cursor:pointer;border-radius:var(--border-radius-md);width:100%}
+.score-flow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.flow-box{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px}
+.flow-num{font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:4px}
+.flow-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.flow-formula{font-size:11px;font-family:var(--font-mono);color:var(--color-text-secondary);line-height:1.5}
+.flow-range{font-size:11px;color:var(--color-text-tertiary);margin-top:4px}
+</style>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('mimari')">Sistem mimarisi</button>
+  <button class="tab-btn" onclick="switchTab('k-kurallari')">K1-K14 kuralları</button>
+  <button class="tab-btn" onclick="switchTab('hatalar')">Tespit edilen hatalar</button>
+  <button class="tab-btn" onclick="switchTab('parametreler')">Parametre önerileri</button>
+</div>
+
+<div id="tab-mimari" class="panel active">
+  <div class="metrics-grid">
+    <div class="metric"><div class="val">14</div><div class="lbl">Aktif kural</div></div>
+    <div class="metric"><div class="val" style="color:#A32D2D">-500</div><div class="lbl">Maks. ceza (doygunluk)</div></div>
+    <div class="metric"><div class="val" style="color:#27500A">~150</div><div class="lbl">Maks. taban puan</div></div>
+    <div class="metric"><div class="val" style="color:#633806">3</div><div class="lbl">Kritik hata</div></div>
+  </div>
+
+  <div class="sec-title">Puanlama akışı — 3 katman</div>
+  <div class="score-flow">
+    <div class="flow-box">
+      <div class="flow-num">Katman 1 — Tarihsel</div>
+      <div class="flow-title">Genel frekans puanı</div>
+      <div class="flow-formula">(frekans / (toplam × 6)) × 1000 × %40 → 0-50 normalize</div>
+      <div class="flow-range">Katkı: 0 – 50 puan</div>
+    </div>
+    <div class="flow-box">
+      <div class="flow-num">Katman 2 — Son dönem</div>
+      <div class="flow-title">Ağırlıklı yakın geçmiş</div>
+      <div class="flow-formula">(f15×2 + f10×3 + f5×4) × %60 → 0-50 normalize</div>
+      <div class="flow-range">Katkı: 0 – 50 puan</div>
+    </div>
+    <div class="flow-box">
+      <div class="flow-num">Katman 3 — Kurallar</div>
+      <div class="flow-title">K1-K14 bonus / ceza</div>
+      <div class="flow-formula">14 kural taban puana eklenir veya çıkarılır</div>
+      <div class="flow-range">Katkı: -500 – +~100 puan</div>
+    </div>
+  </div>
+
+  <div class="sec-sub">Taban puan en fazla 100'dür. Üzerine K1-K14 kuralları uygulanır. Olumlu kurallar toplamda yaklaşık +100 puan ekleyebilirken doygunluk cezası tek başına -500 yapabilir. Bu ölçek farkı temel sorundur.</div>
+
+  <hr class="divider">
+  <div class="sec-title">Varsayılan config değerleri</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="rule-card">
+      <div class="rule-top"><span class="k-badge k-blue">Ağırlıklar</span></div>
+      <div class="rule-desc">Son 15 dönem ağırlığı: <code>%60</code><br>Tarihsel geçmiş ağırlığı: <code>%40</code><br>Son 15 çarpanı: <code>×2.0</code><br>Son 10 çarpanı: <code>×3.0</code><br>Son 5 çarpanı: <code>×4.0</code><br>Kuraklık çarpanı: <code>×2.0</code><br>Joker çarpanı: <code>×5.0</code></div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-top"><span class="k-badge k-green">Bonuslar</span></div>
+      <div class="rule-desc">1. halka komşu: <code>+8 puan</code><br>2. halka komşu: <code>+2 puan</code><br>Gecikmeli tekrar: <code>+15 puan</code><br>Bölge geçişi: <code>+10 puan</code><br>Onluk blok kuraklık: <code>+10 puan</code><br>Kinetik ivme: <code>+20 puan</code><br>Ölüm cezası sınırı: <code>30 hafta</code></div>
+    </div>
+    <div class="rule-card" style="grid-column:1/-1">
+      <div class="rule-top"><span class="k-badge k-red">Cezalar</span></div>
+      <div class="rule-desc">Ölü sayı (f5≥3): <code>-15 puan</code> &nbsp;|&nbsp; Çifte tekrar: <code>-5 puan</code> &nbsp;|&nbsp; Doygunluk (tüm eşikler): <code>-500 puan</code> her biri</div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-k-kurallari" class="panel">
+  <div class="sec-sub">Her kural taban puana eklenip çıkarılan bağımsız bir modüldür. Sağdaki değer config'deki varsayılan katkı miktarıdır.</div>
+
+  <div class="rule-card"><div class="rule-top"><span class="k-badge k-blue">K1-3</span><div class="rule-name">Son 15 / 10 / 5 çekiliş ağırlıklı puanı</div><div class="rule-val">×2.0 / ×3.0 / ×4.0</div></div><div class="rule-desc">Son 15, 10 ve 5 çekilişte kaç kez geldiği, artan çarpanlarla hesaplanır. Yakın geçmiş daha ağırlıklıdır. Bu üç kural taban puanın <code>%60</code> bileşenini oluşturur.</div></div>
+
+  <div class="rule-card"><div class="rule-top"><span class="k-badge k-green">K4</span><div class="rule-name">Kuraklık haftası bonusu</div><div class="rule-val">hafta × 2.0</div></div><div class="rule-desc">Sayının son gelişinden bu yana geçen hafta sayısı × kuraklık çarpanı puan olarak eklenir. 30 hafta eşiğini aşarsa <code>-150</code> ölüm cezası devreye girer. <span style="color:#A32D2D;font-weight:500">29.hafta = +58p, 30.hafta = +60-150 = -90p.</span></div></div>
+
+  <div class="rule-card"><div class="rule-top"><span class="k-badge k-green">K5</span><div class="rule-name">Joker bonus</div><div class="rule-val">max +50</div></div><div class="rule-desc">Son 15 çekilişte joker olarak gelen sayılara ağırlıklı puan verilir. En yakın joker = <code>(15/15) × 5.0 × 10 = 50p</code>, en uzak joker = <code>(1/15) × 5.0 × 10 ≈ 3p</code>.</div></div>
+
+  <div class="rule-card"><div class="rule-top"><span class="k-badge k-green">K6</span><div class="rule-name">1. halka komşu radarı</div><div class="rule-val">+8 / komşu</div></div><div class="rule-desc">Son 3 çekilişin sayılarına komşu olan (±3 içinde) her sayı +8 puan alır. 6/90 oyununda bu kural potansiyel olarak 50+ sayıyı etkiler — sinyal gürültüsü yüksek.</div></div>
+
+  <div class="rule-card"><div class="rule-top"><span class="k-badge k-blue">K7</span><div class="rule-name">2. halka komşu radarı</div><div class="rule-val">+2 / komşu</div></div><div class="rule-desc">K6'nın daha uzak halkası. +2 puan ile etkisi oldukça düşük, ancak birden fazla çekilişte etkinleşebilir.</div></div>
+
+  <div class="rule-card"><div class="rule-top"><span class="k-badge k-blue">K8</span><div class="rule-name">Onluk blok kuraklık bonusu</div><div class="rule-val">+10</div></div><div class="rule-desc">Son 3 çekilişte hiç çıkmayan 10'lu bloğun (1-10, 11-20…) tüm üyelerine +10 puan verilir. Blok tabanlı denge mekanizması.</div></div>
+
+  <div class="rule-card"><div class="rule-top"><span class="k-badge k-amber">K9</span><div class="rule-name">Kinetik ivme bonusu</div><div class="rule-val">+20</div></div><div class="rule-desc">Koşul: <code>count_3 &lt; 2 AND f3 ≥ 2 AND f15 ≤ 1 AND count_7 &lt; 3</code>. <span style="color:#A32D2D">Sorun:</span> Joker yokken f3≥2 olan her sayı zaten count_3≥2 demektir. Koşul neredeyse hiç tetiklenmiyor.</div></div>
+
+  <div class="rule-card"><div class="rule-top"><span class="k-badge k-blue">K10</span><div class="rule-name">Gecikmeli tekrar bonusu</div><div class="rule-val">+15</div></div><div class="rule-desc">Son 15'te 2 kez gelmiş ama son 5'te 0 kez gelen sayılara +15 puan. "Bir ara aktifti, uyudu, yakında döner" mantığı.</div></div>
+
+  <div class="rule-card"><div class="rule-top"><span class="k-badge k-amber">K11</span><div class="rule-name">Bölge geçişi bonusu</div><div class="rule-val">+? (bkz. hata)</div></div><div class="rule-desc">Son çekilişin bölgesinden zıt bölgeye bonus verir. Formül: <code>Math.floor(PUAN_BOLGE_GECISI / limit)</code>. 6/90'da limit=45 → <code>Math.floor(10/45) = 0</code>. <span style="color:#A32D2D;font-weight:500">Bu kural hiç çalışmıyor.</span></div></div>
+
+  <div class="rule-card"><div class="rule-top"><span class="k-badge k-red">K12</span><div class="rule-name">Ölü sayı cezası</div><div class="rule-val">-15</div></div><div class="rule-desc">f5 ≥ 3 (son 5'te 3+ kez geldi) koşulunda -15 ceza. Ama bu sayı K1-3'ten zaten yüksek puan alıyor. -15 etkisiz kalıyor.</div></div>
+
+  <div class="rule-card"><div class="rule-top"><span class="k-badge k-red">K13</span><div class="rule-name">Çifte tekrar cezası</div><div class="rule-val">-5</div></div><div class="rule-desc">Son 2 çekilişte art arda gelen sayılara -5 ceza. Mantıklı bir kural, değer tartışılabilir.</div></div>
+
+  <div class="rule-card"><div class="rule-top"><span class="k-badge k-red">K14</span><div class="rule-name">Doygunluk cezası (4 eşik)</div><div class="rule-val">-500 (her eşik)</div></div><div class="rule-desc">Son 3'te 2+, son 7'de 3+, son 11'de 4+, son 15'te 5+ kez gelen sayılara -500 ceza uygulanır. Dört farklı doygunluk düzeyi <span style="font-weight:500">aynı</span> -500 cezayı paylaşıyor. Ölçek ve kademeleme sorunu var.</div></div>
+</div>
+
+<div id="tab-hatalar" class="panel">
+  <div class="sec-sub">Uygulamanın kaynak kodundan tespit edilen hatalar ve optimizasyon noktaları.</div>
+
+  <div class="sec-title" style="margin-bottom:10px">Kritik hatalar</div>
+
+  <div class="bug-card bug-crit">
+    <i class="ti ti-bug bug-icon" aria-hidden="true"></i>
+    <div>
+      <div class="bug-title">K11 Bölge Geçişi hiç çalışmıyor</div>
+      <div class="bug-desc">Kod: <code>Math.floor(PUAN_BOLGE_GECISI / limit)</code>. 6/90 oyununda <code>limit = 45</code>, <code>PUAN_BOLGE_GECISI = 10</code>. Sonuç: <code>Math.floor(10 / 45) = Math.floor(0.22) = 0</code>. K11 her zaman sıfır puan üretiyor. Tablo panelinde görünse de hiçbir etkisi yok. Düzeltme: bölündürme yerine doğrudan <code>PUAN_BOLGE_GECISI</code> değerini uygula.</div>
+    </div>
+  </div>
+
+  <div class="bug-card bug-crit">
+    <i class="ti ti-alert-triangle bug-icon" aria-hidden="true"></i>
+    <div>
+      <div class="bug-title">Kuraklık cliff-edge: 29. hafta +58p → 30. hafta -90p</div>
+      <div class="bug-desc">Kuraklık çarpanı (×2.0) ile 29. haftada +58 puan elde edilir. Sınır (30 hafta) aşılınca -150 ölüm cezası devreye girer: <code>+60 - 150 = -90p</code>. Tek hafta farkla 148 puanlık ani düşüş istatistiksel olarak anlamsız — 30+ haftadır gelen sayılar aslında yüksek beklenti taşır. Düzeltme: sınırı 40'a çek veya lineer azalan bir geçiş uygula.</div>
+    </div>
+  </div>
+
+  <div class="bug-card bug-crit">
+    <i class="ti ti-stack-2 bug-icon" aria-hidden="true"></i>
+    <div>
+      <div class="bug-title">Doygunluk cezaları ölçek dışı ve kademesiz</div>
+      <div class="bug-desc">Taban puan max ~100, tüm bonuslar toplamda ~+100 puan ekleyebilir. Yani makul bir sayı en fazla ~200 puan alabilir. Doygunluk cezası ise -500 — bu sayıyı -300'e iter. Üstelik 4 farklı eşik (3'te 2+, 7'de 3+, 11'de 4+, 15'te 5+) aynı -500 cezayı paylaşıyor. Daha ciddi doygunluk daha ağır ceza almalı: -150 / -250 / -350 / -500 gibi kademeli bir yapı mantıklıdır.</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="sec-title" style="margin-bottom:10px">Optimizasyon noktaları</div>
+
+  <div class="bug-card bug-warn">
+    <i class="ti ti-circuit-diode bug-icon" aria-hidden="true"></i>
+    <div>
+      <div class="bug-title">K9 Kinetik İvme koşulu çelişkili</div>
+      <div class="bug-desc">Koşul: <code>count_3 &lt; 2 AND f3 ≥ 2</code>. Joker yokken f3≥2 olan sayı kesinlikle count_3≥2'dir. Koşulun her iki parçası birbirini dışlıyor. Kural joker içeren çekilişlerde bile nadiren tetiklenebilir. <code>f3≥2</code> yerine <code>f3≥1</code> kullanmak daha mantıklı.</div>
+    </div>
+  </div>
+
+  <div class="bug-card bug-warn">
+    <i class="ti ti-minus-vertical bug-icon" aria-hidden="true"></i>
+    <div>
+      <div class="bug-title">K12 Ölü Sayı cezası (-15) etkisiz</div>
+      <div class="bug-desc">Son 5'te 3+ kez gelen sayı K1-K3 kurallarından halihazırda yüksek puan alıyor. -15 ceza bu artışı dengeleyemiyor. Etkin bir ceza için en az -40 ile -60 arası değer gerekir.</div>
+    </div>
+  </div>
+
+  <div class="bug-card bug-warn">
+    <i class="ti ti-broadcast bug-icon" aria-hidden="true"></i>
+    <div>
+      <div class="bug-title">K6 Komşu radarı 6/90'da çok geniş kapsama</div>
+      <div class="bug-desc">Son 3 çekilişte 6 sayı × her iki yönde komşular = potansiyel 50+ sayı etkileniyor. 90 sayılı oyunda neredeyse tüm sayı tabanı komşu bonusu alıyor. Sinyalin gürültüye oranı düşük. Komşu yarıçapını ±3'ten ±2'ye indirmek veya sadece son 1-2 çekiliş baz almak önerilir.</div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-parametreler" class="panel">
+  <div class="sec-sub">Mevcut varsayılan değerleri ve önerilen revizyonları inceleyin. Değerleri değiştirip onaylamak için en alta gidin.</div>
+
+  <div class="param-section">
+    <div class="sec-title">Çarpanlar ve ağırlıklar</div>
+    <div class="param-row" style="font-size:11px;color:var(--color-text-secondary);font-weight:500;margin-bottom:4px">
+      <div>Parametre</div><div style="text-align:center">Mevcut</div><div></div><div>Önerilen</div><div>Gerekçe</div>
+    </div>
+    <div class="param-row"><div class="pr-name">YUZDE_SON_15_DONEM</div><div class="pr-cur">60</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_y15" value="65" min="40" max="80"><div class="pr-why">Son 15 biraz daha ağırlıklı olmalı</div></div>
+    <div class="param-row"><div class="pr-name">CARPAN_15</div><div class="pr-cur">2.0</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_c15" value="2.0" step="0.5" min="1" max="5"><div class="pr-why">Mevcut değer dengeli</div></div>
+    <div class="param-row"><div class="pr-name">CARPAN_10</div><div class="pr-cur">3.0</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_c10" value="3.5" step="0.5" min="1" max="6"><div class="pr-why">Orta dönem biraz daha güçlü</div></div>
+    <div class="param-row"><div class="pr-name">CARPAN_5</div><div class="pr-cur">4.0</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_c5" value="5.0" step="0.5" min="2" max="8"><div class="pr-why">Son 5 en güçlü sinyal</div></div>
+    <div class="param-row"><div class="pr-name">CARPAN_KURAKLIK</div><div class="pr-cur">2.0</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_kur" value="2.5" step="0.5" min="1" max="5"><div class="pr-why">Gecikmeye daha fazla değer ver</div></div>
+    <div class="param-row"><div class="pr-name">OLUM_CEZASI_SINIRI</div><div class="pr-cur">30</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_olum" value="40" min="20" max="60"><div class="pr-why">Cliff edge'i öteye taşı</div></div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="param-section">
+    <div class="sec-title">Bonus değerleri</div>
+    <div class="param-row" style="font-size:11px;color:var(--color-text-secondary);font-weight:500;margin-bottom:4px">
+      <div>Parametre</div><div style="text-align:center">Mevcut</div><div></div><div>Önerilen</div><div>Gerekçe</div>
+    </div>
+    <div class="param-row"><div class="pr-name">PUAN_1_HALKA_KOMSU</div><div class="pr-cur">8</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_k1" value="5" min="2" max="15"><div class="pr-why">90 sayıda kapsama çok geniş</div></div>
+    <div class="param-row"><div class="pr-name">PUAN_KINETIK_IVME</div><div class="pr-cur">20</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_kin" value="25" min="5" max="40"><div class="pr-why">Kural düzeltilirse artırılabilir</div></div>
+    <div class="param-row"><div class="pr-name">PUAN_GECIKMELI_TEKRAR</div><div class="pr-cur">15</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_gec" value="18" min="5" max="30"><div class="pr-why">Hafif artış faydalı</div></div>
+    <div class="param-row"><div class="pr-name">PUAN_BOLGE_GECISI</div><div class="pr-cur">10</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_bolge" value="12" min="5" max="30"><div class="pr-why">Bug düzeltilince mantıklı olur</div></div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="param-section">
+    <div class="sec-title">Ceza değerleri</div>
+    <div class="param-row" style="font-size:11px;color:var(--color-text-secondary);font-weight:500;margin-bottom:4px">
+      <div>Parametre</div><div style="text-align:center">Mevcut</div><div></div><div>Önerilen</div><div>Gerekçe</div>
+    </div>
+    <div class="param-row"><div class="pr-name">CEZA_DOYGUN_4 (3'te 2+)</div><div class="pr-cur">-500</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_d4" value="-150" step="25" min="-600" max="0"><div class="pr-why">En hafif doygunluk</div></div>
+    <div class="param-row"><div class="pr-name">CEZA_DOYGUN_8 (7'de 3+)</div><div class="pr-cur">-500</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_d8" value="-250" step="25" min="-600" max="0"><div class="pr-why">Orta doygunluk</div></div>
+    <div class="param-row"><div class="pr-name">CEZA_DOYGUN_12 (11'de 4+)</div><div class="pr-cur">-500</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_d12" value="-375" step="25" min="-600" max="0"><div class="pr-why">Ağır doygunluk</div></div>
+    <div class="param-row"><div class="pr-name">CEZA_DOYGUN_16 (15'te 5+)</div><div class="pr-cur">-500</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_d16" value="-500" step="25" min="-600" max="0"><div class="pr-why">En ağır — sabit kalsın</div></div>
+    <div class="param-row"><div class="pr-name">CEZA_OLU_SAYI_4 (f5≥3)</div><div class="pr-cur">-15</div><div class="pr-arrow">→</div><input class="pr-inp" type="number" id="p_olu" value="-45" step="5" min="-100" max="0"><div class="pr-why">Şu an çok düşük, etkisiz</div></div>
+  </div>
+
+  <button class="apply-btn" onclick="onayGonder()">
+    <i class="ti ti-check" aria-hidden="true"></i> Bu değerleri onaylıyorum — uygulamayı güncelle ↗
+  </button>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('[onclick="switchTab(\'' + name + '\')"]').classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function onayGonder() {
+  const vals = {
+    'YUZDE_SON_15_DONEM': document.getElementById('p_y15').value,
+    'CARPAN_15': document.getElementById('p_c15').value,
+    'CARPAN_10': document.getElementById('p_c10').value,
+    'CARPAN_5': document.getElementById('p_c5').value,
+    'CARPAN_KURAKLIK': document.getElementById('p_kur').value,
+    'OLUM_CEZASI_SINIRI': document.getElementById('p_olum').value,
+    'PUAN_1_HALKA_KOMSU': document.getElementById('p_k1').value,
+    'PUAN_KINETIK_IVME_BONUSU': document.getElementById('p_kin').value,
+    'PUAN_GECIKMELI_TEKRAR': document.getElementById('p_gec').value,
+    'PUAN_BOLGE_GECISI': document.getElementById('p_bolge').value,
+    'CEZA_DOYGUN_4': document.getElementById('p_d4').value,
+    'CEZA_DOYGUN_8': document.getElementById('p_d8').value,
+    'CEZA_DOYGUN_12': document.getElementById('p_d12').value,
+    'CEZA_DOYGUN_16': document.getElementById('p_d16').value,
+    'CEZA_OLU_SAYI_4': document.getElementById('p_olu').value,
+  };
+  const lines = Object.entries(vals).map(([k,v]) => k + ': ' + v).join('\n');
+  const msg = 'Bu config değerlerini onaylıyorum:\n\n' + lines +
+    '\n\nAyrıca şu 3 bug\'ı da düzelt:\n1. K11: Math.floor yerine direkt PUAN_BOLGE_GECISI uygula\n2. K9: f3>=2 koşulunu f3>=1 yap\n3. YUZDE_TUM_GECMIS = 100 - YUZDE_SON_15_DONEM otomatik hesaplansın\n\nHTML dosyasındaki config bloğunu güncellenmiş haliyle göster.';
+  sendPrompt(msg);
+}
+</script>

@@ -1,0 +1,10 @@
+10310:         const jok15 = joks.slice(0, 15);
+10312:         jok15.forEach(j => { if (j) prev15.add(j); });
+10318:         jok15.forEach(j => { if (j) rgnCnt[rgn(j)] = (rgnCnt[rgn(j)] || 0) + 0.5; });
+10379:           const jrec2 = jok15.slice(0, 2).filter(j => j === n).length;
+10973:           { id: 'k15', name: 'K15-TamIsınma', desc: `<b>Tam Isınma (Sinerji) Puanı:</b><br>Bir sayı hem yakın zamanda joker olarak çıkmış hem de son çekilişlerdeki sayıların komşusuysa, bu iki güç birleşir. Makine bu iki kuralın aynı anda bir sayıda birleştiğini fark ettiğinde, bu sayıya çok nadir görülen devasa bir "Sinerji (Tam Isınma)" puanı hediye eder.` },
+11058:             res += fmt(details.k15);
+12257:         let k15 = 0;
+12259:             k15 = 75;
+12406:         let currentSum = historical + recent + k1 + k2 + k3 + k4 + k5 + k6 + k7 + k8 + k9 + k10 + k11 + k12 + k13 + k14 + k15 + k16 + k17 + k18 + k19 + k20 + k21;
+12427:           k15,

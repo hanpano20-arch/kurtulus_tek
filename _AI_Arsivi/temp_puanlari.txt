@@ -1,0 +1,194 @@
+puanlari_hesapla: function (df, maxN, joks = []) {
+        if (!df || df.length === 0) return {};
+        const config = this.config;
+        let puanlar = {};
+        let genel_frekans = {};
+        let meta_komsular = {};
+        let meta_kuraklik = {};
+
+        for (let i = 1; i <= maxN; i++) {
+          puanlar[i] = 0;
+          genel_frekans[i] = 0;
+        }
+
+        df.forEach(draw => {
+          if (draw && Array.isArray(draw)) {
+            draw.forEach(num => {
+              if (num >= 1 && num <= maxN) genel_frekans[num]++;
+            });
+          }
+        });
+
+        const son_15 = df.slice(0, 15);
+        const son_10 = df.slice(0, 10);
+        const son_5 = df.slice(0, 5);
+        const son_3 = df.slice(0, 3);
+        const son_15_joks = joks.slice(0, 15);
+
+        let k1_raw = {}, k2_raw = {};
+        let max_k1_raw = 0;
+        let total_hist = 0;
+        for (let i = 1; i <= maxN; i++) {
+          total_hist += genel_frekans[i];
+          let f15 = son_15.reduce((s, d) => s + (d && Array.isArray(d) && d.includes(i) ? 1 : 0), 0);
+          let j15 = son_15_joks.filter(j => j === i).length;
+          let total_hits_15 = f15 + j15; 
+          k1_raw[i] = total_hits_15;
+          if (total_hits_15 > max_k1_raw) max_k1_raw = total_hits_15;
+        }
+        let avg_hist = total_hist / maxN;
+        let max_hist = Math.max(...Object.values(genel_frekans));
+        let min_hist = Math.min(...Object.values(genel_frekans));
+
+        let joker_komsu_count = {};
+        son_15_joks.forEach((joker_sayisi, index) => {
+          let j = parseInt(joker_sayisi, 10);
+          if (j >= 1 && j <= maxN) {
+             puanlar[j] += Math.floor(config.K4_PUAN * ((15 - index)/15)); 
+             const sutun = ((j - 1) % 10) + 1;
+             const jk = [];
+             if (sutun > 1)  jk.push(j - 1);
+             if (sutun < 10) jk.push(j + 1);
+             if (j - 10 >= 1)    jk.push(j - 10);
+             if (j + 10 <= maxN) jk.push(j + 10);
+             if (j - 11 >= 1    && sutun > 1)  jk.push(j - 11);
+             if (j -  9 >= 1    && sutun < 10) jk.push(j -  9);
+             if (j +  9 <= maxN && sutun > 1)  jk.push(j +  9);
+             if (j + 11 <= maxN && sutun < 10) jk.push(j + 11);
+             jk.forEach(komsu => {
+                let count = joker_komsu_count[komsu] || 0;
+                if (count < 2) { 
+                   puanlar[komsu] += Math.floor((config.K4_PUAN * 0.5) * ((15 - index)/15)); 
+                   joker_komsu_count[komsu] = count + 1;
+                }
+             });
+          }
+        });
+
+        let komsuSayaci_1 = {}, komsuSayaci_2 = {};
+        for(let i=1; i<=maxN; i++) { komsuSayaci_1[i] = 0; komsuSayaci_2[i] = 0; }
+        
+        son_3.forEach(cekilis => {
+          if (cekilis && Array.isArray(cekilis)) {
+             cekilis.forEach(sayi => {
+                const sutun = ((sayi - 1) % 10) + 1;
+                if (sutun > 1)  komsuSayaci_1[sayi - 1]++;
+                if (sutun < 10) komsuSayaci_1[sayi + 1]++;
+                if (sayi - 10 >= 1)    komsuSayaci_1[sayi - 10]++;
+                if (sayi + 10 <= maxN) komsuSayaci_1[sayi + 10]++;
+                if (sayi - 11 >= 1    && sutun > 1)  komsuSayaci_1[sayi - 11]++;
+                if (sayi -  9 >= 1    && sutun < 10) komsuSayaci_1[sayi -  9]++;
+                if (sayi +  9 <= maxN && sutun > 1)  komsuSayaci_1[sayi +  9]++;
+                if (sayi + 11 <= maxN && sutun < 10) komsuSayaci_1[sayi + 11]++;
+
+                if (sutun > 2)  komsuSayaci_2[sayi - 2]++;
+                if (sutun < 9)  komsuSayaci_2[sayi + 2]++;
+                if (sayi - 20 >= 1)    komsuSayaci_2[sayi - 20]++;
+                if (sayi + 20 <= maxN) komsuSayaci_2[sayi + 20]++;
+                if (sayi - 22 >= 1    && sutun > 2)  komsuSayaci_2[sayi - 22]++;
+                if (sayi - 18 >= 1    && sutun < 9)  komsuSayaci_2[sayi - 18]++;
+                if (sayi + 18 <= maxN && sutun > 2)  komsuSayaci_2[sayi + 18]++;
+                if (sayi + 22 <= maxN && sutun < 9)  komsuSayaci_2[sayi + 22]++;
+             });
+          }
+        });
+        
+        let son_2_sayilari = new Set();
+        df.slice(0, 2).forEach(d => {
+            if(d && Array.isArray(d)) d.forEach(num => son_2_sayilari.add(num));
+        });
+
+        for (let i = 1; i <= maxN; i++) {
+           let k1_val = 0;
+           if (max_k1_raw > 0) k1_val = (k1_raw[i] / max_k1_raw) * config.K1_PUAN;
+           puanlar[i] += Math.floor(k1_val);
+
+           let k2_val = 0;
+           let my_freq = genel_frekans[i];
+           if (my_freq >= avg_hist) {
+             let ratio = (my_freq - avg_hist) / (max_hist - avg_hist || 1);
+             k2_val = ratio * config.K2_PUAN;
+           } else {
+             let ratio = (avg_hist - my_freq) / (avg_hist - min_hist || 1);
+             k2_val = -ratio * config.K2_PUAN;
+           }
+           puanlar[i] += Math.floor(k2_val);
+
+           let kuraklik = 0;
+           for (let idx = 0; idx < df.length; idx++) {
+             if (df[idx] && Array.isArray(df[idx]) && df[idx].includes(i)) break;
+             kuraklik++;
+           }
+           meta_kuraklik[i] = kuraklik;
+           puanlar[i] += kuraklik * config.K3_PUAN;
+
+           if (komsuSayaci_1[i] > 0) puanlar[i] += komsuSayaci_1[i] * config.K5_PUAN;
+           if (komsuSayaci_2[i] > 0) puanlar[i] += komsuSayaci_2[i] * config.K6_PUAN;
+           meta_komsular[i] = komsuSayaci_1[i] + komsuSayaci_2[i] + (joker_komsu_count[i] || 0);
+
+           let blok = Math.floor((i - 1) / 10);
+           let bas = blok * 10 + 1;
+           let bit = Math.min(bas + 9, maxN);
+           let cikti = false;
+           for(let n=bas; n<=bit; n++) { if (son_2_sayilari.has(n)) { cikti = true; break; } }
+           if (!cikti) puanlar[i] += config.K7_PUAN;
+
+           let hits_15 = son_15.reduce((s,d)=>s+(d&&d.includes(i)?1:0),0) + son_15_joks.filter(j=>j===i).length;
+           let hits_10 = son_10.reduce((s,d)=>s+(d&&d.includes(i)?1:0),0) + joks.slice(0,10).filter(j=>j===i).length;
+           let hits_5 = son_5.reduce((s,d)=>s+(d&&d.includes(i)?1:0),0) + joks.slice(0,5).filter(j=>j===i).length;
+           let hits_3 = son_3.reduce((s,d)=>s+(d&&d.includes(i)?1:0),0) + joks.slice(0,3).filter(j=>j===i).length;
+           let komsuluk = meta_komsular[i] > 0;
+
+           if (hits_15 >= 1 && hits_15 <= 2 && hits_3 >= 1 && !komsuluk) puanlar[i] += config.K8_PUAN;
+           if (hits_3 >= 2 && hits_15 <= 3) puanlar[i] += config.K9_PUAN;
+           if (hits_15 === 2 && hits_5 === 0) puanlar[i] += config.K10_PUAN;
+           if (kuraklik >= 5 && kuraklik <= 15 && hits_15 >= 2 && komsuluk) puanlar[i] += config.K11_PUAN;
+           if (hits_10 > 0 && komsuluk) puanlar[i] += config.K12_PUAN;
+           
+           if (hits_15 >= 4) puanlar[i] += config.K13_PUAN;
+
+           if (df.length >= 2 && 
+               ((df[0] && df[0].includes(i)) || joks[0]===i) && 
+               ((df[1] && df[1].includes(i)) || joks[1]===i)) {
+               puanlar[i] += config.K14_PUAN;
+           }
+
+           let doygun = false;
+           if (hits_3 >= 2) doygun = true;
+           else {
+               let h7 = df.slice(0,7).reduce((s,d)=>s+(d&&d.includes(i)?1:0),0) + joks.slice(0,7).filter(j=>j===i).length;
+               if (h7 >= 3) doygun = true;
+               else {
+                  let h11 = df.slice(0,11).reduce((s,d)=>s+(d&&d.includes(i)?1:0),0) + joks.slice(0,11).filter(j=>j===i).length;
+                  if (h11 >= 4) doygun = true;
+               }
+           }
+           if (doygun) puanlar[i] += config.K15_PUAN;
+
+           let is_in_last = ((df[0] && df[0].includes(i)) || joks[0]===i);
+           if (!komsuluk && !is_in_last) puanlar[i] += config.K16_PUAN;
+
+           if (is_in_last) {
+               let streak_events = 0;
+               let current_streak = 0;
+               for (let c = df.length - 1; c >= 0; c--) {
+                   let hit = (df[c] && df[c].includes(i)) || joks[c]===i;
+                   if (hit) current_streak++;
+                   else {
+                       if (current_streak >= 2) streak_events++;
+                       current_streak = 0;
+                   }
+               }
+               if (current_streak >= 2) streak_events++;
+               if (streak_events <= 1) puanlar[i] += config.K17_PUAN;
+           }
+
+           if (kuraklik >= config.OLUM_CEZASI_SINIRI) puanlar[i] += config.K18_PUAN;
+           
+           puanlar[i] = Math.floor(puanlar[i] || 0);
+        }
+
+        Object.defineProperty(puanlar, '__komsular', { value: meta_komsular, enumerable: false });
+        Object.defineProperty(puanlar, '__kuraklik', { value: meta_kuraklik, enumerable: false });
+        return puanlar;
+      },

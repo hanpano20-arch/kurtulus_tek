@@ -1,0 +1,10 @@
+const four25 = results.filter(r => r.hits25 >= 4).length;
+
+        const box = $$('h-backtest-result');
+        if (!box) return;
+        box.innerHTML = '<div class="h-backtest-box">' +
+          '<div style="font-weight:700;margin-bottom:6px;color:var(--color-accent,#53f0db)">🔬 Backtest Sonuçları (Son 15 Çekiliş)</div>' +
+          '<div style="margin-bottom:6px;font-size:12px">' +
+          'Top-25 ort: <b>' + avg25.toFixed(2) + '/6</b> &nbsp;|&nbsp; ' +
+          'Top-35 ort: <b>' + avg35.toFixed(2) + '/6</b> &nbsp;|&nbsp; ' +
+          '4+ hit (top-25): <b>' + four25 + '/' + results.lengt

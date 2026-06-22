@@ -1,0 +1,4 @@
+H.compute = function () {
+        const db = loadDB(); const w = getW(); const maxN = mx();
+        const wh = w.wh / 100; const wr = 1 - wh;
+        _ephemeral_ms = {}

@@ -1,0 +1,313 @@
+let max_streak = 0;
+              let current_streak = 0;
+              for (let c = df.length - 1; c >= 0; c--) {
+                  if (df[c] && Array.isArray(df[c]) && df[c].includes(i)) {
+                      current_streak++;
+                      if (current_streak > max_streak) max_streak = current_streak;
+                  } else {
+                      current_streak = 0;
+                  }
+              }
+              
+              if (max_streak >= 3) {
+                  puanlar[i] += 150; // Patlamaya hazır bomba (28)
+              } else if (max_streak <= 2) {
+                  puanlar[i] -= 100; // Zayıf tekrar kapasitesi (19, 20)
+              }
+          }
+
+
+          // 🚨 YENİ: AŞIRI DOYGUNLUK (TÜKENMİŞLİK) CEZALARIN 🚨
+          let count_3 = 0, count_7 = 0, count_11 = 0, count_15 = 0;
+
+          for (let c = 0; c < Math.min(15, df.length); c++) {
+            let hit = (df[c] && Array.isArray(df[c]) && df[c].includes(i)) || (joks[c] === i);
+            if (hit) {
+              if (c < 3) count_3++;
+              if (c < 7) count_7++;
+              if (c < 11) count_11++;
+              if (c < 15) count_15++;
+            }
+          }
+
+          if (count_3 >= 2) {
+            puanlar[i] += this.config.CEZA_DOYGUN_4;
+          } else if (count_7 >= 3) {
+            puanlar[i] += this.config.CEZA_DOYGUN_8;
+          } else if (count_11 >= 4) {
+            puanlar[i] += this.config.CEZA_DOYGUN_12;
+          } else if (count_15 >= 5) {
+            puanlar[i] += this.config.CEZA_DOYGUN_16;
+          }
+
+          // Çifte Tekrar Cezası KALDIRILDI (Dinamik Seri Analizörü ile yönetiliyor)
+        }
+
+
+        // Bölge Geçiş Bonusu (Sadece Son Çekiliş)
+        if (son_15_donem.length > 0 && son_15_donem[0] && Array.isArray(son_15_donem[0])) {
+          let son_cekilis = son_15_donem[0];
+          let limit = Math.floor(maxN / 2);
+          son_cekilis.forEach(sayi => {
+            if (sayi <= limit) {
+              for (let n = limit + 1; n <= maxN; n++) puanlar[n] += Math.floor(this.config.PUAN_BOLGE_GECISI / limit);
+            } else {
+              for (let n = 1; n <= limit; n++) puanlar[n] += Math.floor(this.config.PUAN_BOLGE_GECISI / limit);
+            }
+          });
+        }
+
+        // YENİ: Bölgesel Boşluk (Cluster Vacuum) - Son 2 çekilişte boş kalan 10'luk dilimlere +20 puan
+        let son_2_donem = df.slice(0, 2);
+        let son_2_hafta_sayilari = new Set();
+        son_2_donem.forEach(draw => {
+          if (draw && Array.isArray(draw)) {
+            draw.forEach(n => son_2_hafta_sayilari.add(n));
+          }
+        });
+        const onlukSayisi = Math.ceil(maxN / 10);
+        for (let blok = 0; blok < onlukSayisi; blok++) {
+          let bas = blok * 10 + 1;
+          let bit = Math.min(bas + 9, maxN);
+          let ciktiMi = false;
+          for (let n = bas; n <= bit; n++) {
+            if (son_2_hafta_sayilari.has(n)) {
+              ciktiMi = true;
+              break;
+            }
+          }
+          if (!ciktiMi) {
+            for (let n = bas; n <= bit; n++) {
+              puanlar[n] += 20; // Bölge Boşluk Bonusu
+            }
+          }
+        }
+
+        // Tamsayıya yuvarlama
+        for (let i = 1; i <= maxN; i++) {
+          puanlar[i] = Math.floor(puanlar[i] || 0);
+        }
+
+
+        // Metadata'ları puanlar objesine gizli property olarak ekle
+        let tum_komsular = {};
+        if (typeof komsuSayaci_1 !== 'undefined') { for(let k in komsuSayaci_1) tum_komsular[k] = (tum_komsular[k] || 0) + komsuSayaci_1[k]; }
+        if (typeof komsuSayaci_2 !== 'undefined') { for(let k in komsuSayaci_2) tum_komsular[k] = (tum_komsular[k] || 0) + komsuSayaci_2[k]; }
+        if (typeof jokerKomsuSayaci !== 'undefined') { for(let k in jokerKomsuSayaci) tum_komsular[k] = (tum_komsular[k] || 0) + jokerKomsuSayaci[k]; }
+        // Ayrıca son 10 Jokerleri de "Komşu" kotasından faydalanabilmesi için katalım
+        if (typeof joks !== 'undefined') { joks.slice(0, 10).forEach(j => { if(j) tum_komsular[j] = (tum_komsular[j] || 0) + 1; }); }
+
+        Object.defineProperty(puanlar, '__komsular', { value: tum_komsular, enumerable: false });
+        Object.defineProperty(puanlar, '__kuraklik', { value: meta_kuraklik, enumerable: false });
+
+        return puanlar;
+      },
+
+      akilli_secim: function (sirali, puanlar, poolSize) {
+        let eklenecekler = new Set();
+        
+        let topCount = Math.floor(poolSize * 0.65);
+        let komsuCount = Math.floor(poolSize * 0.20);
+
+        // 1. Kategori: En Yüksek Puanlılar (Sıcak/Genel Başarı)
+        for (let i = 0; i < sirali.length && eklenecekler.size < topCount; i++) {
+            eklenecekler.add(parseInt(sirali[i][0]));
+        }
+
+        // 2. Kategori: Puanı Düşük Ama Komşuluğu Olanlar (Kullanıcının Harika Fikri!)
+        let komsu_adaylari = sirali.filter(x => {
+            let n = parseInt(x[0]);
+            return !eklenecekler.has(n) && (puanlar.__komsular && puanlar.__komsular[n] > 0);
+        });
+
+        // SİZİN EMRİNİZ: "Puanı Düşükse ama komşuluğu varsa..." 
+        // Önce en yüksek komşuluk gücüne göre, eşitse en düşük puana göre sıralıyoruz! (Gizli Cevherleri kurtarmak için)
+        komsu_adaylari.sort((a, b) => {
+            let nA = parseInt(a[0]), nB = parseInt(b[0]);
+            let kA = puanlar.__komsular ? puanlar.__komsular[nA] || 0 : 0;
+            let kB = puanlar.__komsular ? puanlar.__komsular[nB] || 0 : 0;
+            if (kB !== kA) return kB - kA; // En çok komşuluğu olan ÖNCE!
+            return parseInt(a[1]) - parseInt(b[1]); // Eşit komşulukta en DÜŞÜK puanlı ÖNCE!
+        });
+
+        for (let i = 0; i < komsu_adaylari.length && komsuCount > 0; i++) {
+            eklenecekler.add(parseInt(komsu_adaylari[i][0]));
+            komsuCount--;
+        }
+
+        // 3. Kategori: Derin Kuraklık (Dengeleyici Soğuk Sayılar)
+        let kalan_kota = poolSize - eklenecekler.size;
+        let kurak_adaylari = sirali.filter(x => !eklenecekler.has(parseInt(x[0])));
+        kurak_adaylari.sort((a, b) => {
+            let nA = parseInt(a[0]); let nB = parseInt(b[0]);
+            let kA = puanlar.__kuraklik ? puanlar.__kuraklik[nA] || 0 : 0;
+            let kB = puanlar.__kuraklik ? puanlar.__kuraklik[nB] || 0 : 0;
+            return kB - kA; 
+        });
+
+        for (let i = 0; i < kurak_adaylari.length && kalan_kota > 0; i++) {
+            eklenecekler.add(parseInt(kurak_adaylari[i][0]));
+            kalan_kota--;
+        }
+
+        // Eğer hala boşluk kaldıysa, puan sırasına göre doldur
+        for (let i = 0; i < sirali.length && eklenecekler.size < poolSize; i++) {
+            eklenecekler.add(parseInt(sirali[i][0]));
+        }
+
+        return Array.from(eklenecekler);
+      },
+
+      autoTune: async function () {
+        const rawDraws = this.getRawData();
+        const testCount = parseInt(document.getElementById('hm-test-count').value) || 10;
+        const poolSize = parseInt(document.getElementById('hm-pool-size').value) || 30;
+        const maxN = (typeof gameMax === 'function') ? gameMax() : 90;
+
+        if (rawDraws.length < testCount + 15) {
+          alert(`Test için yeterli veri yok. En az ${testCount + 15} çekiliş gerekli.`);
+          return;
+        }
+
+        let btn = document.querySelector('button[onclick="window.HavuzMotoru.autoTune()"]');
+        let orgText = btn ? btn.innerHTML : "";
+        if (btn) btn.innerHTML = "⏳ Yapay Zeka Hill Climbing Optimizasyonu... Lütfen Bekleyin";
+
+        await new Promise(r => setTimeout(r, 50));
+
+        const idMap = {
+          PUAN_1_HALKA_KOMSU: 'komsu',
+          PUAN_2_HALKA_KOMSU: 'komsu2',
+          CARPAN_KURAKLIK: 'kurak',
+          PUAN_ONLUK_KURAKLIK_BONUSU: 'onluk',
+          PUAN_KINETIK_IVME_BONUSU: 'ivme',
+          PUAN_GECIKMELI_TEKRAR: 'gecik',
+          CARPAN_JOKER: 'joker',
+          CEZA_OLU_SAYI_4: 'olu',
+          OLUM_CEZASI_SINIRI: 'kurak_sinir',
+          CEZA_CIFTE_TEKRAR: 'cifte',
+          CEZA_DOYGUN_4: 'c4',
+          CEZA_DOYGUN_8: 'c8',
+          CEZA_DOYGUN_12: 'c12',
+          CEZA_DOYGUN_16: 'c16'
+        };
+
+        const ranges = {
+          PUAN_1_HALKA_KOMSU: [5, 500],
+          PUAN_2_HALKA_KOMSU: [0, 200],
+          CARPAN_KURAKLIK: [0.5, 5.0],
+          PUAN_ONLUK_KURAKLIK_BONUSU: [0, 300],
+          PUAN_KINETIK_IVME_BONUSU: [10, 300],
+          PUAN_GECIKMELI_TEKRAR: [0, 150],
+          CARPAN_JOKER: [0, 50],
+          CEZA_OLU_SAYI_4: [-100, 0],
+          OLUM_CEZASI_SINIRI: [15, 50],
+          CEZA_CIFTE_TEKRAR: [-250, 0],
+          CEZA_DOYGUN_4: [-100, 0],
+          CEZA_DOYGUN_8: [-100, 0],
+          CEZA_DOYGUN_12: [-100, 0],
+          CEZA_DOYGUN_16: [-100, 0]
+        };
+
+        // Mevcut config ile başla
+        let best_config = {};
+        for (let key in idMap) {
+            best_config[key] = this.config[key] !== undefined ? this.config[key] : ranges[key][0];
+        }
+
+        const evaluate = (cfg) => {
+          let temp_backup = Object.assign({}, this.config);
+          Object.assign(this.config, cfg);
+          let toplam_dogru = 0;
+          let toplam_fitness = 0;
+
+          for (let i = testCount - 1; i >= 0; i--) {
+            let gercek_cekilis_df = rawDraws.slice(i + 1).map(d => d.nums);
+            let gercek_joks = rawDraws.slice(i + 1).map(d => d.joker || null);
+            let hedef_cekilis = rawDraws[i].nums.slice(0, 6);
+
+            let puanlar = this.puanlari_hesapla(gercek_cekilis_df, maxN, gercek_joks);
+            let sirali = Object.entries(puanlar).sort((a, b) => b[1] - a[1]);
+
+            // Kotalı Akıllı Seçim Uygulandı!
+            let havuz = this.akilli_secim(sirali, puanlar, poolSize);
+
+            let bilinen_sayi = havuz.filter(x => hedef_cekilis.includes(x)).length;
+            toplam_dogru += bilinen_sayi;
+
+            // Yumuşatılmış Fitness fonksiyonu
+            if (bilinen_sayi === 0) toplam_fitness -= 20;
+            else if (bilinen_sayi === 1) toplam_fitness -= 5;
+            else if (bilinen_sayi === 2) toplam_fitness += 2;
+            else if (bilinen_sayi === 3) toplam_fitness += 15;
+            else if (bilinen_sayi === 4) toplam_fitness += 50;
+            else if (bilinen_sayi === 5) toplam_fitness += 150;
+            else if (bilinen_sayi === 6) toplam_fitness += 500;
+          }
+          Object.assign(this.config, temp_backup);
+          return { fitness: toplam_fitness, avg: toplam_dogru / testCount };
+        };
+
+        let current_eval = evaluate(best_config);
+        let best_fitness = current_eval.fitness;
+        let best_avg = current_eval.avg;
+
+        // Hill Climbing / Simüle Edilmiş Tavlama
+        const ITERATIONS = 1500;
+        const keys = Object.keys(idMap);
+
+        for (let iter = 0; iter < ITERATIONS; iter++) {
+          let test_config = Object.assign({}, best_config);
+          
+          // Rastgele 2 ila 5 parametreyi mutasyona uğrat
+          let num_mutations = Math.floor(Math.random() * 4) + 2;
+          for (let m = 0; m < num_mutations; m++) {
+            let key = keys[Math.floor(Math.random() * keys.length)];
+            let range = ranges[key];
+            // Parametre aralığının %10'u kadar aşağı veya yukarı kaydır
+            let shift = (Math.random() - 0.5) * 0.20 * (range[1] - range[0]);
+            test_config[key] += shift;
+            
+            // Sınırları aşmasını engelle
+            if (test_config[key] < range[0]) test_config[key] = range[0];
+            if (test_config[key] > range[1]) test_config[key] = range[1];
+          }
+
+          let res = evaluate(test_config);
+          
+          // Daha iyi veya EŞİTSE kabul et (yerel minimumdan çıkmak için eşitliği kabul ediyoruz)
+          // Hatta iterasyonların başlarında çok küçük ihtimalle daha kötüleri de kabul edebiliriz (Simulated Annealing) ama şimdilik greedy yapalım.
+          if (res.fitness >= best_fitness) {
+            best_fitness = res.fitness;
+            best_avg = res.avg;
+            best_config = Object.assign({}, test_config);
+          }
+        }
+
+        if (best_config) {
+          for (let k in best_config) {
+            let el = document.getElementById('hm_' + idMap[k]);
+            let sel = document.getElementById('ws-hm_' + idMap[k]);
+            let val = (k.startsWith('CEZA') || k.startsWith('OLUM')) ? Math.round(best_config[k]) : best_config[k].toFixed(1);
+            if (sel) {
+              sel.value = val;
+              if (el) el.value = val;
+              let wv = document.getElementById('wv-hm_' + idMap[k]);
+              if (wv) wv.innerText = val;
+              let wlb = document.getElementById('wlb-hm_' + idMap[k]);
+              if (wlb) wlb.innerText = val;
+            }
+          }
+          this.updateConfigFromUI();
+          this.testHistorical();
+          
+          let alertMsg = `Yapay Zeka (Hill Climbing) Başarıyla Tamamlandı!\n`;
+          alertMsg += `Hedef Havuz: ${poolSize} | Yeni Ortalama Başarı: ${best_avg.toFixed(2)} / 6\n`;
+          alertMsg += `Elde Edilen Fitness Skoru: ${best_fitness}`;
+          setTimeout(() => alert(alertMsg), 300);
+        }
+
+        if (btn) btn.innerHTML = orgText;
+      },
+
+     

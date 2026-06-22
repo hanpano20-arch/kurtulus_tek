@@ -1,0 +1,14 @@
+).reverse().join("-") : "Bilinmeyen";
+                    let numsStr = entry.nums ? entry.nums.join(',') : "";
+                    opt.textContent = dateStr + " (Çekiliş: " + numsStr + ")";
+                    sel.appendChild(opt);
+                });
+            }
+          }
+      </script>
+
+    <!-- SAYI LİSTESİ -->
+    <div id="hc-list" style="display:none">
+      <div class="btn-row" style="gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+        <button class="btn" onclick="H.selGrp('hot')">🔴 Sıcakları Seç</button>
+        <button class="btn" onclick="H.selGrp('warm')">🟡 Ilıkları Seç</button
