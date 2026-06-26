@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motor Test Paneli - Aşama 1</title>
+    <!-- read-excel-file kütüphanesi (Excel'i okumak için) -->
+    <script src="https://unpkg.com/read-excel-file@5.x/bundle/read-excel-file.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e24; color: #fff; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: #2b2b36; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h1 { color: #00d2ff; text-align: center; border-bottom: 2px solid #00d2ff; padding-bottom: 10px; }
+        .controls { display: flex; gap: 20px; margin-bottom: 20px; align-items: center; background: #3a3a48; padding: 15px; border-radius: 8px; }
+        input[type="file"] { background: #4caf50; color: white; padding: 10px; border-radius: 5px; cursor: pointer; border: none; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #1e1e24; }
+        th, td { border: 1px solid #444; padding: 6px; text-align: center; }
+        th { background: #3a3a48; color: #00d2ff; font-size: 0.9em; position: sticky; top: 0; z-index: 10; }
+        .top-no { font-weight: bold; font-size: 1.2em; color: #ffeb3b; }
+        
+        /* Yeni Slider Tasarımı */
+        .slider-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .slider-row { display: flex; align-items: center; background: #2a2a35; padding: 8px 12px; border-radius: 8px; border: 1px solid #444; }
+        .slider-label { flex: 1; font-size: 0.95em; color: #ddd; text-align: left; }
+        .slider-val-box { background: #111; border: 1px solid #555; color: #00d2ff; padding: 2px 4px; border-radius: 4px; font-weight: bold; margin-right: 10px; width: 50px; text-align: center; -moz-appearance: textfield; appearance: textfield; }
+        .slider-val-box::-webkit-inner-spin-button, .slider-val-box::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
+        .h-arrow { background: #444; color: #fff; border: none; border-radius: 4px; cursor: pointer; padding: 4px 8px; font-weight: bold; user-select: none; }
+        .h-arrow:hover { background: #666; }
+        .slider-input { flex: 2; margin: 0 10px; cursor: pointer; }
+        .btn-reset { background: transparent; color: #aaa; border: none; font-size: 1.2em; cursor: pointer; padding: 0 5px; margin-left: 5px; }
+        .btn-reset:hover { color: #fff; text-shadow: 0 0 5px #fff; }
+
+        /* Durum Renkleri (Neon) */
+        .durum-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 40px; background: #222; }
+        .durum-rank { font-size: 1.3em; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px #000; margin-bottom: -2px; }
+        .durum-text { font-size: 0.65em; font-weight: bold; letter-spacing: 1px; }
+
+        .sicak-glow td.durum-col { border-left: 4px solid #ff5252; box-shadow: inset 15px 0 20px -15px rgba(255,82,82,0.6); }
+        .sicak-glow .durum-text { color: #ff5252; text-shadow: 0 0 4px #ff5252, 0 0 8px #ff5252; }
+
+        .ilik-glow td.durum-col { border-left: 4px solid #ffeb3b; box-shadow: inset 15px 0 20px -15px rgba(255,235,59,0.5); }
+        .ilik-glow .durum-text { color: #ffeb3b; text-shadow: 0 0 4px #ffeb3b; }
+
+        .soguk-glow td.durum-col { border-left: 4px solid #00bcd4; box-shadow: inset 15px 0 20px -15px rgba(0,188,212,0.5); }
+        .soguk-glow .durum-text { color: #00bcd4; text-shadow: 0 0 4px #00bcd4; }
+
+        .ihdisi-glow td.durum-col { border-left: 4px solid #9e9e9e; box-shadow: inset 15px 0 20px -15px rgba(158,158,158,0.5); }
+        .ihdisi-glow .durum-text { color: #9e9e9e; text-shadow: 0 0 4px #9e9e9e; }
+
+        /* Arama ve Araç Çubuğu */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; background: #2a2a35; padding: 10px; border-radius: 8px; }
+        .search-box { padding: 8px; border-radius: 4px; border: 1px solid #444; background: #111; color: #fff; }
+        
+        /* Manuel Kontrol */
+        .manual-ctrl { display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-m { background: #444; color: #fff; border: none; border-radius: 4px; width: 26px; height: 26px; cursor: pointer; font-weight: bold; user-select: none; }
+        .btn-m:hover { background: #666; }
+        .btn-m.plus { background: #4caf50; }
+        .btn-m.minus { background: #f44336; }
+        .manual-ctrl span { min-width: 40px; text-align: center; font-size: 1.1em; }
+        .lotto-ball {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffffff 0%, #d7e1ec 100%);
+            box-shadow: 
+                0 4px 6px rgba(0,0,0,0.5), 
+                inset 0 3px 5px rgba(255,255,255,0.9), 
+                inset 0 -3px 6px rgba(0,0,0,0.3);
+            color: #1a1a1a;
+            font-weight: 900;
+            font-size: 18px;
+            border: 2px solid #90a4ae;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.8);
+            margin: 0 auto;
+        }
+        .btn { background: #00d2ff; color: #000; padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
+        .btn:hover { background: #0099cc; }
+        .btn:active { transform: scale(0.92); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        /* Ayarlar Modal Ek CSS */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; background: #1a1a24; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #444; }
+        .setting-row label { font-size: 1.3em; font-weight: bold; color: #ddd; }
+        .setting-row input { background: #111; color: #00d2ff; border: 1px solid #444; padding: 8px 12px; width: 80px; font-size: 1.2em; text-align: center; border-radius: 4px; font-weight: bold; -moz-appearance: textfield; appearance: textfield; }
+        .setting-row input::-webkit-inner-spin-button, .setting-row input::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
+        
+        /* Sayı Havuzu (Aşama 7) */
+        .pool-container { background: #2a2a35; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #444; }
+        .pool-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .pool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px; }
+        .pool-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: #111; border: 1px solid #333; border-radius: 6px; padding: 5px; cursor: pointer; user-select: none; transition: all 0.2s; }
+        .pool-item:hover { border-color: #666; }
+        .pool-item.selected { border-color: #00ff00; box-shadow: 0 0 10px rgba(0,255,0,0.5); }
+        .pool-item.selected .pool-no { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
+        .pool-no { font-size: 1.2em; font-weight: bold; color: #ddd; }
+        .pool-info { font-size: 0.65em; font-weight: bold; margin-top: 2px; }
+        .pool-joker { color: #ff9800; font-size: 0.7em; font-weight: bold; margin-top: 2px; }
+        
+        /* Modal Stilleri */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: #2b2b36; border: 1px solid #555; border-radius: 10px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); width: 800px; max-width: 95%; max-height: 90vh; overflow-y: auto; position: relative; }
+        
+        /* Sayı Listesi Modal & Zaman Makinesi */
+        .list-row { display: flex; align-items: center; background: #111; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #333; }
+        .list-label { width: 180px; font-weight: bold; font-size: 1.1em; display:flex; align-items:center; gap: 5px; }
+        .list-items { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
+        .zm-group { background: #111; border: 1px solid #333; border-radius: 8px; padding: 10px; }
+        .zm-header { font-weight: bold; font-size: 1.1em; margin-bottom: 10px; color: #ddd; display: flex; justify-content: space-between; }
+        .zm-draws-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .zm-draw { display: flex; align-items: center; gap: 10px; background: #000; padding: 8px; border-radius: 6px; border: 1px solid #222; }
+        .zm-date { width: 80px; font-weight: bold; color: #888; font-size: 0.85em; }
+        .zm-balls { display: flex; gap: 6px; flex-wrap: wrap; }
+        .zm-ball { display: flex; flex-direction: column; align-items: center; background: #222; padding: 6px; border-radius: 6px; border: 1px solid #444; min-width: 32px; }
+        .zm-ball.hit { border-color: #4caf50; background: #4caf50; }
+        .zm-ball.hit .zm-no { color: #fff; text-shadow: none; font-size: 1.1em; }
+        .zm-no { font-size: 1.0em; font-weight: bold; color: #ddd; }
+        .zm-score { font-size: 0.75em; font-weight: bold; margin-top: 3px; color: #aaa; }
+        .zm-ball.hit .zm-score { color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Tarihsel Analiz Motoru - Zaman Makinesi V1</h1>
+    
+    <div class="controls" style="display: flex; gap: 20px; align-items: center; justify-content: center; background: #3a3a48; padding: 15px; border-radius: 8px; margin-bottom: 20px; flex-wrap: wrap;">
+        <span id="dataStatus" style="display:none;"></span>
+        <label style="font-weight: bold; color: #ddd; display:flex; align-items:center; gap:5px;">📊 Hedef Havuz Boyutu: 
+            <input type="number" id="havuzBoyutu" value="30" style="width: 60px; background: #111; color: #fff; border: 1px solid #444; padding: 5px; text-align: center; border-radius: 4px; font-weight: bold;">
+        </label>
+        <label style="font-weight: bold; color: #ddd; display:flex; align-items:center; gap:5px;">⏱️ Test Çekiliş Sayısı: 
+            <input type="number" id="testCekilisSayisi" value="15" style="width: 60px; background: #111; color: #fff; border: 1px solid #444; padding: 5px; text-align: center; border-radius: 4px; font-weight: bold;">
+        </label>
+        <label style="font-weight: bold; color: #ddd; display:flex; align-items:center; gap:5px;">⏳ Testin Başlayacağı Tarih: 
+            <input type="date" id="hedefTarih" onchange="currentSonuc = null; testCalistir();" style="width: 140px; background: #111; color: #fff; border: 1px solid #444; padding: 5px; text-align: center; border-radius: 4px; font-weight: bold;">
+        </label>
+    </div>
+
+    <div class="controls" style="display: flex; gap: 15px; align-items: center; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
+        <button class="btn" onclick="testCalistir()" style="background: #e67e22; flex:1; text-transform: uppercase;">🧠 Akıllı Havuz Oluştur</button>
+        <button class="btn" onclick="gecmisiTestEt()" style="background: #2196F3; flex:1; text-transform: uppercase;">⏳ Geçmişi Test Et</button>
+        <button class="btn" onclick="openVeriEkleModal()" style="background: #ff9800; flex:1; text-transform: uppercase;">📥 Yeni Çekiliş / Excel Yükle</button>
+        <button class="btn" onclick="openSayiListesi()" style="background: #4caf50; flex:1; text-transform: uppercase;">📊 SAYI LİSTESİ</button>
+        <button class="btn" onclick="openDetayliTablo()" style="background: #607d8b; flex:1; text-transform: uppercase;">📋 PUAN DETAYLARI</button>
+        <button class="btn" onclick="openSettings()" style="background: #9c27b0; flex:1; text-transform: uppercase;">⚙️ AYARLAR</button>
+    </div>
+
+
+    
+    <div class="panel">
+        <h3>Kurallar ve Ağırlıklar</h3>
+        <div class="slider-grid">
+            <div class="slider-row">
+                <span class="slider-label" style="color: white;">K1 Çarpanı<br><span style="font-size: 0.85em; color: #bbb;">(Tüm Çekilişler)</span></span>
+                <input type="number" class="slider-val-box manual-ctrl-ignore" id="k1_val" value="100" onchange="syncInputToSlider('k1_val', 'k1_weight')">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k1_weight', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                <input type="range" id="k1_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200" step="1" value="100" oninput="syncSlider('k1_weight', 'k1_val')" onchange="testCalistir()">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k1_weight', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k1_weight', 100)" title="Sıfırla">↺</button>
+            </div>
+            
+            <div class="slider-row">
+                <span class="slider-label" style="color: white;">K2 Çarpanı<br><span style="font-size: 0.85em; color: #bbb;">(Son 50)</span></span>
+                <input type="number" class="slider-val-box manual-ctrl-ignore" id="k2_val" value="100" onchange="syncInputToSlider('k2_val', 'k2_weight')">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k2_weight', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                <input type="range" id="k2_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200" step="1" value="100" oninput="syncSlider('k2_weight', 'k2_val')" onchange="testCalistir()">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k2_weight', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k2_weight', 100)" title="Sıfırla">↺</button>
+            </div>
+
+            <div class="slider-row">
+                <span class="slider-label" style="color: white;">K3 Çarpanı<br><span style="font-size: 0.85em; color: #bbb;">(Son 15)</span></span>
+                <input type="number" class="slider-val-box manual-ctrl-ignore" id="k3_val" value="100" onchange="syncInputToSlider('k3_val', 'k3_weight')">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k3_weight', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                <input type="range" id="k3_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200" step="1" value="100" oninput="syncSlider('k3_weight', 'k3_val')" onchange="testCalistir()">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k3_weight', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k3_weight', 100)" title="Sıfırla">↺</button>
+            </div>
+
+            <div class="slider-row">
+                <span class="slider-label" style="color: white;">K4 Çarpanı<br><span style="font-size: 0.85em; color: #bbb;">(1. Halka)</span></span>
+                <input type="number" class="slider-val-box manual-ctrl-ignore" id="k4_val" value="100" onchange="syncInputToSlider('k4_val', 'k4_weight')">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k4_weight', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                <input type="range" id="k4_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200" step="1" value="100" oninput="syncSlider('k4_weight', 'k4_val')" onchange="testCalistir()">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k4_weight', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k4_weight', 100)" title="Sıfırla">↺</button>
+            </div>
+
+            <div class="slider-row">
+                <span class="slider-label" style="color: white;">K5 Çarpanı<br><span style="font-size: 0.85em; color: #bbb;">(2. Halka)</span></span>
+                <input type="number" class="slider-val-box manual-ctrl-ignore" id="k5_val" value="100" onchange="syncInputToSlider('k5_val', 'k5_weight')">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k5_weight', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                <input type="range" id="k5_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200" step="1" value="100" oninput="syncSlider('k5_weight', 'k5_val')" onchange="testCalistir()">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k5_weight', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k5_weight', 100)" title="Sıfırla">↺</button>
+            </div>
+
+            <div class="slider-row">
+                <span class="slider-label" style="color: white;">K6 Çarpanı<br><span style="font-size: 0.85em; color: #bbb;">(Son 15 Joker)</span></span>
+                <input type="number" class="slider-val-box manual-ctrl-ignore" id="k6_val" value="100" onchange="syncInputToSlider('k6_val', 'k6_weight')">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k6_weight', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                <input type="range" id="k6_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200" step="1" value="100" oninput="syncSlider('k6_weight', 'k6_val')" onchange="testCalistir()">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k6_weight', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k6_weight', 100)" title="Sıfırla">↺</button>
+            </div>
+
+            <div class="slider-row" style="border-left: 3px solid #ff5252;">
+                <span class="slider-label" style="color: white;">K7 Çarpanı<br><span style="font-size: 0.85em; color: #bbb;">(Tekrar Cezası)</span></span>
+                <input type="number" class="slider-val-box manual-ctrl-ignore" id="k7_val" value="100" onchange="syncInputToSlider('k7_val', 'k7_weight')">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k7_weight', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                <input type="range" id="k7_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200" step="1" value="100" oninput="syncSlider('k7_weight', 'k7_val')" onchange="testCalistir()">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k7_weight', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k7_weight', 100)" title="Sıfırla">↺</button>
+            </div>
+
+            <div class="slider-row" style="border-left: 3px solid #ff9800;">
+                <span class="slider-label" style="color: white;">K8 Çarpanı<br><span style="font-size: 0.85em; color: #bbb;">(Uyku Cezası)</span></span>
+                <input type="number" class="slider-val-box manual-ctrl-ignore" id="k8_val" value="100" onchange="syncInputToSlider('k8_val', 'k8_weight')">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k8_weight', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                <input type="range" id="k8_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200" step="1" value="100" oninput="syncSlider('k8_weight', 'k8_val')" onchange="testCalistir()">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k8_weight', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k8_weight', 100)" title="Sıfırla">↺</button>
+            </div>
+
+            <div class="slider-row" style="border-left: 3px solid #e91e63;">
+                <span class="slider-label" style="color: white;">K9 Çarpanı<br><span style="font-size: 0.85em; color: #bbb;">(Son 4 Cezası)</span></span>
+                <input type="number" class="slider-val-box manual-ctrl-ignore" id="k9_val" value="100" onchange="syncInputToSlider('k9_val', 'k9_weight')">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k9_weight', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                <input type="range" id="k9_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200" step="1" value="100" oninput="syncSlider('k9_weight', 'k9_val')" onchange="testCalistir()">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k9_weight', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k9_weight', 100)" title="Sıfırla">↺</button>
+            </div>
+            
+            <div class="slider-row" style="border-left: 3px solid #f44336;">
+                <span class="slider-label" style="color: white;">K10 Çarpanı<br><span style="font-size: 0.85em; color: #bbb;">(Son 8 Cezası)</span></span>
+                <input type="number" class="slider-val-box manual-ctrl-ignore" id="k10_val" value="100" onchange="syncInputToSlider('k10_val', 'k10_weight')">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k10_weight', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                <input type="range" id="k10_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200" step="1" value="100" oninput="syncSlider('k10_weight', 'k10_val')" onchange="testCalistir()">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k10_weight', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k10_weight', 100)" title="Sıfırla">↺</button>
+            </div>
+
+            <div class="slider-row" style="border-left: 3px solid #ff5722;">
+                <span class="slider-label" style="color: white;">K11 Çarpanı<br><span style="font-size: 0.85em; color: #bbb;">(Son 12 Cezası)</span></span>
+                <input type="number" class="slider-val-box manual-ctrl-ignore" id="k11_val" value="100" onchange="syncInputToSlider('k11_val', 'k11_weight')">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k11_weight', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                <input type="range" id="k11_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200" step="1" value="100" oninput="syncSlider('k11_weight', 'k11_val')" onchange="testCalistir()">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k11_weight', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k11_weight', 100)" title="Sıfırla">↺</button>
+            </div>
+
+            <div class="slider-row" style="border-left: 3px solid #795548;">
+                <span class="slider-label" style="color: white;">K12 Çarpanı<br><span style="font-size: 0.85em; color: #bbb;">(Son 15 Cezası)</span></span>
+                <input type="number" class="slider-val-box manual-ctrl-ignore" id="k12_val" value="100" onchange="syncInputToSlider('k12_val', 'k12_weight')">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k12_weight', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                <input type="range" id="k12_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200" step="1" value="100" oninput="syncSlider('k12_weight', 'k12_val')" onchange="testCalistir()">
+                <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k12_weight', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k12_weight', 100)" title="Sıfırla">↺</button>
+            </div>
+        </div>
+
+        <!-- Sayı Listesi Modal'a Taşındı -->
+        
+        <!-- Eski Arama ve Kaydet Butonu Kaldırıldı -->
+    </div>
+
+    <!-- Zaman Makinesi Buraya Taşındı -->
+    <div id="zamanMakinesiContainer" style="display:none; margin-top: 20px; margin-bottom: 20px; background: #1a1a24; padding: 20px; border-radius: 8px; border: 1px solid #4caf50;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px;">
+            <h2 style="color: #4caf50; margin: 0; font-size: 1.5em;">⏳ ZAMAN MAKİNESİ SONUÇLARI</h2>
+            <span id="zmStats" style="font-size: 1em; color: #aaa; font-weight: bold;"></span>
+        </div>
+        <div id="zamanMakinesiSonuclari" style="margin-top: 15px; display: flex; flex-direction: column; gap: 15px;">
+            <!-- JS ile doldurulacak -->
+        </div>
+    </div>
+
+    <!-- Detaylı Puan Tablosu Modal / Sayfa -->
+    <div class="modal-overlay" id="detayliTabloModal" style="background: #111; display: none;">
+        <div class="modal-content" style="width: 95%; height: 95vh; max-width: 1400px; display: flex; flex-direction: column; overflow: hidden; padding: 0;">
+            <div class="modal-header" style="justify-content: space-between; position: sticky; top: 0; background: #1e1e2d; z-index: 100; padding: 15px 20px; border-bottom: 1px solid #333; margin: 0;">
+                <h2 style="margin: 0;">📋 DETAYLI PUAN TABLOSU</h2>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <input type="number" id="detayliSearchInput" class="search-box" placeholder="Sayı Bul (Örn: 45)" style="width: 150px; padding: 5px;" onkeypress="if(event.key==='Enter') searchDetayliNumber()">
+                    <button class="btn" style="background: #9c27b0; padding: 5px 15px;" onclick="searchDetayliNumber()">Bul</button>
+                    <button class="btn" style="background: #2196F3;" onclick="saveAndSortDetayliModal()">Kaydet ve Sırala</button>
+                    <button class="btn" style="background: #e67e22;" onclick="closeDetayliTablo()">Kapat</button>
+                </div>
+            </div>
+            <div style="flex: 1; overflow-y: auto; padding: 20px;">
+                <table id="resultsTable">
+                    <thead>
+            <tr>
+                <th>Sayı</th>
+                <th>J/N</th>
+                <th>Durum</th>
+                <th>Toplam Puan</th>
+                <th>Manuel</th>
+                <th>K1 (Tüm Zamanlar Frekans)</th>
+                <th>K1 Puanı</th>
+                <th>K2 (Son 50 Frekans)</th>
+                <th>K2 Puanı</th>
+                <th>K3 (Son 15 Frekans)</th>
+                <th>K3 Puanı</th>
+                <th>1. Halka Komşu</th>
+                <th>K4 Puan</th>
+                <th>2. Halka Komşu</th>
+                <th>K5 Puan</th>
+                <th>K6 (Joker)</th>
+                <th>K7 (Ceza)</th>
+                <th>Uyku (Çek.)</th>
+                <th>K8 (Uyku Puan)</th>
+                <th>K9 (Son 4)</th>
+                <th>K10 (Son 8)</th>
+                <th>K11 (Son 12)</th>
+                <th>K12 (Son 15)</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr><td colspan="19">Lütfen Excel yükleyip Motoru Çalıştırın...</td></tr>
+        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+    <!-- Sayı Listesi Modal / Sayfa -->
+    <div class="modal-overlay" id="sayiListesiModal" style="background: #111;">
+        <div class="modal-content" style="width: 95%; height: 95vh; max-width: 1400px; display: flex; flex-direction: column; overflow: hidden; padding: 0;">
+            <div class="modal-header" style="justify-content: space-between; position: sticky; top: 0; background: #1e1e2d; z-index: 100; padding: 15px 20px; border-bottom: 1px solid #333; margin: 0;">
+                <h2 style="margin: 0;">📊 SAYI LİSTESİ VE HAVUZ</h2>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <input type="number" id="modalSearchInput" class="search-box" placeholder="Sayı Ara (Örn: 45)" style="width: 150px; padding: 5px;">
+                    <button class="btn" style="background: #9c27b0; padding: 5px 15px;" onclick="searchModalNumber()">Sayı Bul</button>
+                    <button class="btn" style="background: #607d8b; padding: 5px 15px;" onclick="toggleModalGroups()">Grupları Kapat/Aç</button>
+                    <span style="color:#aaa; margin: 0 5px;">|</span>
+                    <button class="btn" style="background: #2196F3;" onclick="saveAndSortModal()">Kaydet ve Yenile</button>
+                    <button class="btn" style="background: #e67e22;" onclick="closeSayiListesi()">Ana Sayfaya Dön</button>
+                </div>
+            </div>
+            <div id="modalScrollBody" style="padding: 20px; overflow-y: auto; flex: 1;">
+                <div id="havuzContainer" style="margin-bottom: 30px;">
+                    <!-- JavaScript ile Toplar -->
+                </div>
+                <div id="sayiListesiContainer">
+                    <!-- JavaScript ile Tablo Doldurulacak -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Ayarlar Modalı -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-content" style="width: 800px;">
+        <div class="modal-header">
+            <h3>⚙️ Kuralların Taban Puanları</h3>
+            <button class="close-btn" onclick="closeSettings()">&times;</button>
+        </div>
+        <div id="settingsContainer">
+            <!-- JS ile doldurulacak -->
+        </div>
+        <div style="text-align: right; margin-top: 15px;">
+            <button class="btn" onclick="saveSettings()">AYARLARI KAYDET</button>
+        </div>
+    </div>
+</div>
+
+<!-- Veri Ekleme Modalı -->
+<div class="modal-overlay" id="veriEkleModal">
+    <div class="modal-content" style="width: 700px; max-width: 95%;">
+        <div class="modal-header">
+            <h3>📥 Çekiliş Verisi Ekle & Güncelle</h3>
+            <button class="close-btn" onclick="closeVeriEkleModal()">&times;</button>
+        </div>
+        
+        <div style="padding: 15px; background: #222; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ff9800;">
+            <h4 style="margin-top: 0; color: #ff9800;">1. Seçenek: Hızlı Manuel Ekleme</h4>
+            <p style="font-size: 0.9em; color: #aaa;">Dünkü çekilişi hızlıca eklemek için burayı kullanabilirsiniz (Uygulamayı kapatana kadar hafızada kalır).</p>
+            <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap;">
+                <input type="text" id="m_tarih" placeholder="Tarih (Örn: 22.06.2026)" class="search-box" style="width: 150px;">
+                <input type="number" id="m_s1" placeholder="S1" class="slider-val-box" style="width: 50px;" min="1" max="90">
+                <input type="number" id="m_s2" placeholder="S2" class="slider-val-box" style="width: 50px;" min="1" max="90">
+                <input type="number" id="m_s3" placeholder="S3" class="slider-val-box" style="width: 50px;" min="1" max="90">
+                <input type="number" id="m_s4" placeholder="S4" class="slider-val-box" style="width: 50px;" min="1" max="90">
+                <input type="number" id="m_s5" placeholder="S5" class="slider-val-box" style="width: 50px;" min="1" max="90">
+                <input type="number" id="m_s6" placeholder="S6" class="slider-val-box" style="width: 50px;" min="1" max="90">
+                <span style="color:#aaa;">|</span>
+                <input type="number" id="m_joker" placeholder="Joker" class="slider-val-box" style="width: 60px; border-color: #f44336;" min="1" max="90">
+                <button class="btn" style="background: #4caf50; padding: 5px 15px;" onclick="manuelCekilisEkle()">+ EKLE</button>
+            </div>
+        </div>
+
+        <div style="padding: 15px; background: #222; border-radius: 8px; border-left: 4px solid #2196F3;">
+            <h4 style="margin-top: 0; color: #2196F3;">2. Seçenek: Güncel Excel Yükle</h4>
+            <p style="font-size: 0.9em; color: #aaa;">Kalıcı olarak excelinize girdiğiniz verileri sisteme tek tuşla yükleyebilirsiniz.</p>
+            <input type="file" id="excelFile" accept=".xlsx, .xls" style="background: #111; color: #fff; padding: 10px; border-radius: 4px; border: 1px solid #444; width: 100%;">
+            <button class="btn" style="background: #2196F3; margin-top: 10px; width: 100%;" onclick="loadExcelFile()">EXCEL'DEN GÜNCELLE</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="test_motor_v3.js?v=4"></script>
+<script src="veri.js"></script>
+<script>
+    // --- Ayarlar ve Taban Puanlar ---
+    const DEFAULTS = {
+        K1_TABAN: 100,
+        K2_TABAN: 100,
+        K3_TABAN: 100,
+        K4_TABAN: 20,
+        K5_TABAN: 10,
+        K6_TABAN: 100,
+        K7_TABAN: -200,
+        K8_TABAN: 100,
+        K8_UYKU_SINIRI: 25,
+        K8_ADIM_CEZASI: 5,
+        K9_TABAN: -250, K9_SINIR: 4,
+        K10_TABAN: -250, K10_SINIR: 8,
+        K11_TABAN: -250, K11_SINIR: 12,
+        K12_TABAN: -250, K12_SINIR: 15
+    };
+    let baseSettings = {};
+
+    function loadSettings() {
+        let stored = localStorage.getItem('kurtulus_ayarlar');
+        if (stored) {
+            try {
+                baseSettings = JSON.parse(stored);
+            } catch(e) {
+                baseSettings = { ...DEFAULTS };
+            }
+        } else {
+            baseSettings = { ...DEFAULTS };
+        }
+        
+        // Yeni eklenen ayarların undefined kalmasını engelle
+        for (let key in DEFAULTS) {
+            if (baseSettings[key] === undefined) {
+                baseSettings[key] = DEFAULTS[key];
+            }
+        }
+    }
+
+    function renderSettings() {
+        let html = '';
+        const labels = {
+            K1_TABAN: 'K1 (Tarihsel) Maks.',
+            K2_TABAN: 'K2 (Son 50) Maks.',
+            K3_TABAN: 'K3 (Son 15) Maks.',
+            K4_TABAN: 'K4 (1.Halka) Başına',
+            K5_TABAN: 'K5 (2.Halka) Başına',
+            K6_TABAN: 'K6 (Joker) Puanı',
+            K7_TABAN: 'K7 (Tekrar Cezası) Tabanı',
+            K8_TABAN: 'K8 (Uyku Cezası) Tabanı',
+            K8_UYKU_SINIRI: 'K8 Uyku Sınırı',
+            K8_ADIM_CEZASI: 'K8 Adım Cezası'
+        };
+
+        for (let key in DEFAULTS) {
+            if (key === 'K8_UYKU_SINIRI' || key === 'K8_ADIM_CEZASI' || 
+                key.startsWith('K9_') || key.startsWith('K10_') || key.startsWith('K11_') || key.startsWith('K12_')) continue;
+
+            if (key === 'K8_TABAN') {
+                html += `
+                <div class="setting-row" style="background: rgba(255, 152, 0, 0.1); border-left: 3px solid #ff9800; padding-left: 10px;">
+                    <label style="color: #ff9800; min-width: 150px;">K8 (Uyku Cezası) Ayarları</label>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span style="font-size: 0.8em; color: #aaa;">Sınır:</span>
+                            <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K8_UYKU_SINIRI', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                            <input type="number" id="input_K8_UYKU_SINIRI" value="${baseSettings.K8_UYKU_SINIRI}" style="width: 50px;">
+                            <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K8_UYKU_SINIRI', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span style="font-size: 0.8em; color: #aaa;">Taban:</span>
+                            <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K8_TABAN', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                            <input type="number" id="input_K8_TABAN" value="${baseSettings.K8_TABAN}" style="width: 50px;">
+                            <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K8_TABAN', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span style="font-size: 0.8em; color: #aaa;">Adım:</span>
+                            <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K8_ADIM_CEZASI', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                            <input type="number" id="input_K8_ADIM_CEZASI" value="${baseSettings.K8_ADIM_CEZASI}" style="width: 50px;">
+                            <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K8_ADIM_CEZASI', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                            <button class="btn-reset" onclick="document.getElementById('input_K8_UYKU_SINIRI').value = ${DEFAULTS.K8_UYKU_SINIRI}; document.getElementById('input_K8_TABAN').value = ${DEFAULTS.K8_TABAN}; document.getElementById('input_K8_ADIM_CEZASI').value = ${DEFAULTS.K8_ADIM_CEZASI};" title="Varsayılana Dön">↺</button>
+                        </div>
+                    </div>
+                </div>`;
+            } else {
+                html += `
+                <div class="setting-row">
+                    <label>${labels[key]}</label>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, '${key}', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                        <input type="number" id="input_${key}" value="${baseSettings[key]}">
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, '${key}', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                        <button class="btn-reset" onclick="document.getElementById('input_${key}').value = ${DEFAULTS[key]}" title="Varsayılana Dön">↺</button>
+                    </div>
+                </div>`;
+            }
+        }
+
+        // K9-K12 Ayarları
+        html += `
+        <div class="setting-row" style="background: rgba(233, 30, 99, 0.1); border-left: 3px solid #e91e63; padding-left: 10px; margin-top: 10px;">
+            <label style="color: #e91e63; min-width: 150px;">K9-K12 (Doygunluk) Ayarları</label>
+            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">`;
+            
+        [9, 10, 11, 12].forEach(k => {
+            html += `
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span style="font-size: 0.8em; color: #aaa; width: 55px;">K${k} Sınır:</span>
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K${k}_SINIR', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                        <input type="number" id="input_K${k}_SINIR" value="${baseSettings['K'+k+'_SINIR']}" style="width: 50px;">
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K${k}_SINIR', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span style="font-size: 0.8em; color: #aaa;">Taban:</span>
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K${k}_TABAN', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                        <input type="number" id="input_K${k}_TABAN" value="${baseSettings['K'+k+'_TABAN']}" style="width: 50px;">
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K${k}_TABAN', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                    </div>
+                </div>`;
+        });
+        
+        html += `</div></div>`;
+
+        document.getElementById('settingsContainer').innerHTML = html;
+    }
+
+    function openSettings() {
+        renderSettings();
+        document.getElementById('settingsModal').style.display = 'flex';
+    }
+
+    function closeSettings() {
+        document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    function saveSettings() {
+        for (let key in DEFAULTS) {
+            baseSettings[key] = parseInt(document.getElementById(`input_${key}`).value, 10) || DEFAULTS[key];
+        }
+        localStorage.setItem('kurtulus_ayarlar', JSON.stringify(baseSettings));
+        closeSettings();
+        // Eğer sonuç varsa yeniden hesapla
+        if (currentSonuc) {
+            testCalistir(); 
+        }
+    }
+
+    // Başlangıçta ayarları yükle
+    loadSettings();
+
+    // Çekiliş Verilerini (Excel/Manuel) Yerel Hafızadan Yükle
+    function loadSavedData() {
+        try {
+            let saved = localStorage.getItem('kurtulus_data');
+            if (saved) {
+                let parsed = JSON.parse(saved);
+                if (parsed.c && parsed.c.length > 0) {
+                    globalCekilisler = parsed.c;
+                    globalJokerler = parsed.j;
+                    globalTarihler = parsed.t;
+                    console.log("Önceki oturumdan " + parsed.c.length + " çekiliş yüklendi.");
+                }
+            }
+        } catch(e) { console.error("Veri yükleme hatası", e); }
+    }
+    loadSavedData();
+
+    // --- Hold-to-increment mantığı ---
+    let holdInterval = null;
+    let holdTimeout = null;
+    let holdCount = 0;
+
+    function startHold(actionFn, ...args) {
+        actionFn(...args); // İlk tıklamayı anında yap
+        holdCount = 0;
+        
+        holdTimeout = setTimeout(() => {
+            holdInterval = setInterval(() => {
+                holdCount++;
+                let multiplier = 1;
+                if (holdCount > 15) multiplier = 10;
+                else if (holdCount > 5) multiplier = 5;
+                
+                let adjustedArgs = [...args];
+                adjustedArgs[1] = args[1] * multiplier; // args[1] her zaman delta değeridir (-1 veya 1)
+                actionFn(...adjustedArgs);
+            }, 80); // Basılı tutulurken her 80ms'de bir tekrarla
+        }, 350); // İlk 350ms basılı tutma süresi
+    }
+
+    function stopHold() {
+        clearTimeout(holdTimeout);
+        clearInterval(holdInterval);
+        holdCount = 0;
+    }
+
+    function adjSlider(sliderId, step) {
+        let s = document.getElementById(sliderId);
+        let nv = parseInt(s.value) + step;
+        if(nv > parseInt(s.max)) nv = s.max;
+        if(nv < parseInt(s.min)) nv = s.min;
+        s.value = nv;
+        // İlgili text inputunu bul ve güncelle
+        let valId = sliderId.replace('_weight', '_val');
+        if (document.getElementById(valId)) {
+            document.getElementById(valId).value = nv;
+        }
+    }
+    
+    function syncSlider(sliderId, valId) {
+        let s = document.getElementById(sliderId);
+        let v = document.getElementById(valId);
+        v.value = s.value;
+    }
+
+    function adjSetting(inputIdSuffix, step) {
+        let input = document.getElementById('input_' + inputIdSuffix);
+        if (!input) return;
+        let nv = parseInt(input.value) + step;
+        input.value = nv;
+    }
+
+    function resetSlider(id, defaultValue) {
+        let el = document.getElementById(id);
+        el.value = defaultValue;
+        syncSlider(id, id.replace('_weight', '_val'));
+    }
+
+    function syncInputToSlider(inputId, sliderId) {
+        let val = parseInt(document.getElementById(inputId).value, 10);
+        if (isNaN(val)) val = 0;
+        let slider = document.getElementById(sliderId);
+        let min = parseInt(slider.min, 10);
+        let max = parseInt(slider.max, 10);
+        if (val < min) val = min;
+        if (val > max) val = max;
+        document.getElementById(inputId).value = val;
+        slider.value = val;
+        testCalistir();
+    }
+
+    // --- Veri Ekleme Modal İşlevleri ---
+    function openVeriEkleModal() {
+        document.getElementById('veriEkleModal').style.display = 'flex';
+    }
+
+    function closeVeriEkleModal() {
+        document.getElementById('veriEkleModal').style.display = 'none';
+    }
+
+    function manuelCekilisEkle() {
+        let tarih = document.getElementById('m_tarih').value || "Yeni";
+        let s1 = parseInt(document.getElementById('m_s1').value);
+        let s2 = parseInt(document.getElementById('m_s2').value);
+        let s3 = parseInt(document.getElementById('m_s3').value);
+        let s4 = parseInt(document.getElementById('m_s4').value);
+        let s5 = parseInt(document.getElementById('m_s5').value);
+        let s6 = parseInt(document.getElementById('m_s6').value);
+        let joker = parseInt(document.getElementById('m_joker').value);
+
+        if (!s1 || !s2 || !s3 || !s4 || !s5 || !s6 || !joker) {
+            alert("Lütfen 6 sayı ve 1 joker bilgisini eksiksiz girin.");
+            return;
+        }
+
+        let yeniSayilar = [s1, s2, s3, s4, s5, s6];
+        
+        // Verileri başa (en yeni olarak) ekle
+        globalCekilisler.unshift(yeniSayilar);
+        globalJokerler.unshift(joker);
+        if (typeof globalTarihler !== 'undefined') {
+            globalTarihler.unshift(tarih);
+        }
+
+        // Yerel hafızaya kaydet
+        try {
+            localStorage.setItem('kurtulus_data', JSON.stringify({
+                c: globalCekilisler,
+                j: globalJokerler,
+                t: globalTarihler
+            }));
+        } catch(e) { console.warn("Yerel hafıza sınırı aşıldı", e); }
+
+        alert("Yeni çekiliş hafızaya eklendi! Yeni testler bu veriyi kapsayacaktır.");
+        
+        // Kutuları temizle
+        document.getElementById('m_tarih').value = '';
+        document.getElementById('m_s1').value = '';
+        document.getElementById('m_s2').value = '';
+        document.getElementById('m_s3').value = '';
+        document.getElementById('m_s4').value = '';
+        document.getElementById('m_s5').value = '';
+        document.getElementById('m_s6').value = '';
+        document.getElementById('m_joker').value = '';
+
+        closeVeriEkleModal();
+    }
+
+    function loadExcelFile() {
+        const fileInput = document.getElementById('excelFile');
+        if (!fileInput.files.length) {
+            alert("Lütfen bir Excel dosyası seçin!");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const json = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: false});
+
+            let newCekilisler = [];
+            let newJokerler = [];
+            let newTarihler = [];
+
+            for (let i = 1; i < json.length; i++) {
+                let row = json[i];
+                if (!row || row.length < 8) continue;
+                
+                let s1 = parseInt(row[1]), s2 = parseInt(row[2]), s3 = parseInt(row[3]);
+                let s4 = parseInt(row[4]), s5 = parseInt(row[5]), s6 = parseInt(row[6]);
+                let joker = parseInt(row[7]);
+                let tarih = row[8] || "Tarihsiz";
+                
+                if (!isNaN(s1) && !isNaN(joker)) {
+                    newTarihler.push(tarih);
+                    newCekilisler.push([s1, s2, s3, s4, s5, s6]);
+                    newJokerler.push(joker);
+                }
+            }
+
+            if (newCekilisler.length > 0) {
+                globalCekilisler = newCekilisler;
+                globalJokerler = newJokerler;
+                globalTarihler = newTarihler;
+
+                // Yerel hafızaya kaydet
+                try {
+                    localStorage.setItem('kurtulus_data', JSON.stringify({
+                        c: globalCekilisler,
+                        j: globalJokerler,
+                        t: globalTarihler
+                    }));
+                } catch(e) { console.warn("Yerel hafıza sınırı aşıldı", e); }
+
+                alert(newCekilisler.length + " adet çekiliş Excel'den başarıyla yüklendi!");
+                closeVeriEkleModal();
+            } else {
+                alert("Excel dosyasından veri okunamadı. Lütfen formatı kontrol edin.");
+            }
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+
+    let unsavedChanges = false;
+    let manualScores = {}; // Her top için eklenmiş manuel puanları tutar
+    let poolOverrides = {}; // Havuz seçimi (true=zorla ekle, false=zorla çıkar)
+    let currentSonuc = null;
+    
+    function inFinalPool(num) {
+        if (poolOverrides[num] !== undefined) return poolOverrides[num];
+        // Varsayılan: havuzBoyutu kadar en yüksek puanlı
+        let havuzBoyutu = parseInt(document.getElementById('havuzBoyutu').value, 10) || 30;
+        let sorted = Object.keys(currentSonuc.puanlar.k1).map(n => ({
+            num: parseInt(n), 
+            tp: (currentSonuc.puanlar.k1[n] || 0) + 
+                (currentSonuc.puanlar.k2[n] || 0) + 
+                (currentSonuc.puanlar.k3[n] || 0) + 
+                (currentSonuc.puanlar.k4[n] || 0) + 
+                (currentSonuc.puanlar.k5[n] || 0) + 
+                (currentSonuc.puanlar.k6[n] || 0) + 
+                (currentSonuc.puanlar.k7[n] || 0) + 
+                (currentSonuc.puanlar.k8 ? (currentSonuc.puanlar.k8[n] || 0) : 0) +
+                (manualScores[n] || 0)
+        }));
+        sorted.sort((a,b) => b.tp - a.tp);
+        let top = sorted.slice(0, havuzBoyutu).map(s => s.num);
+        return top.includes(num);
+    }
+
+    function changeManualScore(num, delta) {
+        if (!manualScores[num]) manualScores[num] = 0;
+        manualScores[num] += delta;
+        let els = document.querySelectorAll(`.man-val-${num}`);
+        els.forEach(el => {
+            el.innerText = manualScores[num];
+            el.style.color = manualScores[num] < 0 ? '#f44336' : (manualScores[num] > 0 ? '#4caf50' : '#fff');
+        });
+        unsavedChanges = true;
+    }
+
+    function togglePoolOverride(num) {
+        poolOverrides[num] = !inFinalPool(num);
+        openSayiListesi(false);
+    }
+
+    function saveAndSort() {
+        let tarihVal = document.getElementById('hedefTarih').value;
+        if (!tarihVal) {
+            alert("Lütfen 'Testin Başlayacağı Tarih' kısmına geçerli bir tarih girin!");
+            return;
+        }
+        unsavedChanges = false;
+        if (currentSonuc) {
+            renderTable(currentSonuc);
+        } else {
+            testCalistir();
+        }
+    }
+
+    function searchTable() {
+        let input = document.getElementById("searchInput").value.trim();
+        let trs = document.getElementById("tableBody").getElementsByTagName("tr");
+        for (let i = 0; i < trs.length; i++) {
+            let td = trs[i].getElementsByTagName("td")[0];
+            if (td) {
+                let txtValue = td.textContent || td.innerText;
+                if (input === "" || txtValue.trim() === input) {
+                    trs[i].style.display = "";
+                } else {
+                    trs[i].style.display = "none";
+                }
+            }
+        }
+    }
+
+    window.onload = function() {
+        let ds = document.getElementById('dataStatus');
+        if (typeof globalCekilisler !== 'undefined' && globalCekilisler.length > 0) {
+            if (ds) ds.innerText = globalCekilisler.length + " adet çekiliş başarıyla yüklendi!";
+        } else {
+            if (ds) {
+                ds.innerText = "Hata: Veri yüklenemedi!";
+                ds.style.background = "#f44336";
+            }
+        }
+
+        // Otomatik bugünün tarihini atayalım
+        let today = new Date();
+        let yyyy = today.getFullYear();
+        let mm = String(today.getMonth() + 1).padStart(2, '0');
+        let dd = String(today.getDate()).padStart(2, '0');
+        document.getElementById('hedefTarih').value = `${yyyy}-${mm}-${dd}`;
+    };
+
+    function testCalistir() {
+        let tarihVal = document.getElementById('hedefTarih').value;
+        if (!tarihVal) {
+            alert("Lütfen 'Testin Başlayacağı Tarih' kısmına geçerli bir tarih girin!");
+            return;
+        }
+
+        if (typeof globalCekilisler === 'undefined' || globalCekilisler.length === 0) {
+            alert("Veriler yüklenmemiş!");
+            return;
+        }
+
+        let startIndex = 0;
+        let exactMatchFound = false;
+        
+        if (tarihVal) {
+            function parseTarih(t) {
+                if (!t) return 0;
+                let s = t.toString().trim();
+                let parts = s.split(/[\s\.\-\/]+/).filter(p => p.length > 0);
+                if (parts.length === 3) {
+                    let d, m, y;
+                    if (parts[0].length === 4) {
+                        // YYYY-MM-DD
+                        y = parseInt(parts[0], 10);
+                        m = parseInt(parts[1], 10);
+                        d = parseInt(parts[2], 10);
+                    } else if (t.toString().includes('/')) {
+                        // M/D/Y (veri.js or US format)
+                        m = parseInt(parts[0], 10);
+                        d = parseInt(parts[1], 10);
+                        y = parseInt(parts[2], 10);
+                    } else {
+                        // D.M.Y or D M Y (European/Turkish format)
+                        d = parseInt(parts[0], 10);
+                        m = parseInt(parts[1], 10);
+                        y = parseInt(parts[2], 10);
+                    }
+                    if (y < 100) y += 2000;
+                    if (m > 12) { let temp = d; d = m; m = temp; }
+                    if (isNaN(y) || isNaN(m) || isNaN(d)) return 0;
+                    return y * 10000 + m * 100 + d;
+                }
+                return 0;
+            }
+
+            let targetInt = parseTarih(tarihVal);
+            if (targetInt > 0) {
+                // 1. Tam Eşleşme Ara
+                for (let i = 0; i < globalTarihler.length; i++) {
+                    let tInt = parseTarih(globalTarihler[i]);
+                    if (tInt === targetInt) {
+                        startIndex = i;
+                        exactMatchFound = true;
+                        break;
+                    }
+                }
+                
+                // 2. Tam Eşleşme Yoksa Fallback (Ondan küçük en yakın tarih)
+                if (!exactMatchFound) {
+                    for (let i = 0; i < globalTarihler.length; i++) {
+                        let tInt = parseTarih(globalTarihler[i]);
+                        if (tInt > 0 && tInt <= targetInt) {
+                            startIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        let hedefCekilisler;
+        let hedefJokerler;
+        
+        if (tarihVal) {
+            // Eğer girilen tarih excel'deki tarihle tamamen aynıysa (exactMatchFound)
+            // O günün çekilişini geçmişten çıkarmalıyız ki motor "o günden öncesine" bakarak tahmin yapsın.
+            // Eğer girilen tarih eşleşmediyse (gelecek bir tarih), en son bulduğumuz tarihi dahil ederiz.
+            if (exactMatchFound) {
+                hedefCekilisler = globalCekilisler.slice(startIndex + 1);
+                hedefJokerler = globalJokerler.slice(startIndex + 1);
+            } else {
+                hedefCekilisler = globalCekilisler.slice(startIndex);
+                hedefJokerler = globalJokerler.slice(startIndex);
+            }
+        } else {
+            hedefCekilisler = globalCekilisler.slice(0);
+            hedefJokerler = globalJokerler.slice(0);
+        }
+
+        if (!hedefCekilisler || hedefCekilisler.length === 0) {
+            alert("Test edilecek çekiliş bulunamadı!");
+            return;
+        }
+
+        let ayarlar = {
+            K1_TABAN: baseSettings.K1_TABAN,
+            K2_TABAN: baseSettings.K2_TABAN,
+            K3_TABAN: baseSettings.K3_TABAN,
+            K4_TABAN: baseSettings.K4_TABAN,
+            K5_TABAN: baseSettings.K5_TABAN,
+            K6_TABAN: baseSettings.K6_TABAN,
+            K7_TABAN: baseSettings.K7_TABAN,
+            K8_TABAN: baseSettings.K8_TABAN,
+            K8_UYKU_SINIRI: baseSettings.K8_UYKU_SINIRI,
+            K8_ADIM_CEZASI: baseSettings.K8_ADIM_CEZASI,
+            K1_CARPAN: parseInt(document.getElementById('k1_weight').value, 10),
+            K2_CARPAN: parseInt(document.getElementById('k2_weight').value, 10),
+            K3_CARPAN: parseInt(document.getElementById('k3_weight').value, 10),
+            K4_CARPAN: parseInt(document.getElementById('k4_weight').value, 10),
+            K5_CARPAN: parseInt(document.getElementById('k5_weight').value, 10),
+            K6_CARPAN: parseInt(document.getElementById('k6_weight').value, 10),
+            K7_CARPAN: parseInt(document.getElementById('k7_weight').value, 10),
+            K8_CARPAN: parseInt(document.getElementById('k8_weight').value, 10),
+            K9_TABAN: baseSettings.K9_TABAN,
+            K9_SINIR: baseSettings.K9_SINIR,
+            K9_CARPAN: parseInt(document.getElementById('k9_weight') ? document.getElementById('k9_weight').value : 100, 10),
+            K10_TABAN: baseSettings.K10_TABAN,
+            K10_SINIR: baseSettings.K10_SINIR,
+            K10_CARPAN: parseInt(document.getElementById('k10_weight') ? document.getElementById('k10_weight').value : 100, 10),
+            K11_TABAN: baseSettings.K11_TABAN,
+            K11_SINIR: baseSettings.K11_SINIR,
+            K11_CARPAN: parseInt(document.getElementById('k11_weight') ? document.getElementById('k11_weight').value : 100, 10),
+            K12_TABAN: baseSettings.K12_TABAN,
+            K12_SINIR: baseSettings.K12_SINIR,
+            K12_CARPAN: parseInt(document.getElementById('k12_weight') ? document.getElementById('k12_weight').value : 100, 10)
+        };
+
+        currentSonuc = motorAtesle(hedefCekilisler, hedefJokerler, ayarlar);
+        renderTable(currentSonuc);
+    }
+
+    function renderTable(sonuc) {
+        let tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+        
+        let siralama = [];
+        for (let i = 1; i <= MAX_TOP; i++) {
+            let p1 = sonuc.puanlar.k1[i] || 0;
+            let p2 = sonuc.puanlar.k2[i] || 0;
+            let p3 = sonuc.puanlar.k3[i] || 0;
+            let p4 = sonuc.puanlar.k4[i] || 0;
+            let p5 = sonuc.puanlar.k5[i] || 0;
+            let p6 = sonuc.puanlar.k6[i] || 0;
+            let p7 = sonuc.puanlar.k7[i] || 0;
+            let p8 = sonuc.puanlar.k8 ? (sonuc.puanlar.k8[i] || 0) : 0;
+            let p9 = sonuc.puanlar.k9 ? (sonuc.puanlar.k9[i] || 0) : 0;
+            let p10 = sonuc.puanlar.k10 ? (sonuc.puanlar.k10[i] || 0) : 0;
+            let p11 = sonuc.puanlar.k11 ? (sonuc.puanlar.k11[i] || 0) : 0;
+            let p12 = sonuc.puanlar.k12 ? (sonuc.puanlar.k12[i] || 0) : 0;
+            let uyku = sonuc.uykuSureleri ? (sonuc.uykuSureleri[i] || 0) : 0;
+            let man = manualScores[i] || 0;
+            let toplam = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + man;
+            siralama.push({ i: i, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, uyku, man, toplam });
+        }
+
+        siralama.sort((a, b) => b.toplam - a.toplam);
+
+        siralama.forEach((item, index) => {
+            let rank = index + 1;
+            if (rank <= 22) { item.durum = "SICAK"; item.glowClass = "sicak-glow"; item.rankId = rank; }
+            else if (rank <= 44) { item.durum = "ILIK"; item.glowClass = "ilik-glow"; item.rankId = rank; }
+            else if (rank <= 66) { item.durum = "SOĞUK"; item.glowClass = "soguk-glow"; item.rankId = rank; }
+            else { item.durum = "İHTİMAL DIŞI"; item.glowClass = "ihdisi-glow"; item.rankId = rank; }
+        });
+
+        siralama.forEach(item => {
+            let i = item.i;
+            let tr = document.createElement("tr");
+            let isJoker = (sonuc.jokerler && sonuc.jokerler.some(j => Number(j) === Number(i))) ? 'J' : 'N';
+            let jokerColor = (isJoker === 'J') ? '#ff9800' : '#888';
+            tr.className = item.glowClass;
+            tr.innerHTML = `
+                <td><div class="lotto-ball">${i}</div></td>
+                <td style="font-weight:bold; color:${jokerColor}; text-align:center;">${isJoker}</td>
+                <td class="durum-col">
+                    <div class="durum-cell">
+                        <span class="durum-rank">${item.rankId}</span>
+                        <span class="durum-text">${item.durum}</span>
+                    </div>
+                </td>
+                <td style="font-size:1.2em; font-weight:bold; color:${item.toplam < 0 ? '#f44336' : '#fff'};">${item.toplam}</td>
+                <td class="manual-ctrl">
+                    <button class="btn-m minus manual-ctrl-ignore" onmousedown="startHold(changeManualScore, ${i}, -1)" onmouseup="stopHold()" onmouseleave="stopHold()">-</button>
+                    <span class="man-val-${i}" style="font-weight:bold; color:${item.man < 0 ? '#f44336' : (item.man > 0 ? '#4caf50' : '#fff')}">${item.man}</span>
+                    <button class="btn-m plus manual-ctrl-ignore" onmousedown="startHold(changeManualScore, ${i}, 1)" onmouseup="stopHold()" onmouseleave="stopHold()">+</button>
+                </td>
+                <td>${sonuc.frekanslar.tumu[i]}</td>
+                <td style="color:${item.p1 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p1}</td>
+                <td>${sonuc.frekanslar.son50[i]}</td>
+                <td style="color:${item.p3 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p3}</td>
+                <td>${sonuc.frekanslar.son15[i]}</td>
+                <td style="color:${item.p2 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p2}</td>
+                <td>${sonuc.frekanslar.halka1[i]}</td>
+                <td style="color:${item.p4 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p4}</td>
+                <td>${sonuc.frekanslar.halka2[i]}</td>
+                <td style="color:${item.p5 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p5}</td>
+                <td style="color:${item.p6 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p6}</td>
+                <td style="color:${item.p7 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p7}</td>
+                <td style="color:${item.uyku > 25 ? '#ff9800' : '#fff'};">${item.uyku}</td>
+                <td style="color:${item.p8 < 0 ? '#ff9800' : '#fff'}; font-weight:bold;">${item.p8}</td>
+                <td style="color:${item.p9 < 0 ? '#f44336' : (item.p9 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p9}</td>
+                <td style="color:${item.p10 < 0 ? '#f44336' : (item.p10 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p10}</td>
+                <td style="color:${item.p11 < 0 ? '#f44336' : (item.p11 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p11}</td>
+                <td style="color:${item.p12 < 0 ? '#f44336' : (item.p12 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p12}</td>
+            </tr>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // SAYI LİSTESİ MODAL FONKSİYONLARI
+    function openSayiListesi(checkSonuc = true) {
+        let tarihVal = document.getElementById('hedefTarih').value;
+        if (!tarihVal) {
+            alert("Lütfen 'Testin Başlayacağı Tarih' kısmına geçerli bir tarih girin!");
+            return;
+        }
+
+        if (checkSonuc && !currentSonuc) {
+            testCalistir(); // Motoru otomatik çalıştır
+        }
+
+        if (!currentSonuc) {
+            alert("Lütfen önce motoru çalıştırın.");
+            return;
+        }
+        
+        let siralama = [];
+        for (let num = 1; num <= 90; num++) {
+            let p1 = currentSonuc.puanlar.k1[num] || 0;
+            let p2 = currentSonuc.puanlar.k2[num] || 0;
+            let p3 = currentSonuc.puanlar.k3[num] || 0;
+            let p4 = currentSonuc.puanlar.k4[num] || 0;
+            let p5 = currentSonuc.puanlar.k5[num] || 0;
+            let p6 = currentSonuc.puanlar.k6[num] || 0;
+            let p7 = currentSonuc.puanlar.k7[num] || 0;
+            let p8 = currentSonuc.puanlar.k8 ? (currentSonuc.puanlar.k8[num] || 0) : 0;
+            let p9 = currentSonuc.puanlar.k9 ? (currentSonuc.puanlar.k9[num] || 0) : 0;
+            let p10 = currentSonuc.puanlar.k10 ? (currentSonuc.puanlar.k10[num] || 0) : 0;
+            let p11 = currentSonuc.puanlar.k11 ? (currentSonuc.puanlar.k11[num] || 0) : 0;
+            let p12 = currentSonuc.puanlar.k12 ? (currentSonuc.puanlar.k12[num] || 0) : 0;
+            let man = manualScores[num] || 0;
+            siralama.push({ num: num, tp: p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + man });
+        }
+        siralama.sort((a, b) => b.tp - a.tp);
+        
+        let groups = [
+            { id: "SICAK (1-22)", color: "#f44336", condition: (s, rank) => rank <= 22 },
+            { id: "ILIK (23-44)", color: "#ffeb3b", condition: (s, rank) => rank > 22 && rank <= 44 },
+            { id: "SOĞUK (45-66)", color: "#00bcd4", condition: (s, rank) => rank > 44 && rank <= 66 },
+            { id: "İHTİMAL DIŞI (67-90)", color: "#888", condition: (s, rank) => rank > 66 }
+        ];
+
+        let poolHtml = '';
+        groups.forEach(grp => {
+            let slice = siralama.filter((s, i) => grp.condition(s, i+1));
+            if (slice.length === 0) return;
+
+            let itemsHtml = slice.map(s => {
+                let inPool = inFinalPool(s.num);
+                let bgStyle = inPool ? '#4caf50' : 'rgba(255,255,255,0.05)';
+                let borderColor = inPool ? '#4caf50' : grp.color;
+                let numColor = inPool ? '#fff' : '#fff';
+                let infoColor = inPool ? '#e8f5e9' : '#aaa';
+                
+                return `
+                <div id="pool_item_${s.num}" class="pool-item ${inPool ? 'selected' : ''} modal-ball-item" data-num="${s.num}" style="cursor: pointer; background: ${bgStyle}; padding: 5px; border-radius: 4px; border: 2px solid ${borderColor}; text-align: center; width: 40px;" onclick="togglePoolOverride(${s.num})">
+                    <div class="pool-no" style="color:${numColor}; font-weight: bold; font-size: 1.2em; text-shadow: ${inPool ? '0 1px 2px rgba(0,0,0,0.3)' : 'none'};">${s.num}</div>
+                    <div class="pool-info" style="color:${infoColor}; font-size: 0.75em;">${s.tp}p</div>
+                </div>`;
+            }).join('');
+
+            poolHtml += `
+            <div class="list-row modal-grp-row" style="margin-bottom: 20px; background: #222; padding: 15px; border-radius: 8px; border-left: 5px solid ${grp.color};">
+                <div class="list-label modal-grp-label" style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                    <span style="color:${grp.color}; font-size:1.5em;">●</span> ${grp.id}
+                </div>
+                <div class="list-items modal-grp-items" style="display: flex; gap: 10px; flex-wrap: wrap;">${itemsHtml}</div>
+            </div>`;
+        });
+        
+        document.getElementById('havuzContainer').innerHTML = poolHtml;
+
+        // --- TABLO OLUŞTURMA ---
+        let html = `
+        <table id="sayiListesiTable">
+            <thead style="position: sticky; top: 0; z-index: 10; background: #333; box-shadow: 0 2px 2px -1px rgba(0,0,0,0.5);">
+                <tr>
+                    <th style="padding: 10px;">Sıra</th>
+                    <th style="padding: 10px;">Sayı</th>
+                    <th style="padding: 10px;">Toplam Puan</th>
+                    <th style="padding: 10px;">Manuel Puan</th>
+                    <th style="padding: 10px; writing-mode: vertical-rl; transform: rotate(180deg);">K1 Puanı</th>
+                    <th style="padding: 10px; writing-mode: vertical-rl; transform: rotate(180deg);">K2 Puanı</th>
+                    <th style="padding: 10px; writing-mode: vertical-rl; transform: rotate(180deg);">K3 Puanı</th>
+                    <th style="padding: 10px; writing-mode: vertical-rl; transform: rotate(180deg);">K4 Puanı</th>
+                    <th style="padding: 10px; writing-mode: vertical-rl; transform: rotate(180deg);">K5 Puanı</th>
+                    <th style="padding: 10px; writing-mode: vertical-rl; transform: rotate(180deg);">K6 Puanı</th>
+                    <th style="padding: 10px; writing-mode: vertical-rl; transform: rotate(180deg);">K7 (Ceza)</th>
+                    <th style="padding: 10px; writing-mode: vertical-rl; transform: rotate(180deg);">K8 (Uyku)</th>
+                    <th style="padding: 10px; writing-mode: vertical-rl; transform: rotate(180deg);">K9 (Son 4)</th>
+                    <th style="padding: 10px; writing-mode: vertical-rl; transform: rotate(180deg);">K10 (Son 8)</th>
+                    <th style="padding: 10px; writing-mode: vertical-rl; transform: rotate(180deg);">K11 (Son 12)</th>
+                    <th style="padding: 10px; writing-mode: vertical-rl; transform: rotate(180deg);">K12 (Son 15)</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+        
+        siralama.forEach((item, index) => {
+            let isSelected = inFinalPool(item.num);
+            let bgClass = isSelected ? 'background: rgba(76, 175, 80, 0.2);' : '';
+            let ballStyle = isSelected ? 'background: #4caf50; color: #fff; border-color: #4caf50;' : '';
+
+            let p1 = currentSonuc.puanlar.k1[item.num] || 0;
+            let p2 = currentSonuc.puanlar.k2[item.num] || 0;
+            let p3 = currentSonuc.puanlar.k3[item.num] || 0;
+            let p4 = currentSonuc.puanlar.k4[item.num] || 0;
+            let p5 = currentSonuc.puanlar.k5[item.num] || 0;
+            let p6 = currentSonuc.puanlar.k6[item.num] || 0;
+            let p7 = currentSonuc.puanlar.k7[item.num] || 0;
+            let p8 = currentSonuc.puanlar.k8 ? (currentSonuc.puanlar.k8[item.num] || 0) : 0;
+            let p9 = currentSonuc.puanlar.k9 ? (currentSonuc.puanlar.k9[item.num] || 0) : 0;
+            let p10 = currentSonuc.puanlar.k10 ? (currentSonuc.puanlar.k10[item.num] || 0) : 0;
+            let p11 = currentSonuc.puanlar.k11 ? (currentSonuc.puanlar.k11[item.num] || 0) : 0;
+            let p12 = currentSonuc.puanlar.k12 ? (currentSonuc.puanlar.k12[item.num] || 0) : 0;
+            let man = manualScores[item.num] || 0;
+
+            html += `
+            <tr style="${bgClass}" class="modal-table-row" data-num="${item.num}">
+                <td style="color:#888; font-weight:bold;">${index + 1}</td>
+                <td><div class="lotto-ball" style="${ballStyle}">${item.num}</div></td>
+                <td style="font-size:1.2em; font-weight:bold; color:${item.tp < 0 ? '#f44336' : '#fff'};">${item.tp}</td>
+                <td class="manual-ctrl">
+                    <button class="btn-m minus manual-ctrl-ignore" onmousedown="startHold(changeManualScore, ${item.num}, -1)" onmouseup="stopHold()" onmouseleave="stopHold()">-</button>
+                    <span class="man-val-${item.num}" style="font-weight:bold; color:${man < 0 ? '#f44336' : (man > 0 ? '#4caf50' : '#fff')}">${man}</span>
+                    <button class="btn-m plus manual-ctrl-ignore" onmousedown="startHold(changeManualScore, ${item.num}, 1)" onmouseup="stopHold()" onmouseleave="stopHold()">+</button>
+                </td>
+                <td style="color:${p1 < 0 ? '#f44336' : '#fff'}">${p1}</td>
+                <td style="color:${p2 < 0 ? '#f44336' : '#fff'}">${p2}</td>
+                <td style="color:${p3 < 0 ? '#f44336' : '#fff'}">${p3}</td>
+                <td style="color:${p4 < 0 ? '#f44336' : '#fff'}">${p4}</td>
+                <td style="color:${p5 < 0 ? '#f44336' : '#fff'}">${p5}</td>
+                <td style="color:${p6 < 0 ? '#f44336' : '#fff'}">${p6}</td>
+                <td style="color:#f44336; font-weight:bold;">${p7}</td>
+                <td style="color:${p8 < 0 ? '#ff9800' : '#fff'}; font-weight:bold;">${p8}</td>
+                <td style="color:${p9 < 0 ? '#f44336' : (p9 > 0 ? '#fff' : '#888')}; font-weight:bold;">${p9}</td>
+                <td style="color:${p10 < 0 ? '#f44336' : (p10 > 0 ? '#fff' : '#888')}; font-weight:bold;">${p10}</td>
+                <td style="color:${p11 < 0 ? '#f44336' : (p11 > 0 ? '#fff' : '#888')}; font-weight:bold;">${p11}</td>
+                <td style="color:${p12 < 0 ? '#f44336' : (p12 > 0 ? '#fff' : '#888')}; font-weight:bold;">${p12}</td>
+            </tr>`;
+        });
+        
+        html += `</tbody></table>`;
+        document.getElementById('sayiListesiContainer').innerHTML = html;
+        document.getElementById('sayiListesiModal').style.display = 'flex';
+    }
+
+    function saveAndSortModal() {
+        if (unsavedChanges) {
+            saveAndSort(); // Ana sayfadaki tabloyu günceller
+            openSayiListesi(); // Modalı güncel puanlarla tekrar çizer
+        }
+    }
+
+    function closeSayiListesi() {
+        if (unsavedChanges) {
+            alert("Kaydedilmemiş manuel puan değişiklikleriniz var! Lütfen çıkmadan önce 'Kaydet ve Yenile' butonuna basın.");
+            return;
+        }
+        document.getElementById('sayiListesiModal').style.display = 'none';
+    }
+
+    function openDetayliTablo() {
+        let tarihVal = document.getElementById('hedefTarih').value;
+        if (!tarihVal) {
+            alert("Lütfen 'Testin Başlayacağı Tarih' kısmına geçerli bir tarih girin!");
+            return;
+        }
+        if (!currentSonuc) {
+            testCalistir(); 
+        }
+        if (!currentSonuc) {
+             alert("Motor çalıştırılamadı.");
+             return;
+        }
+        document.getElementById('detayliTabloModal').style.display = 'flex';
+    }
+
+    function saveAndSortDetayliModal() {
+        if (unsavedChanges) {
+            saveAndSort(); // Ana sayfadaki tabloyu günceller
+        }
+        
+        let searchInput = document.getElementById('detayliSearchInput');
+        if (searchInput) searchInput.value = '';
+        
+        let tbody = document.getElementById('tableBody');
+        if (tbody) {
+            let rows = tbody.getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].style.boxShadow = '';
+                rows[i].style.backgroundColor = '';
+            }
+        }
+        
+        openDetayliTablo();
+    }
+
+    function closeDetayliTablo() {
+        let searchInput = document.getElementById('detayliSearchInput');
+        if (searchInput && searchInput.value.trim() !== '') {
+            alert("Sayı arama işlemi aktiftir. Çıkmak için lütfen önce 'Kaydet ve Sırala' butonuna basınız.");
+            return;
+        }
+        document.getElementById('detayliTabloModal').style.display = 'none';
+    }
+
+    function searchDetayliNumber() {
+        let val = document.getElementById('detayliSearchInput').value.trim();
+        if (!val) return;
+        let tbody = document.getElementById('tableBody');
+        let rows = tbody.getElementsByTagName('tr');
+        for (let i = 0; i < rows.length; i++) {
+            let tr = rows[i];
+            tr.style.boxShadow = '';
+            tr.style.backgroundColor = '';
+            let ball = tr.querySelector('.lotto-ball');
+            if (ball && ball.innerText === val) {
+                tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                tr.style.boxShadow = '0 -4px 10px -2px #0f0, 0 4px 10px -2px #0f0';
+                tr.style.backgroundColor = 'rgba(0, 255, 0, 0.15)';
+            }
+        }
+    }
+
+    let isGroupsCollapsed = false;
+    function toggleModalGroups() {
+        isGroupsCollapsed = !isGroupsCollapsed;
+        let poolContainer = document.getElementById('havuzContainer');
+        if (isGroupsCollapsed) {
+            poolContainer.style.display = 'none'; // Sadece tablo kalsın
+        } else {
+            poolContainer.style.display = 'block';
+        }
+    }
+
+    function searchModalNumber() {
+        let val = document.getElementById('modalSearchInput').value.trim();
+        let ballItems = document.querySelectorAll('.modal-ball-item');
+        let tableRows = document.querySelectorAll('.modal-table-row');
+        
+        // 1) Topları Filitrele
+        ballItems.forEach(item => {
+            if (!val) {
+                item.style.display = 'block';
+            } else {
+                if (item.getAttribute('data-num') === val) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            }
+        });
+        
+        // 2) Tablo Satırlarını Filitrele
+        tableRows.forEach(row => {
+            if (!val) {
+                row.style.display = '';
+            } else {
+                if (row.getAttribute('data-num') === val) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+        
+        // Eğer sayı temizlendiyse topların gruplarını da aç
+        if (!val && !isGroupsCollapsed) {
+            document.getElementById('havuzContainer').style.display = 'block';
+        }
+    }
+
+    // ZAMAN MAKİNESİ (GEÇMİŞİ TEST ET) FONKSİYONLARI
+    function gecmisiTestEt() {
+        let tarihVal = document.getElementById('hedefTarih').value || "";
+        if (!tarihVal) {
+            alert("Lütfen 'Testin Başlayacağı Tarih' kısmına geçerli bir tarih girin!");
+            return;
+        }
+
+        if (typeof globalCekilisler === 'undefined' || globalCekilisler.length === 0) {
+            alert("Veriler yüklenmemiş!");
+            return;
+        }
+
+        let testSayisi = parseInt(document.getElementById('testCekilisSayisi').value, 10) || 15;
+        let havuzBoyutu = parseInt(document.getElementById('havuzBoyutu').value, 10) || 30;
+        let tarihStr = "";
+        let targetInt = 0;
+        
+        function parseTarih(t) {
+            if (!t) return 0;
+            let s = t.toString().trim();
+            let parts = s.split(/[\s\.\-\/]+/).filter(p => p.length > 0);
+            if (parts.length === 3) {
+                let d, m, y;
+                if (parts[0].length === 4) {
+                    y = parseInt(parts[0], 10);
+                    m = parseInt(parts[1], 10);
+                    d = parseInt(parts[2], 10);
+                } else if (t.toString().includes('/')) {
+                    m = parseInt(parts[0], 10);
+                    d = parseInt(parts[1], 10);
+                    y = parseInt(parts[2], 10);
+                } else {
+                    d = parseInt(parts[0], 10);
+                    m = parseInt(parts[1], 10);
+                    y = parseInt(parts[2], 10);
+                }
+                if (y < 100) y += 2000;
+                if (m > 12) { let temp = d; d = m; m = temp; }
+                if (isNaN(y) || isNaN(m) || isNaN(d)) return 0;
+                return y * 10000 + m * 100 + d;
+            }
+            return 0;
+        }
+
+        if (tarihVal) {
+            targetInt = parseTarih(tarihVal);
+            let parts = tarihVal.split('-');
+            if (parts.length === 3) {
+                tarihStr = parts[2] + "." + parts[1] + "." + parts[0];
+            }
+        }
+
+        let ayarlar = {
+            K1_TABAN: baseSettings.K1_TABAN,
+            K2_TABAN: baseSettings.K2_TABAN,
+            K3_TABAN: baseSettings.K3_TABAN,
+            K4_TABAN: baseSettings.K4_TABAN,
+            K5_TABAN: baseSettings.K5_TABAN,
+            K6_TABAN: baseSettings.K6_TABAN,
+            K7_TABAN: baseSettings.K7_TABAN,
+            K8_TABAN: baseSettings.K8_TABAN,
+            K8_UYKU_SINIRI: baseSettings.K8_UYKU_SINIRI,
+            K8_ADIM_CEZASI: baseSettings.K8_ADIM_CEZASI,
+            K1_CARPAN: parseInt(document.getElementById('k1_weight').value, 10),
+            K2_CARPAN: parseInt(document.getElementById('k2_weight').value, 10),
+            K3_CARPAN: parseInt(document.getElementById('k3_weight').value, 10),
+            K4_CARPAN: parseInt(document.getElementById('k4_weight').value, 10),
+            K5_CARPAN: parseInt(document.getElementById('k5_weight').value, 10),
+            K6_CARPAN: parseInt(document.getElementById('k6_weight').value, 10),
+            K7_CARPAN: parseInt(document.getElementById('k7_weight').value, 10),
+            K8_CARPAN: parseInt(document.getElementById('k8_weight').value, 10)
+        };
+
+        // Zaman Makinesini Çalıştır
+        let sonuclar = zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler, globalJokerler, ayarlar);
+
+        if (sonuclar.length === 0) {
+            alert("Belirtilen tarihe uygun yeterli geçmiş veri bulunamadı.");
+            return;
+        }
+
+        renderZamanMakinesi(sonuclar, testSayisi, havuzBoyutu);
+    }
+
+    function renderZamanMakinesi(sonuclar, testSayisi, havuzBoyutu) {
+        let container = document.getElementById('zamanMakinesiContainer');
+        let sonuclarDiv = document.getElementById('zamanMakinesiSonuclari');
+        
+        let groups = {
+            6: [], 5: [], 4: [], 3: [], 2: [], 1: [], 0: []
+        };
+        
+        let totalHits = 0;
+
+        sonuclar.forEach(s => {
+            let hit = s.kacBilen;
+            if (hit > 6) hit = 6;
+            groups[hit].push(s);
+            totalHits += hit;
+        });
+
+        let avg = (totalHits / sonuclar.length).toFixed(2);
+        document.getElementById('zmStats').innerText = `Test: ${sonuclar.length} | Havuz: ${havuzBoyutu} | Ortalama Başarı: ${avg} / 6`;
+
+        let html = '';
+        
+        // Sadece sonucu olan grupları (4 bilen, 3 bilen vb.) yazdır (Görseldeki gibi)
+        [6,5,4,3,2,1,0].forEach(hitLevel => {
+            if (groups[hitLevel].length > 0 && hitLevel > 0) {
+                let drawsHtml = groups[hitLevel].map(s => {
+                    let ballsHtml = '';
+                    s.gercekSayilar.sort((a,b)=>a-b).forEach(num => {
+                        let isHit = s.bilenler.includes(num);
+                        let tp = s.secilenPuanlar[num] || 0;
+                        let isJokerSourced = s.k6Puanlar && s.k6Puanlar[num] > 0;
+                        
+                        let jBadge = isJokerSourced ? `<div style="position:absolute; top:-6px; right:-6px; background:#ff9800; color:#fff; font-size:0.7em; font-weight:bold; padding:1px 4px; border-radius:4px; box-shadow:0 0 3px #000;">J</div>` : '';
+
+                        ballsHtml += `
+                            <div class="zm-ball ${isHit ? 'hit' : ''}" style="position:relative;">
+                                ${jBadge}
+                                <span class="zm-no">${num}</span>
+                                <span class="zm-score">${tp}p</span>
+                            </div>
+                        `;
+                    });
+
+                    let formattedTarih = s.tarih || 'Tarihsiz';
+                    if (formattedTarih && formattedTarih.includes('/')) {
+                        let p = formattedTarih.split('/');
+                        if (p.length === 3) {
+                            let m = p[0].padStart(2, '0');
+                            let d = p[1].padStart(2, '0');
+                            let y = p[2];
+                            if (y.length === 2) y = "20" + y;
+                            formattedTarih = d + "." + m + "." + y;
+                        }
+                    }
+
+                    return `
+                        <div class="zm-draw">
+                            <div class="zm-date" style="font-size: 1.5em; font-weight: bold; min-width: 130px; text-align: center;">${formattedTarih}</div>
+                            <div class="zm-balls">${ballsHtml}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                html += `
+                <div class="zm-group">
+                    <div class="zm-header">
+                        <span>${hitLevel} Bilen Sayısı: ${groups[hitLevel].length}</span>
+                        <span style="font-size:0.8em; color:#888; cursor:pointer;" onclick="toggleZMAccordion(this)">▼ AÇ/KAPAT</span>
+                    </div>
+                    <div class="zm-draws-container">
+                        ${drawsHtml}
+                    </div>
+                </div>`;
+            }
+        });
+
+        sonuclarDiv.innerHTML = html;
+        container.style.display = 'block';
+    }
+
+    function toggleZMAccordion(el) {
+        let container = el.parentElement.nextElementSibling;
+        if (container.style.display === 'none') {
+            container.style.display = 'grid';
+            el.innerHTML = '▼ AÇ/KAPAT';
+        } else {
+            container.style.display = 'none';
+            el.innerHTML = '▲ AÇ/KAPAT';
+        }
+    }
+
+</script>
+
+</body>
+</html>

@@ -1,29 +1,44 @@
-# Kurtuluş Tek - Çılgın Sayısal Analiz Projesi Devir Teslim Tutanağı
+# Devir Teslim Dosyası (Handover Document)
 
-## 1. Mevcut Durum ve Eklenen Yeni Özellikler
-* **K7 (Seri Tekrar Cezası) Eklendi:** Bir sayı en son çekilişlerde üst üste 2 defa çıkarsa K7 taban puanını, 3 veya daha fazla defa çıkarsa (Seri Sayısı - 1) * K7 Çarpanı oranında katlanarak eksi puan almasını sağlayan `tekrarCezasiHesapla` fonksiyonu `test_motor_v3.js` içerisine başarıyla eklendi.
-* **Arayüz Güncellendi:** K7 ayarlarının yapılması için `Motor_Test_Paneli.html` dosyasına slider ve input alanları eklendi. Tüm tablo sıralaması K7 puanını da (p7) hesaba katacak şekilde revize edildi.
+## Projenin Mevcut Durumu
 
-## 2. Karşılaşılan Sorunlar ve "Neden Puanlar Değişti?"
-Son testlerde daha önceden aşina olduğumuz (örneğin 25 sayısının 310 puan olması, 33'ün 219 puan olması) değerlerin tamamen değiştiğini fark ettik. Bunun altında yatan çok kritik ve düzeltilmesi gereken bir **Zaman Makinesi (Mantık) Hatası** yatıyordu:
+Kullanıcı ile `kurtulus_tek` projesinin `Tarihsel_Analiz_Test` klasöründeki loto/sayı seçimi test motoru uygulaması üzerinde çalışılmaktadır. Ana dosyalar:
+- `Motor_Test_Paneli.html` (Arayüz ve Modal Yönetimi)
+- `test_motor_v3.js` (Hesaplama ve Puanlama Motoru)
 
-* **Eski (Hatalı) Durum:** Sen sisteme 18.06.2026 tarihini "Hedef" olarak girdiğinde, eski sistem `slice(startIndex)` kodunu kullanıyordu. Bu ne demekti? 18 Haziran'da çıkacak sayıları tahmin etmek için **18 Haziran çekilişinin KENDİSİNİ DE** geçmiş veri gibi hesaba katıyordu. Yani geleceği tahmin etmek için o günün sonuçlarına da bakarak hile yapıyordu. Aşina olduğun puanlar, bu "hileli" hesabın puanlarıydı.
-* **Yeni (Düzeltilmiş) Durum:** Test motorundaki dilimleme mantığını `slice(startIndex + 1)` olarak düzelttik. Yani 18 Haziran'ı tahmin etmek istersen, artık 18 Haziran sonuçlarına bakmıyor, hakkaniyetli bir şekilde **15 Haziran ve öncesini** baz alarak tahmin yapıyor.
-* **Sonuç:** Tahmin havuzundan kendi günü çıkarıldığı için doğal olarak tüm sayıların sıcaklık, soğukluk ve çıkma sıklığı puanları baştan aşağıya gerçekçi değerlere göre değişti. Puanların farklı olmasının asıl sebebi motorun bozulması değil, geçmişteki hileli (geleceği gören) mantığın düzeltilmiş olmasıdır.
+### Son Oturumda Yapılanlar:
+1. **Joker Körlüğü Sorunu:** `K8_UYKU_CEZASI` hesaplanırken joker sayılarının uykuyu bozmaması (Jokerlerin görülmemesi) sorunu çözüldü. Artık sayı joker olarak çıksa dahi uykusu sıfırlanıyor.
+2. **K13 (Canlandırma) Kuralı Yeniden Düzenlendi:** K13 kuralı için "Eşik 1" ve "Eşik 2" şeklinde iki ayrı seçenek eklendi (örn: 2 komşu ve 3 komşu). İlk eşiği geçen taban puanı alıyor, ikinci eşiği geçen (daha çok komşusu olan) taban puanın 2 katını alıyor. Joker sayıları da artık komşuluk kontrollerine dâhil ediliyor.
+3. **Havuz (Pool) Hatası:** Sistem 20 sayı seçmesi gerekirken 36 sayı seçiyordu. Bunun sebebi K13 puanlarının nihai havuza girmemesiydi, bu matematiksel mantık hatası düzeltildi.
+4. **Settings (Ayarlar) Modalı Görsel Düzenlemeler:** K8, K9, K10, K12 ve K13 kurallarının "Ayarlar" sayfasındaki görünümleri, `K1` ile `K7` arasındaki standart görünüme uyacak şekilde "yan yana (inline)" tasarlandı.
 
-## 3. "79 Neden 2 Ay Öncesinde Bile -2000 Alıyor?" Gizemi
-Bunun da sebebi kod içerisindeki varsayılan (fallback) durumla alakalıdır:
-* Kullanıcı `veri.js` içerisinde **birebir bulunmayan** bir tarih (örneğin listede olmayan gelecekteki 22.06.2026 veya formatı uymayan bir gün) girdiğinde sistem eşleşme bulamıyor.
-* Eşleşme bulamayınca güvenlik ağı olarak `slice(0)` yapıyor. Yani Excel'in en güncel tarihinden geriye tüm tarihi yüklüyor.
-* Ve tüm tarihin en güncel (0, 1 ve 2. indekslerinde) 79 sayısı 3 kere üst üste çıkmış durumda!
-* Sistem tarihi bulamadığı için "En güncel havuzu kullanıyorum" diyor ve en güncel havuzda da 79'un 3'lü serisi olduğu için acımadan **-2000 cezasını** yapıştırıyor. Hangi eski tarihi girersen gir (eğer formatı Excel ile tam eşleşmezse), eşleşme bulamadığı için sürekli bu en güncel senaryoyu ve -2000 cezasını karşına çıkarıyor.
+### Son Oturumda Yaşanan Sorun (Kritik):
+**Ayarlar Modalının İstenmeyen Şekilde Kapanması:** 
+Kullanıcı, "Ayarlar" sayfasında değişiklik yapıp henüz kaydetmeden "X" (kapat) butonuna bastığında modalın **kesinlikle kapanmamasını**, sadece uyararak kapanışı engellemesini istiyor. 
+Şu ana kadar `oninput="unsavedSettings = true"` yöntemi ve son olarak DOM üzerinden anlık değerlerin `baseSettings` ile kıyaslandığı `isSettingsChanged()` mekanizması kuruldu. Ancak kullanıcının ortamında modal halen uyarı vermeden kapanabiliyor. 
 
-## 4. Yeni Oturumdaki İlk Görevler (Next Steps)
-Yeni sohbetteki ajan arkadaşıma notlar:
-1. **Tarih Formatı Eşleşmesi (Regex/Kapsamlı Trim):** Kullanıcı "18 06 2026" veya "2026-06-18" yazdığında, `veri.js` içindeki Amerikan formatlı `6/18/26` formatına %100 çevrilip eşleşmesi garanti altına alınmalıdır.
-2. **Eşleşme Bulunamama (Fallback) Mantığı:** `exactMatchFound === false` olduğu durumda `slice(0)` almak yerine, kullanıcının girdiği tarihe **en yakın ve ondan daha eski olan ilk çekiliş tarihini** dinamik olarak bulup onu baz alacak bir algoritma yazılmalıdır. Böylece olmayan tarih girildiğinde bile 79'un güncel -2000 cezası geçmiş tarihlere yansımamış olur.
-3. Kullanıcıya puanların değiştiği ve bunun doğru/gerçekçi olduğu yavaşça anlatılmalı, yeni duruma göre testler yapılmalıdır.
+---
 
-Tüm kod günceldir, K7 algoritması hatasız çalışmaktadır. Sorun tamamen zaman yolculuğu dilimleme mantığının yeni düzeltilmiş olması ve eşleşmeyen tarihlerde ana listenin yüklenmesidir.
+## Yeni Ajan İçin Notlar ve Görevler
 
-Kolay gelsin!
+Merhaba Yeni Ajan! Bu projeyi devraldığında lütfen aşağıdaki adımları sırasıyla uygula:
+
+1. **Ayarlar Modalının Kapanma Sorununu Kalıcı Olarak Çöz:**
+   Kullanıcının ortamında "X" tuşu (ya da modal overlay dışına tıklama vb.) bir şekilde JavaScript'in `return` komutunu bypass ediyor.
+   - Lütfen `Motor_Test_Paneli.html` dosyasındaki `closeSettings(e)` fonksiyonunu incele.
+   - Kullanıcı **değişiklik yapıldıysa** ve **"AYARLARI KAYDET"** butonuna basılmadıysa, X butonunun hiçbir şart altında çalışmamasını sağla.
+
+2. **K13 (Canlandırma) Layout (Görsel Düzen) Kontrolü:**
+   `renderSettings()` içindeki K13 kuralı için oluşturulan HTML satırının tıpkı K8, K9 gibi tamamen yatay (`flex-wrap`, `align-items: center`) olduğundan ve alt alta devrilmediğinden emin ol. 
+
+3. **YENİ KURAL: K14'ün Eklenmesi:**
+   Kullanıcı K14 kuralını entegre etmek istiyor. Önceki konuşmalarda K13 olarak tartışılan ama artık K14 olarak kodlanması gereken kural şudur:
+   - "Son üç çekilişte çıkan 21 sayıyla ilgili kural."
+   - K14'ün motor (`test_motor_v3.js`) içine yazılması ve `Motor_Test_Paneli.html` içerisine ayarlarının / UI bağlantılarının yapılması gerekiyor. Lütfen bu kuralın detaylarını kullanıcıya sorarak onaylat ve sadece K14'ü dikkatlice ekle.
+
+---
+## Kullanıcıya Prompt Önerisi (Kopyalayıp Yeni Sohbete Yapıştırın)
+
+Lütfen aşağıdaki metni kopyalayıp açacağınız yeni sohbet penceresine yapıştırın:
+
+"Merhaba. Devir teslim işlemi için `d:\GitHub\kurtulus_tek\Tarihsel_Analiz_Test\devir_teslim.md` dosyasını okuyarak projenin neresinde kaldığımızı ve senden önceki ajanın çözemediği Ayarlar penceresinin kapanma hatasını hemen analiz et. Öncelikle Modal'ın kaydetmeden kapanma sorununu çöz. Ardından K13'ün tasarımını düzelt ve K14 kuralı için benim vereceğim direktifleri bekle."

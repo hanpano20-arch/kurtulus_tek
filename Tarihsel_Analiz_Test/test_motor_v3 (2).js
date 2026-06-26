@@ -142,8 +142,8 @@ function tekrarCezasiHesapla(cekilisler, tabanCeza, carpan) {
     
     if (!cekilisler || cekilisler.length === 0) return k7Puanlar;
     
-    let safeTaban = isNaN(tabanCeza) || tabanCeza === 0 ? -200 : tabanCeza;
-    let safeCarpan = isNaN(carpan) || carpan === 0 ? 100 : carpan;
+    let safeTaban = isNaN(tabanCeza) ? -200 : tabanCeza;
+    let safeCarpan = isNaN(carpan) ? 100 : carpan;
 
     for (let i = 1; i <= MAX_TOP; i++) {
         let streak = 0;
@@ -162,6 +162,107 @@ function tekrarCezasiHesapla(cekilisler, tabanCeza, carpan) {
         }
     }
     return k7Puanlar;
+}
+
+// K8 (Uyku/Kuraklık) Hesabı
+function uykuSuresiHesapla(cekilisler) {
+    let uykuSureleri = {};
+    for (let i = 1; i <= MAX_TOP; i++) {
+        let sure = 0;
+        let bulundu = false;
+        for (let j = 0; j < cekilisler.length; j++) {
+            if (cekilisler[j] && cekilisler[j].includes(i)) {
+                bulundu = true;
+                break;
+            }
+            sure++;
+        }
+        if (!bulundu) sure = cekilisler.length;
+        uykuSureleri[i] = sure;
+    }
+    return uykuSureleri;
+}
+
+function uykuCezasiHesapla(uykuSureleri, tabanCeza, carpan, uykuSiniri, adimCezasi) {
+    let k8Puanlar = {};
+    let safeTaban = isNaN(tabanCeza) ? 100 : tabanCeza;
+    let safeCarpan = isNaN(carpan) ? 100 : carpan;
+    let safeSinir = isNaN(uykuSiniri) ? 25 : uykuSiniri;
+    let safeAdim = isNaN(adimCezasi) ? 5 : adimCezasi;
+    
+    for (let i = 1; i <= MAX_TOP; i++) {
+        let sure = uykuSureleri[i];
+        if (sure >= safeSinir) {
+            let rawCeza = -(safeTaban + ((sure - safeSinir) * safeAdim));
+            k8Puanlar[i] = Math.round(rawCeza * (safeCarpan / 100));
+        } else {
+            k8Puanlar[i] = 0;
+        }
+    }
+    return k8Puanlar;
+}
+
+// Aşama 6: Doygunluk (Aşırı Çıkma) Cezaları K9, K10, K11, K12
+function doygunlukCezalariHesapla(cekilisler, jokerler, ayarlar) {
+    let k9Puanlar = {};
+    let k10Puanlar = {};
+    let k11Puanlar = {};
+    let k12Puanlar = {};
+    
+    for (let i = 1; i <= MAX_TOP; i++) {
+        k9Puanlar[i] = 0; k10Puanlar[i] = 0; k11Puanlar[i] = 0; k12Puanlar[i] = 0;
+    }
+    
+    if (!cekilisler || cekilisler.length === 0) return { k9: k9Puanlar, k10: k10Puanlar, k11: k11Puanlar, k12: k12Puanlar };
+
+    let k9Sinir = isNaN(ayarlar.K9_SINIR) ? 4 : ayarlar.K9_SINIR;
+    let k10Sinir = isNaN(ayarlar.K10_SINIR) ? 8 : ayarlar.K10_SINIR;
+    let k11Sinir = isNaN(ayarlar.K11_SINIR) ? 12 : ayarlar.K11_SINIR;
+    let k12Sinir = isNaN(ayarlar.K12_SINIR) ? 15 : ayarlar.K12_SINIR;
+
+    let maxLimit = Math.max(k9Sinir, k10Sinir, k11Sinir, k12Sinir);
+    let iterLimit = Math.min(maxLimit, cekilisler.length);
+
+    for (let i = 1; i <= MAX_TOP; i++) {
+        let hitsK9 = 0, hitsK10 = 0, hitsK11 = 0, hitsK12 = 0;
+        
+        for (let j = 0; j < iterLimit; j++) {
+            let isHit = (cekilisler[j] && cekilisler[j].includes(i)) || (jokerler && jokerler[j] === i);
+            if (isHit) {
+                if (j < k9Sinir) hitsK9++;
+                if (j < k10Sinir) hitsK10++;
+                if (j < k11Sinir) hitsK11++;
+                if (j < k12Sinir) hitsK12++;
+            }
+        }
+        
+        // K9: Eşik 2
+        if (hitsK9 >= 2) {
+            let taban = isNaN(ayarlar.K9_TABAN) ? -250 : ayarlar.K9_TABAN;
+            let carpan = isNaN(ayarlar.K9_CARPAN) ? 100 : ayarlar.K9_CARPAN;
+            k9Puanlar[i] = Math.round(taban * (carpan / 100));
+        }
+        // K10: Eşik 3
+        if (hitsK10 >= 3) {
+            let taban = isNaN(ayarlar.K10_TABAN) ? -250 : ayarlar.K10_TABAN;
+            let carpan = isNaN(ayarlar.K10_CARPAN) ? 100 : ayarlar.K10_CARPAN;
+            k10Puanlar[i] = Math.round(taban * (carpan / 100));
+        }
+        // K11: Eşik 4
+        if (hitsK11 >= 4) {
+            let taban = isNaN(ayarlar.K11_TABAN) ? -250 : ayarlar.K11_TABAN;
+            let carpan = isNaN(ayarlar.K11_CARPAN) ? 100 : ayarlar.K11_CARPAN;
+            k11Puanlar[i] = Math.round(taban * (carpan / 100));
+        }
+        // K12: Eşik 5
+        if (hitsK12 >= 5) {
+            let taban = isNaN(ayarlar.K12_TABAN) ? -250 : ayarlar.K12_TABAN;
+            let carpan = isNaN(ayarlar.K12_CARPAN) ? 100 : ayarlar.K12_CARPAN;
+            k12Puanlar[i] = Math.round(taban * (carpan / 100));
+        }
+    }
+
+    return { k9: k9Puanlar, k10: k10Puanlar, k11: k11Puanlar, k12: k12Puanlar };
 }
 
 // Dışarıya açılacak ana fonksiyon
@@ -196,6 +297,12 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
     // Aşama 4 Puanları (Tekrar Cezası K7)
     let k7Puanlar = tekrarCezasiHesapla(cekilisler, ayarlar.K7_TABAN || 0, ayarlar.K7_CARPAN || 0);
 
+    // Aşama 5: K8 (Uyku Cezası)
+    let uykuSureleri = uykuSuresiHesapla(cekilisler);
+    let k8Puanlar = uykuCezasiHesapla(uykuSureleri, ayarlar.K8_TABAN, ayarlar.K8_CARPAN, ayarlar.K8_UYKU_SINIRI, ayarlar.K8_ADIM_CEZASI);
+    // Aşama 6: Doygunluk (Aşırı Çıkma) Cezaları (K9, K10, K11, K12)
+    let doygunluk = doygunlukCezalariHesapla(cekilisler, jokerler, ayarlar);
+
     return {
         frekanslar: {
             tumu: frekansTumu,
@@ -211,54 +318,56 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
             k4: k4Puanlar,
             k5: k5Puanlar,
             k6: k6Puanlar,
-            k7: k7Puanlar
+            k7: k7Puanlar,
+            k8: k8Puanlar,
+            k9: doygunluk.k9,
+            k10: doygunluk.k10,
+            k11: doygunluk.k11,
+            k12: doygunluk.k12
         },
+        uykuSureleri: uykuSureleri,
         istatistikler: {
             k1: { min: k1Sonuc.minFrekans, max: k1Sonuc.maxFrekans },
             k2: { min: k2Sonuc.minFrekans, max: k2Sonuc.maxFrekans },
             k3: { min: k3Sonuc.minFrekans, max: k3Sonuc.maxFrekans }
-        }
+        },
+        jokerler: jokerler.slice(0, 15)
     };
 }
 
-function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler, globalJokerler, ayarlar) {
+function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler, globalJokerler, ayarlar, targetInt) {
     let startIndex = 0;
     
     function parseTarih(t) {
         if (!t) return 0;
         let s = t.toString().trim();
-        
-        // HTML input type="date" YYYY-MM-DD formatında gelir
-        if (s.includes('-') && s.match(/^\d{4}-\d{2}-\d{2}$/)) {
-            let parts = s.split('-');
-            let y = parseInt(parts[0], 10);
-            let m = parseInt(parts[1], 10);
-            let d = parseInt(parts[2], 10);
-            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-                return y * 10000 + m * 100 + d;
-            }
-        }
-        
-        // Diğer format: DD.MM.YYYY veya DD/MM/YYYY
-        let parts = s.includes('.') ? s.split('.') : s.split(/[-/\s]/);
+        let parts = s.split(/[\s\.\-\/]+/).filter(p => p.length > 0);
         if (parts.length === 3) {
-            let d = parseInt(parts[0], 10);
-            let m = parseInt(parts[1], 10);
-            let y = parseInt(parts[2], 10);
-            
-            // YYYY format ise
+            let d, m, y;
             if (parts[0].length === 4) {
+                // YYYY-MM-DD
                 y = parseInt(parts[0], 10);
                 m = parseInt(parts[1], 10);
                 d = parseInt(parts[2], 10);
+            } else if (t.toString().includes('/')) {
+                // M/D/Y (veri.js or US format)
+                m = parseInt(parts[0], 10);
+                d = parseInt(parts[1], 10);
+                y = parseInt(parts[2], 10);
             } else {
-                // İki haneli yıl kontrolü
-                if (y < 100) y += 2000;
+                // D.M.Y or D M Y (European/Turkish format)
+                d = parseInt(parts[0], 10);
+                m = parseInt(parts[1], 10);
+                y = parseInt(parts[2], 10);
             }
-            
-            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-                return y * 10000 + m * 100 + d;
+            if (y < 100) y += 2000;
+            if (m > 12) {
+                let temp = d;
+                d = m;
+                m = temp;
             }
+            if (isNaN(y) || isNaN(m) || isNaN(d)) return 0;
+            return y * 10000 + m * 100 + d;
         }
         return 0;
     }
@@ -273,56 +382,18 @@ function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler,
             startIndex = ts;
             exactMatchFound = true;
         } else if (typeof globalTarihler !== 'undefined' && globalTarihler.length > 0) {
-            // Tarih metni olarak eşleştir
-            let foundIdx = globalTarihler.indexOf(tarihStr);
-            if (foundIdx !== -1) {
-                startIndex = foundIdx;
-                exactMatchFound = true;
-            } else {
-                // Farklı formatları (örn: Excel'den gelen M/D/YY) dene
-                let parts = tarihStr.includes('.') ? tarihStr.split('.') : tarihStr.split(/[-/\s]/);
-                if (parts.length === 3) {
-                    let d = parseInt(parts[0], 10);
-                    let m = parseInt(parts[1], 10);
-                    let y = parseInt(parts[2], 10);
-                    let yy = y % 100;
-                    
-                    let dPad = d.toString().padStart(2, '0');
-                    let mPad = m.toString().padStart(2, '0');
-                    
-                    let altFormats = [
-                        `${d}.${m}.${y}`,
-                        `${d}/${m}/${y}`,
-                        `${m}/${d}/${y}`,
-                        `${m}/${d}/${yy}`,
-                        `${dPad}.${mPad}.${y}`,
-                        `${dPad}/${mPad}/${y}`,
-                        `${mPad}/${dPad}/${y}`,
-                        `${dPad}-${mPad}-${y}`,
-                        `${dPad} ${mPad} ${y}`,
-                        `${d} ${m} ${y}`
-                    ];
-                    
-                    for (let i = 0; i < globalTarihler.length; i++) {
-                        let t = globalTarihler[i] ? globalTarihler[i].toString().trim() : "";
-                        if (altFormats.includes(t)) {
-                            startIndex = i;
-                            exactMatchFound = true;
-                            break;
-                        }
-                    }
-                }
-                if (!exactMatchFound) {
-                    // En yakın tarihi bul (geriye dönük)
-                    let targetInt = parseTarih(tarihStr);
-                    if (targetInt > 0) {
-                        for (let i = 0; i < globalTarihler.length; i++) {
-                            let tInt = parseTarih(globalTarihler[i]);
-                            if (tInt > 0 && tInt <= targetInt) {
-                                startIndex = i;
-                                break;
-                            }
-                        }
+            let targetInt = parseTarih(tarihStr);
+            if (targetInt > 0) {
+                for (let i = 0; i < globalTarihler.length; i++) {
+                    let tInt = parseTarih(globalTarihler[i]);
+                    if (tInt === targetInt) {
+                        startIndex = i;
+                        exactMatchFound = true;
+                        break;
+                    } else if (tInt > 0 && tInt < targetInt) {
+                        startIndex = i;
+                        exactMatchFound = false;
+                        break;
                     }
                 }
             }
@@ -364,7 +435,12 @@ function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler,
                          (motorSonucu.puanlar.k4[num] || 0) + 
                          (motorSonucu.puanlar.k5[num] || 0) +
                          (motorSonucu.puanlar.k6[num] || 0) +
-                         (motorSonucu.puanlar.k7[num] || 0);
+                         (motorSonucu.puanlar.k7[num] || 0) +
+                         (motorSonucu.puanlar.k8 ? (motorSonucu.puanlar.k8[num] || 0) : 0) +
+                         (motorSonucu.puanlar.k9 ? (motorSonucu.puanlar.k9[num] || 0) : 0) +
+                         (motorSonucu.puanlar.k10 ? (motorSonucu.puanlar.k10[num] || 0) : 0) +
+                         (motorSonucu.puanlar.k11 ? (motorSonucu.puanlar.k11[num] || 0) : 0) +
+                         (motorSonucu.puanlar.k12 ? (motorSonucu.puanlar.k12[num] || 0) : 0);
             siralama.push({ num: num, toplam: toplam });
         }
         siralama.sort((a, b) => b.toplam - a.toplam);
