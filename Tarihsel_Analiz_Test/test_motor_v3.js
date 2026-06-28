@@ -247,7 +247,7 @@ function doygunlukCezalariHesapla(cekilisler, jokerler, ayarlar) {
         let hitsK9 = 0, hitsK10 = 0, hitsK11 = 0, hitsK12 = 0;
 
         for (let j = 0; j < iterLimit; j++) {
-            let isHit = (cekilisler[j] && cekilisler[j].includes(i)) || (jokerler && jokerler[j] === i);
+            let isHit = (cekilisler[j] && cekilisler[j].includes(i)) || (jokerler && Number(jokerler[j]) === i);
             if (isHit) {
                 if (j < k9Sinir) hitsK9++;
                 if (j < k10Sinir) hitsK10++;
@@ -386,7 +386,7 @@ function canlandirmaCezasiHesapla(cekilisler, jokerler, tabanPuan, carpan, esik1
 }
 
 // K14 (Dinamik Eleme - Son 3 Çekiliş)
-function k14ElemeHesapla(cekilisler, tabanPuan, carpan) {
+function k14ElemeHesapla(cekilisler, jokerler, tabanPuan, carpan) {
     let k14Puanlar = {};
     for (let i = 1; i <= MAX_TOP; i++) k14Puanlar[i] = 0;
     
@@ -400,6 +400,13 @@ function k14ElemeHesapla(cekilisler, tabanPuan, carpan) {
     let t2 = cekilisler[1] || [];
     let t3 = cekilisler[2] || [];
     let son3Sayilar = new Set([...t1, ...t2, ...t3]);
+    // Jokerler 7. sayı olarak dahil et (K7, K8, K13 ile tutarlı)
+    if (jokerler) {
+        [0, 1, 2].forEach(idx => {
+            let jn = Number(jokerler[idx]);
+            if (jn >= 1 && jn <= MAX_TOP) son3Sayilar.add(jn);
+        });
+    }
     if (son3Sayilar.size === 0) return k14Puanlar;
 
     // Her çıkan sayıya performansına göre ceza ver (Kullanıcı hepsinin ceza almasını istiyor)
@@ -550,8 +557,9 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
 
     // Aşama 8: K14 (Dinamik Eleme)
     let k14Puanlar = k14ElemeHesapla(
-        cekilisler, 
-        ayarlar.K14_TABAN, 
+        cekilisler,
+        jokerler,
+        ayarlar.K14_TABAN,
         ayarlar.K14_CARPAN
     );
 
@@ -599,7 +607,8 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
     };
 }
 
-function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler, globalJokerler, ayarlar, targetInt) {
+function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler, globalJokerler, ayarlar, targetInt, manualScores) {
+    manualScores = manualScores || {};
     let startIndex = 0;
 
     function parseTarih(t) {
@@ -707,7 +716,8 @@ function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler,
                 (motorSonucu.puanlar.k12 ? (motorSonucu.puanlar.k12[num] || 0) : 0) +
                 (motorSonucu.puanlar.k13 ? (motorSonucu.puanlar.k13[num] || 0) : 0) +
                 (motorSonucu.puanlar.k14 ? (motorSonucu.puanlar.k14[num] || 0) : 0) +
-                (motorSonucu.puanlar.k15 ? (motorSonucu.puanlar.k15[num] || 0) : 0);
+                (motorSonucu.puanlar.k15 ? (motorSonucu.puanlar.k15[num] || 0) : 0) +
+                (manualScores[num] || 0);
             siralama.push({ num: num, toplam: toplam });
         }
         siralama.sort((a, b) => b.toplam - a.toplam);

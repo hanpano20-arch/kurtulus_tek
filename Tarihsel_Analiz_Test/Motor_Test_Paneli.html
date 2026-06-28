@@ -103,7 +103,7 @@
             text-align: left;
         }
 
-        
+
         .rule-toggle-btn {
             width: 50px;
             padding: 2px 4px;
@@ -120,11 +120,13 @@
             box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
             flex-shrink: 0;
         }
+
         .rule-toggle-btn.inactive {
             background: #f44336;
             border-color: #f44336;
             box-shadow: 0 0 5px rgba(244, 67, 54, 0.5);
         }
+
         .slider-val-box {
             background: #111;
             border: 1px solid #555;
@@ -591,27 +593,85 @@
         .zm-ball.hit .zm-score {
             color: #fff;
         }
+
         #kInfoOverlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.8); z-index: 9999; display: none;
-            justify-content: center; align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
         }
+
         #kInfoBox {
-            background: #111; color: #fff; border: 2px solid #00ff00;
-            box-shadow: 0 0 20px rgba(0,255,0,0.5); border-radius: 10px;
-            width: 500px; max-width: 90%; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #111;
+            color: #fff;
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            border-radius: 10px;
+            width: 500px;
+            max-width: 90%;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        #kInfoBox h2 { color: #00ff00; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; text-align: center; }
-        .kinfo-section { margin-top: 15px; }
-        .kinfo-section h4 { color: #aaa; margin: 0 0 5px 0; font-size: 0.9em; display: flex; align-items: center; gap: 5px; }
-        .kinfo-section p { margin: 0; font-size: 0.95em; line-height: 1.4; color: #ddd; }
+
+        #kInfoBox h2 {
+            color: #00ff00;
+            margin-top: 0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        .kinfo-section {
+            margin-top: 15px;
+        }
+
+        .kinfo-section h4 {
+            color: #aaa;
+            margin: 0 0 5px 0;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .kinfo-section p {
+            margin: 0;
+            font-size: 0.95em;
+            line-height: 1.4;
+            color: #ddd;
+        }
+
         .kinfo-close-btn {
-            background: #f44336; color: #fff; border: none; padding: 10px 20px; font-weight: bold; font-size: 1em;
-            border-radius: 5px; cursor: pointer; width: 100%; margin-top: 20px;
+            background: #f44336;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
         }
-        .kinfo-close-btn:hover { background: #d32f2f; }
-        .clickable-th { cursor: pointer; transition: color 0.2s; }
-        .clickable-th:hover { color: #00ff00 !important; }
+
+        .kinfo-close-btn:hover {
+            background: #d32f2f;
+        }
+
+        .clickable-th {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .clickable-th:hover {
+            color: #00ff00 !important;
+        }
     </style>
 </head>
 
@@ -664,7 +724,8 @@
                 <div class="slider-row">
                     <span class="slider-label" style="color: white;">K1 Çarpanı<br><span
                             style="font-size: 0.85em; color: #bbb;">(Tüm Çekilişler)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k1_toggle" onclick="toggleRule('k1')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k1_toggle"
+                        onclick="toggleRule('k1')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k1_val" value="100"
                         onchange="syncInputToSlider('k1_val', 'k1_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k1_weight', -1)"
@@ -680,7 +741,8 @@
                 <div class="slider-row">
                     <span class="slider-label" style="color: white;">K2 Çarpanı<br><span
                             style="font-size: 0.85em; color: #bbb;">(Son 50)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k2_toggle" onclick="toggleRule('k2')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k2_toggle"
+                        onclick="toggleRule('k2')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k2_val" value="100"
                         onchange="syncInputToSlider('k2_val', 'k2_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k2_weight', -1)"
@@ -696,7 +758,8 @@
                 <div class="slider-row">
                     <span class="slider-label" style="color: white;">K3 Çarpanı<br><span
                             style="font-size: 0.85em; color: #bbb;">(Son 15)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k3_toggle" onclick="toggleRule('k3')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k3_toggle"
+                        onclick="toggleRule('k3')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k3_val" value="100"
                         onchange="syncInputToSlider('k3_val', 'k3_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k3_weight', -1)"
@@ -712,7 +775,8 @@
                 <div class="slider-row">
                     <span class="slider-label" style="color: white;">K4 Çarpanı<br><span
                             style="font-size: 0.85em; color: #bbb;">(1. Halka)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k4_toggle" onclick="toggleRule('k4')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k4_toggle"
+                        onclick="toggleRule('k4')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k4_val" value="100"
                         onchange="syncInputToSlider('k4_val', 'k4_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k4_weight', -1)"
@@ -728,7 +792,8 @@
                 <div class="slider-row">
                     <span class="slider-label" style="color: white;">K5 Çarpanı<br><span
                             style="font-size: 0.85em; color: #bbb;">(2. Halka)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k5_toggle" onclick="toggleRule('k5')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k5_toggle"
+                        onclick="toggleRule('k5')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k5_val" value="100"
                         onchange="syncInputToSlider('k5_val', 'k5_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k5_weight', -1)"
@@ -744,7 +809,8 @@
                 <div class="slider-row">
                     <span class="slider-label" style="color: white;">K6 Çarpanı<br><span
                             style="font-size: 0.85em; color: #bbb;">(Son 15 Joker)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k6_toggle" onclick="toggleRule('k6')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k6_toggle"
+                        onclick="toggleRule('k6')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k6_val" value="100"
                         onchange="syncInputToSlider('k6_val', 'k6_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k6_weight', -1)"
@@ -760,7 +826,8 @@
                 <div class="slider-row" style="border-left: 3px solid #ff5252;">
                     <span class="slider-label" style="color: white;">K7 Çarpanı<br><span
                             style="font-size: 0.85em; color: #bbb;">(Tekrar Cezası)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k7_toggle" onclick="toggleRule('k7')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k7_toggle"
+                        onclick="toggleRule('k7')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k7_val" value="100"
                         onchange="syncInputToSlider('k7_val', 'k7_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k7_weight', -1)"
@@ -776,7 +843,8 @@
                 <div class="slider-row" style="border-left: 3px solid #ff9800;">
                     <span class="slider-label" style="color: white;">K8 Çarpanı<br><span
                             style="font-size: 0.85em; color: #bbb;">(Uyku Cezası)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k8_toggle" onclick="toggleRule('k8')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k8_toggle"
+                        onclick="toggleRule('k8')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k8_val" value="100"
                         onchange="syncInputToSlider('k8_val', 'k8_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k8_weight', -1)"
@@ -792,7 +860,8 @@
                 <div class="slider-row" style="border-left: 3px solid #e91e63;">
                     <span class="slider-label" style="color: white;">K9 Çarpanı<br><span
                             style="font-size: 0.85em; color: #bbb;">(Son 4 Cezası)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k9_toggle" onclick="toggleRule('k9')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k9_toggle"
+                        onclick="toggleRule('k9')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k9_val" value="100"
                         onchange="syncInputToSlider('k9_val', 'k9_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k9_weight', -1)"
@@ -808,7 +877,8 @@
                 <div class="slider-row" style="border-left: 3px solid #f44336;">
                     <span class="slider-label" style="color: white;">K10 Çarpanı<br><span
                             style="font-size: 0.85em; color: #bbb;">(Son 8 Cezası)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k10_toggle" onclick="toggleRule('k10')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k10_toggle"
+                        onclick="toggleRule('k10')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k10_val" value="100"
                         onchange="syncInputToSlider('k10_val', 'k10_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k10_weight', -1)"
@@ -824,7 +894,8 @@
                 <div class="slider-row" style="border-left: 3px solid #ff5722;">
                     <span class="slider-label" style="color: white;">K11 Çarpanı<br><span
                             style="font-size: 0.85em; color: #bbb;">(Son 12 Cezası)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k11_toggle" onclick="toggleRule('k11')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k11_toggle"
+                        onclick="toggleRule('k11')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k11_val" value="100"
                         onchange="syncInputToSlider('k11_val', 'k11_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k11_weight', -1)"
@@ -840,7 +911,8 @@
                 <div class="slider-row" style="border-left: 3px solid #795548;">
                     <span class="slider-label" style="color: white;">K12 Çarpanı<br><span
                             style="font-size: 0.85em; color: #bbb;">(Son 15 Cezası)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k12_toggle" onclick="toggleRule('k12')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k12_toggle"
+                        onclick="toggleRule('k12')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k12_val" value="100"
                         onchange="syncInputToSlider('k12_val', 'k12_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k12_weight', -1)"
@@ -856,7 +928,8 @@
                 <div class="slider-row" style="border-left: 3px solid #00bcd4; margin-top: 15px;">
                     <span class="slider-label" style="color: white;">K13 Çarpanı<br><span
                             style="font-size: 0.85em; color: #bbb;">(Diriltme: Son 3)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k13_toggle" onclick="toggleRule('k13')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k13_toggle"
+                        onclick="toggleRule('k13')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k13_val" value="100"
                         onchange="syncInputToSlider('k13_val', 'k13_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k13_weight', -1)"
@@ -871,7 +944,8 @@
                 <div class="slider-row">
                     <span class="slider-label" style="color: white;">K14 Çarpanı <br><span
                             style="font-size: 0.85em; color: #bbb;">(Son 3 Eleme)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k14_toggle" onclick="toggleRule('k14')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k14_toggle"
+                        onclick="toggleRule('k14')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k14_val" value="100"
                         onchange="syncInputToSlider('k14_val', 'k14_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k14_weight', -1)"
@@ -887,7 +961,8 @@
                 <div class="slider-row">
                     <span class="slider-label" style="color: white;">K15 Çarpanı <br><span
                             style="font-size: 0.85em; color: #bbb;">(Son 10 Yankı)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k15_toggle" onclick="toggleRule('k15')">AÇIK</button>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k15_toggle"
+                        onclick="toggleRule('k15')">AÇIK</button>
                     <input type="number" class="slider-val-box manual-ctrl-ignore" id="k15_val" value="100"
                         onchange="syncInputToSlider('k15_val', 'k15_weight')">
                     <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k15_weight', -1)"
@@ -947,27 +1022,48 @@
                                 <th style="padding: 4px; font-size: 0.85em;">Durum</th>
                                 <th style="padding: 4px; font-size: 0.85em;">Toplam Puan</th>
                                 <th style="padding: 4px; font-size: 0.85em;">Manuel</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k1')" title="Bilgi için tıkla">K1 (Tüm Zamanlar)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k1')" title="Bilgi için tıkla">K1 Puanı</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k2')" title="Bilgi için tıkla">K2 (Son 50)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k2')" title="Bilgi için tıkla">K2 Puanı</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k3')" title="Bilgi için tıkla">K3 (Son 15)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k3')" title="Bilgi için tıkla">K3 Puanı</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k4')" title="Bilgi için tıkla">1. Halka Komşu</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k4')" title="Bilgi için tıkla">K4 Puan</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k5')" title="Bilgi için tıkla">2. Halka Komşu</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k5')" title="Bilgi için tıkla">K5 Puan</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k6')" title="Bilgi için tıkla">K6 (Joker)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k7')" title="Bilgi için tıkla">K7 (Ceza)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k8')" title="Bilgi için tıkla">Uyku (Çek.)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k8')" title="Bilgi için tıkla">K8 (Uyku Puan)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k9')" title="Bilgi için tıkla">K9 (Son 4)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k10')" title="Bilgi için tıkla">K10 (Son 8)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k11')" title="Bilgi için tıkla">K11 (Son 12)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k12')" title="Bilgi için tıkla">K12 (Son 15)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#00bcd4;" onclick="showKInfo('k13')" title="Bilgi için tıkla">K13 (Diriltme)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#f44336;" onclick="showKInfo('k14')" title="Bilgi i&#231;in t&#305;kla">K14 (Eleme)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#00bcd4;" onclick="showKInfo('k15')" title="Bilgi i&#231;in t&#305;kla">K15 (Yank&#305;)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k1')" title="Bilgi için tıkla">K1 (Tüm Zamanlar)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k1')" title="Bilgi için tıkla">K1 Puanı</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k2')" title="Bilgi için tıkla">K2 (Son 50)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k2')" title="Bilgi için tıkla">K2 Puanı</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k3')" title="Bilgi için tıkla">K3 (Son 15)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k3')" title="Bilgi için tıkla">K3 Puanı</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k4')" title="Bilgi için tıkla">1. Halka Komşu</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k4')" title="Bilgi için tıkla">K4 Puan</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k5')" title="Bilgi için tıkla">2. Halka Komşu</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k5')" title="Bilgi için tıkla">K5 Puan</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k6')" title="Bilgi için tıkla">K6 (Joker)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k7')" title="Bilgi için tıkla">K7 (Ceza)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k8')" title="Bilgi için tıkla">Uyku (Çek.)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k8')" title="Bilgi için tıkla">K8 (Uyku Puan)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k9')" title="Bilgi için tıkla">K9 (Son 4)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k10')" title="Bilgi için tıkla">K10 (Son 8)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k11')" title="Bilgi için tıkla">K11 (Son 12)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                    onclick="showKInfo('k12')" title="Bilgi için tıkla">K12 (Son 15)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#00bcd4;"
+                                    onclick="showKInfo('k13')" title="Bilgi için tıkla">K13 (Diriltme)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#f44336;"
+                                    onclick="showKInfo('k14')" title="Bilgi i&#231;in t&#305;kla">K14 (Eleme)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#00bcd4;"
+                                    onclick="showKInfo('k15')" title="Bilgi i&#231;in t&#305;kla">K15 (Yank&#305;)</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
@@ -1017,11 +1113,16 @@
     <!-- Ayarlar Modalı -->
     <div class="modal-overlay" id="settingsModal" onclick="closeSettings(event)">
         <div class="modal-content" style="width: 1250px; max-width: 98vw;" onclick="event.stopPropagation()">
-            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px;">
+            <div class="modal-header"
+                style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px;">
                 <h3 style="font-size: 1.5em; margin: 0;">⚙️ Kuralların Taban Puanları</h3>
                 <div style="display: flex; gap: 10px;">
-                    <button type="button" class="btn" onclick="closeSettings(event)" style="background: #f44336; min-height: 40px; padding: 0 15px; font-size: 14px; width: 160px; justify-content: center; color: white;">SAYFAYI KAPAT</button>
-                    <button type="button" class="btn" id="btnSaveSettings" onclick="saveSettings(event)" style="background: #00bcd4; min-height: 40px; padding: 0 15px; font-size: 14px; width: 160px; justify-content: center; color: white;">AYARLARI KAYDET</button>
+                    <button type="button" class="btn" onclick="closeSettings(event)"
+                        style="background: #f44336; min-height: 40px; padding: 0 15px; font-size: 14px; width: 160px; justify-content: center; color: white;">SAYFAYI
+                        KAPAT</button>
+                    <button type="button" class="btn" id="btnSaveSettings" onclick="saveSettings(event)"
+                        style="background: #00bcd4; min-height: 40px; padding: 0 15px; font-size: 14px; width: 160px; justify-content: center; color: white;">AYARLARI
+                        KAYDET</button>
                 </div>
             </div>
             <div id="settingsContainer">
@@ -1042,32 +1143,47 @@
             <div
                 style="padding: 15px; background: #222; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ff9800;">
                 <h4 style="margin-top: 0; color: #ff9800;">1. Seçenek: Hızlı Manuel Ekleme / Düzenleme</h4>
-                <p style="font-size: 0.9em; color: #aaa;">Dünkü çekilişi hızlıca ekleyebilir veya listeden seçtiğiniz çekilişi düzenleyebilirsiniz.</p>
+                <p style="font-size: 0.9em; color: #aaa;">Dünkü çekilişi hızlıca ekleyebilir veya listeden seçtiğiniz
+                    çekilişi düzenleyebilirsiniz.</p>
                 <div style="display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap;">
                     <input type="hidden" id="m_editIndex" value="-1">
-                    <input type="text" id="m_tarih" placeholder="Tarih (22.06.2026)" class="search-box" style="width: 130px; font-size: 13px;">
-                    <input type="number" id="m_s1" placeholder="S1" class="slider-val-box" style="width: 45px;" min="1" max="90">
-                    <input type="number" id="m_s2" placeholder="S2" class="slider-val-box" style="width: 45px;" min="1" max="90">
-                    <input type="number" id="m_s3" placeholder="S3" class="slider-val-box" style="width: 45px;" min="1" max="90">
-                    <input type="number" id="m_s4" placeholder="S4" class="slider-val-box" style="width: 45px;" min="1" max="90">
-                    <input type="number" id="m_s5" placeholder="S5" class="slider-val-box" style="width: 45px;" min="1" max="90">
-                    <input type="number" id="m_s6" placeholder="S6" class="slider-val-box" style="width: 45px;" min="1" max="90">
+                    <input type="text" id="m_tarih" placeholder="Tarih (22.06.2026)" class="search-box"
+                        style="width: 130px; font-size: 13px;">
+                    <input type="number" id="m_s1" placeholder="S1" class="slider-val-box" style="width: 45px;" min="1"
+                        max="90">
+                    <input type="number" id="m_s2" placeholder="S2" class="slider-val-box" style="width: 45px;" min="1"
+                        max="90">
+                    <input type="number" id="m_s3" placeholder="S3" class="slider-val-box" style="width: 45px;" min="1"
+                        max="90">
+                    <input type="number" id="m_s4" placeholder="S4" class="slider-val-box" style="width: 45px;" min="1"
+                        max="90">
+                    <input type="number" id="m_s5" placeholder="S5" class="slider-val-box" style="width: 45px;" min="1"
+                        max="90">
+                    <input type="number" id="m_s6" placeholder="S6" class="slider-val-box" style="width: 45px;" min="1"
+                        max="90">
                     <span style="color:#aaa; font-size:18px;">|</span>
-                    <input type="number" id="m_joker" placeholder="Jkr" class="slider-val-box" style="width: 50px; border-color: #f44336;" min="1" max="90">
-                    
-                    <button id="btnEkleGuncelle" class="btn" style="background: #4caf50; padding: 6px 12px; font-size: 13px;" onclick="manuelCekilisEkle()">+ YENİ EKLE</button>
-                    <button id="btnIptal" class="btn" style="background: #9e9e9e; padding: 6px 12px; font-size: 13px; display: none;" onclick="cancelEditCekilis()">İPTAL</button>
+                    <input type="number" id="m_joker" placeholder="Jkr" class="slider-val-box"
+                        style="width: 50px; border-color: #f44336;" min="1" max="90">
+
+                    <button id="btnEkleGuncelle" class="btn"
+                        style="background: #4caf50; padding: 6px 12px; font-size: 13px;" onclick="manuelCekilisEkle()">+
+                        YENİ EKLE</button>
+                    <button id="btnIptal" class="btn"
+                        style="background: #9e9e9e; padding: 6px 12px; font-size: 13px; display: none;"
+                        onclick="cancelEditCekilis()">İPTAL</button>
                 </div>
             </div>
 
             <div style="padding: 15px; background: #222; border-radius: 8px; border-left: 4px solid #9c27b0;">
                 <h4 style="margin-top: 0; color: #9c27b0;">3. Sistemdeki Çekilişler (Geçmiş)</h4>
-                <div id="gecmisCekilislerListesi" style="max-height: 60vh; overflow-y: auto; margin-top: 10px; border: 1px solid #444; border-radius: 4px; background: #1a1a24; padding: 5px;">
+                <div id="gecmisCekilislerListesi"
+                    style="max-height: 60vh; overflow-y: auto; margin-top: 10px; border: 1px solid #444; border-radius: 4px; background: #1a1a24; padding: 5px;">
                     <!-- JS ile doldurulacak -->
                 </div>
             </div>
 
-            <div style="padding: 15px; background: #222; border-radius: 8px; border-left: 4px solid #2196F3; margin-top: 20px;">
+            <div
+                style="padding: 15px; background: #222; border-radius: 8px; border-left: 4px solid #2196F3; margin-top: 20px;">
                 <h4 style="margin-top: 0; color: #2196F3;">2. Seçenek: Güncel Excel Yükle</h4>
                 <p style="font-size: 0.9em; color: #aaa;">Kalıcı olarak excelinize girdiğiniz verileri sisteme tek tuşla
                     yükleyebilirsiniz.</p>
@@ -1100,8 +1216,8 @@
             K11_TABAN: -250, K11_SINIR: 12,
             K12_TABAN: -250, K12_SINIR: 15,
             K13_TABAN: 100, K13_ESIK_1: 2, K13_ESIK_2: 3, K13_UYKU_SINIRI: 10,
-            K14_TABAN: 100,
-            K15_TABAN: 100, K15_SON_X: 10
+            K14_TABAN: -250,
+            K15_TABAN: 200, K15_SON_X: 10
         };
         let baseSettings = {};
         let unsavedSettings = false;
@@ -1244,7 +1360,7 @@
                     </div>
                 </div>`;
 
-            
+
             // K14 Özel Satır
             html += `
             <div class="setting-row" style="align-items: center;">
@@ -1408,7 +1524,7 @@
             }
         }
 
-        
+
         function toggleRule(kId) {
             let btn = document.getElementById(kId + '_toggle');
             if (btn.classList.contains('inactive')) {
@@ -1504,14 +1620,14 @@
 
             let html = '<table style="width:100%; border-collapse:collapse; font-size:12px; text-align:center;">';
             html += '<tr style="background:#3a3a48; color:#fff;"><th>Sıra</th><th>Tarih</th><th>Sayılar</th><th>Joker</th><th>İşlem</th></tr>';
-            
+
             for (let i = 0; i < globalCekilisler.length; i++) {
                 let rawTarih = (globalTarihler && globalTarihler[i]) ? globalTarihler[i] : 'Belirsiz';
                 let t = formatTarih(rawTarih);
                 let s = globalCekilisler[i].join(', ');
                 let j = (globalJokerler && globalJokerler[i]) ? globalJokerler[i] : '-';
                 let no = globalCekilisler.length - i; // Eski çekilişler küçük numaralı
-                
+
                 html += `<tr style="border-bottom:1px solid #333; height: 30px;">
                     <td style="color:#aaa;">#${no}</td>
                     <td>${t}</td>
@@ -1532,7 +1648,7 @@
         function editCekilis(index) {
             let c = globalCekilisler[index];
             if (!c) return;
-            
+
             document.getElementById('m_editIndex').value = index;
             document.getElementById('m_tarih').value = (globalTarihler && globalTarihler[index]) ? globalTarihler[index] : '';
             document.getElementById('m_s1').value = c[0] || '';
@@ -1567,8 +1683,8 @@
         function silCekilis(index) {
             if (confirm('Bu çekilişi tamamen silmek istediğinize emin misiniz?')) {
                 globalCekilisler.splice(index, 1);
-                if(globalJokerler) globalJokerler.splice(index, 1);
-                if(globalTarihler) globalTarihler.splice(index, 1);
+                if (globalJokerler) globalJokerler.splice(index, 1);
+                if (globalTarihler) globalTarihler.splice(index, 1);
                 kaydetCekilisler();
                 renderCekilisListesi();
             }
@@ -1581,7 +1697,7 @@
                     j: globalJokerler,
                     t: globalTarihler
                 }));
-            } catch(e) { console.warn("Yerel hafıza sınırı aşıldı", e); }
+            } catch (e) { console.warn("Yerel hafıza sınırı aşıldı", e); }
         }
 
         function manuelCekilisEkle() {
@@ -1600,19 +1716,19 @@
                 return;
             }
 
-            let yeniSayilar = [s1, s2, s3, s4, s5, s6].sort((a,b)=>a-b);
-            
+            let yeniSayilar = [s1, s2, s3, s4, s5, s6].sort((a, b) => a - b);
+
             if (editIdx > -1) {
                 // Güncelleme Modu
                 globalCekilisler[editIdx] = yeniSayilar;
-                if(globalJokerler) globalJokerler[editIdx] = joker;
-                if(globalTarihler) globalTarihler[editIdx] = tarih;
+                if (globalJokerler) globalJokerler[editIdx] = joker;
+                if (globalTarihler) globalTarihler[editIdx] = tarih;
                 alert("Çekiliş başarıyla GÜNCELLENDİ!");
             } else {
                 // Yeni Ekleme Modu (En Başa / En Yeni)
                 globalCekilisler.unshift(yeniSayilar);
-                if(globalJokerler) globalJokerler.unshift(joker);
-                if(globalTarihler) globalTarihler.unshift(tarih);
+                if (globalJokerler) globalJokerler.unshift(joker);
+                if (globalTarihler) globalTarihler.unshift(tarih);
                 alert("Yeni çekiliş başarıyla EKLENDİ!");
             }
 
@@ -1992,7 +2108,7 @@
                 <td style="color:${item.p5 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p5}</td>
                 <td style="color:${item.p6 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p6}</td>
                 <td style="color:${item.p7 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p7}</td>
-                <td style="color:${item.uyku > 25 ? '#ff9800' : '#fff'};">${item.uyku}</td>
+                <td style="color:${item.uyku >= (baseSettings.K8_UYKU_SINIRI || 25) ? '#ff9800' : '#fff'};">${item.uyku}</td>
                 <td style="color:${item.p8 < 0 ? '#ff9800' : '#fff'}; font-weight:bold;">${item.p8}</td>
                 <td style="color:${item.p9 < 0 ? '#f44336' : (item.p9 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p9}</td>
                 <td style="color:${item.p10 < 0 ? '#f44336' : (item.p10 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p10}</td>
@@ -2389,7 +2505,7 @@
             };
 
             // Zaman Makinesini Çalıştır
-            let sonuclar = zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler, globalJokerler, ayarlar);
+            let sonuclar = zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler, globalJokerler, ayarlar, targetInt, manualScores);
 
             if (sonuclar.length === 0) {
                 alert("Belirtilen tarihe uygun yeterli geçmiş veri bulunamadı.");
@@ -2597,7 +2713,7 @@
         function showKInfo(kId) {
             const info = K_RULE_INFO[kId.toLowerCase()];
             if (!info) return;
-            
+
             const html = `
                 <h2>${info.title}</h2>
                 <div class="kinfo-section">
@@ -2618,7 +2734,7 @@
                 </div>
                 <button class="kinfo-close-btn" onclick="closeKInfo()">KAPAT</button>
             `;
-            
+
             document.getElementById('kInfoBox').innerHTML = html;
             document.getElementById('kInfoOverlay').style.display = 'flex';
         }
@@ -2627,7 +2743,7 @@
             document.getElementById('kInfoOverlay').style.display = 'none';
         }
 
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') closeKInfo();
         });
     </script>
