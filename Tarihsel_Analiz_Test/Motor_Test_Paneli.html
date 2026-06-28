@@ -1972,11 +1972,11 @@
 
             if (tarihVal) {
                 // Eğer girilen tarih excel'deki tarihle tamamen aynıysa (exactMatchFound)
-                // O günün çekilişini geçmişten çıkarmalıyız ki motor "o günden öncesine" bakarak tahmin yapsın.
-                // Eğer girilen tarih eşleşmediyse (gelecek bir tarih), en son bulduğumuz tarihi dahil ederiz.
+                // KULLANICI İSTEĞİ: Girilen tarihi geçmişin en son çekilişi (Bugün) olarak kabul et.
+                // Yani o tarihi saklamak yerine hesaplamaya dahil et.
                 if (exactMatchFound) {
-                    hedefCekilisler = globalCekilisler.slice(startIndex + 1);
-                    hedefJokerler = globalJokerler.slice(startIndex + 1);
+                    hedefCekilisler = globalCekilisler.slice(startIndex);
+                    hedefJokerler = globalJokerler.slice(startIndex);
                 } else {
                     hedefCekilisler = globalCekilisler.slice(startIndex);
                     hedefJokerler = globalJokerler.slice(startIndex);
@@ -2099,9 +2099,9 @@
                 <td>${sonuc.frekanslar.tumu[i]}</td>
                 <td style="color:${item.p1 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p1}</td>
                 <td>${sonuc.frekanslar.son50[i]}</td>
-                <td style="color:${item.p3 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p3}</td>
-                <td>${sonuc.frekanslar.son15[i]}</td>
                 <td style="color:${item.p2 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p2}</td>
+                <td>${sonuc.frekanslar.son15[i]}</td>
+                <td style="color:${item.p3 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p3}</td>
                 <td>${sonuc.frekanslar.halka1[i]}</td>
                 <td style="color:${item.p4 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p4}</td>
                 <td>${sonuc.frekanslar.halka2[i]}</td>

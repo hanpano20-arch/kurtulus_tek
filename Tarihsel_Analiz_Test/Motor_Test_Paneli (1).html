@@ -933,11 +933,11 @@
         
         if (tarihVal) {
             // Eğer girilen tarih excel'deki tarihle tamamen aynıysa (exactMatchFound)
-            // O günün çekilişini geçmişten çıkarmalıyız ki motor "o günden öncesine" bakarak tahmin yapsın.
-            // Eğer girilen tarih eşleşmediyse (gelecek bir tarih), en son bulduğumuz tarihi dahil ederiz.
+            // KULLANICI İSTEĞİ: Girilen tarihi geçmişin en son çekilişi (Bugün) olarak kabul et.
+            // Yani o tarihi saklamak yerine hesaplamaya dahil et.
             if (exactMatchFound) {
-                hedefCekilisler = globalCekilisler.slice(startIndex + 1);
-                hedefJokerler = globalJokerler.slice(startIndex + 1);
+                hedefCekilisler = globalCekilisler.slice(startIndex);
+                hedefJokerler = globalJokerler.slice(startIndex);
             } else {
                 hedefCekilisler = globalCekilisler.slice(startIndex);
                 hedefJokerler = globalJokerler.slice(startIndex);

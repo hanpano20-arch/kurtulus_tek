@@ -42,11 +42,14 @@ function puanUret(frekanslar, tabanPuan, carpan) {
         return { puanlar, minFrekans, maxFrekans };
     }
 
-    // 2. Orantısal Ham Puan (0 ile tabanPuan arası)
+    // 2. Yeni Analitik Formül: Laplace Yumuşatmalı Doğrudan Orantı
     // 3. Çarpan Uygulaması (Çarpan % olarak gelir, örn 100 = 1.0, 50 = 0.5)
     for (let i = 1; i <= MAX_TOP; i++) {
         let f = frekanslar[i];
-        let oran = (f - minFrekans) / (maxFrekans - minFrekans);
+        
+        // (Frekans + 1) / (Max Frekans + 1) -> Doğrudan orantı, ancak 0 değerleri için minik bir şans payı
+        let oran = (f + 1) / (maxFrekans + 1);
+        
         let hamPuan = oran * tabanPuan;
         puanlar[i] = Math.round(hamPuan * (carpan / 100));
     }
@@ -61,7 +64,7 @@ function komsulukHesapla(cekilisler, jokerler, sonKacCekilis) {
     for (let i = 0; i < limit; i++) {
         cekilisler[i].forEach(num => cikanSayilar.add(num));
         if (jokerler && jokerler[i]) {
-            cikanSayilar.add(jokerler[i]);
+            cikanSayilar.add(Number(jokerler[i]));
         }
     }
 
@@ -319,7 +322,7 @@ function canlandirmaCezasiHesapla(cekilisler, jokerler, tabanPuan, carpan, esik1
             cekilisler[i].forEach(s => { if (s >= 1 && s <= MAX_TOP) son3Sayilar.add(s); });
         }
         if (jokerler && jokerler[i] >= 1 && jokerler[i] <= MAX_TOP) {
-            son3Sayilar.add(jokerler[i]);
+            son3Sayilar.add(Number(jokerler[i]));
         }
     }
 
@@ -331,7 +334,7 @@ function canlandirmaCezasiHesapla(cekilisler, jokerler, tabanPuan, carpan, esik1
             cekilisler[i].forEach(s => { if (s >= 1 && s <= MAX_TOP) uyananSayilar.add(s); });
         }
         if (jokerler && jokerler[i] >= 1 && jokerler[i] <= MAX_TOP) {
-            uyananSayilar.add(jokerler[i]);
+            uyananSayilar.add(Number(jokerler[i]));
         }
     }
     // Uyuyan = 1..90 arasındaki, bu pencerede ÇIKMAMIŞ sayılar
@@ -412,9 +415,9 @@ function k14ElemeHesapla(cekilisler, jokerler, tabanPuan, carpan) {
     // Her çıkan sayıya performansına göre ceza ver (Kullanıcı hepsinin ceza almasını istiyor)
     son3Sayilar.forEach(n => {
         let count = 0;
-        if (t1.includes(n)) count++;
-        if (t2.includes(n)) count++;
-        if (t3.includes(n)) count++;
+        if (t1.includes(n) || (jokerler && Number(jokerler[0]) === n)) count++;
+        if (t2.includes(n) || (jokerler && Number(jokerler[1]) === n)) count++;
+        if (t3.includes(n) || (jokerler && Number(jokerler[2]) === n)) count++;
         
         // Sadece 1 kez çıksa bile mutlaka ceza alacak.
         // Eğer 2 veya 3 kez çıktıysa, cezası daha da artacak.
