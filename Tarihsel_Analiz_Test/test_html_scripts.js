@@ -1,1088 +1,4 @@
-<!DOCTYPE html>
-<html lang="tr">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motor Test Paneli - Aşama 1</title>
-    <!-- read-excel-file kütüphanesi (Excel'i okumak için) -->
-    <script src="https://unpkg.com/read-excel-file@5.x/bundle/read-excel-file.min.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1e1e24;
-            color: #fff;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            background: #2b2b36;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-        }
-
-        h1 {
-            color: #00d2ff;
-            text-align: center;
-            border-bottom: 2px solid #00d2ff;
-            padding-bottom: 10px;
-        }
-
-        .controls {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-            align-items: center;
-            background: #3a3a48;
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        input[type="file"] {
-            background: #4caf50;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            border: none;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            background: #1e1e24;
-        }
-
-        th,
-        td {
-            border: 1px solid #444;
-            padding: 6px;
-            text-align: center;
-        }
-
-        th {
-            background: #3a3a48;
-            color: #00d2ff;
-            font-size: 0.9em;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .top-no {
-            font-weight: bold;
-            font-size: 1.2em;
-            color: #ffeb3b;
-        }
-
-        /* Yeni Slider Tasarımı */
-        .slider-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .slider-row {
-            display: flex;
-            align-items: center;
-            background: #2a2a35;
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 1px solid #444;
-        }
-
-        .slider-label {
-            flex: 1;
-            font-size: 0.95em;
-            color: #ddd;
-            text-align: left;
-        }
-
-        
-        .rule-toggle-btn {
-            width: 50px;
-            padding: 2px 4px;
-            border: 1px solid #4caf50;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 11px;
-            margin-right: 10px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-            background: #4caf50;
-            color: white;
-            box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
-            flex-shrink: 0;
-        }
-        .rule-toggle-btn.inactive {
-            background: #f44336;
-            border-color: #f44336;
-            box-shadow: 0 0 5px rgba(244, 67, 54, 0.5);
-        }
-        .slider-val-box {
-            background: #111;
-            border: 1px solid #555;
-            color: #00d2ff;
-            padding: 2px 4px;
-            border-radius: 4px;
-            font-weight: bold;
-            margin-right: 10px;
-            width: 50px;
-            text-align: center;
-            -moz-appearance: textfield;
-            appearance: textfield;
-        }
-
-        .slider-val-box::-webkit-inner-spin-button,
-        .slider-val-box::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            appearance: none;
-            margin: 0;
-        }
-
-        .h-arrow {
-            background: #444;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            padding: 4px 8px;
-            font-weight: bold;
-            user-select: none;
-        }
-
-        .h-arrow:hover {
-            background: #666;
-        }
-
-        .slider-input {
-            flex: 2;
-            margin: 0 10px;
-            cursor: pointer;
-        }
-
-        .btn-reset {
-            background: transparent;
-            color: #aaa;
-            border: none;
-            font-size: 1.2em;
-            cursor: pointer;
-            padding: 0 5px;
-            margin-left: 5px;
-        }
-
-        .btn-reset:hover {
-            color: #fff;
-            text-shadow: 0 0 5px #fff;
-        }
-
-        /* Durum Renkleri (Neon) */
-        .durum-cell {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            min-height: 40px;
-            background: #222;
-        }
-
-        .durum-rank {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 1px 1px 2px #000;
-            margin-bottom: -2px;
-        }
-
-        .durum-text {
-            font-size: 0.65em;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .sicak-glow td.durum-col {
-            border-left: 4px solid #ff5252;
-            box-shadow: inset 15px 0 20px -15px rgba(255, 82, 82, 0.6);
-        }
-
-        .sicak-glow .durum-text {
-            color: #ff5252;
-            text-shadow: 0 0 4px #ff5252, 0 0 8px #ff5252;
-        }
-
-        .ilik-glow td.durum-col {
-            border-left: 4px solid #ffeb3b;
-            box-shadow: inset 15px 0 20px -15px rgba(255, 235, 59, 0.5);
-        }
-
-        .ilik-glow .durum-text {
-            color: #ffeb3b;
-            text-shadow: 0 0 4px #ffeb3b;
-        }
-
-        .soguk-glow td.durum-col {
-            border-left: 4px solid #00bcd4;
-            box-shadow: inset 15px 0 20px -15px rgba(0, 188, 212, 0.5);
-        }
-
-        .soguk-glow .durum-text {
-            color: #00bcd4;
-            text-shadow: 0 0 4px #00bcd4;
-        }
-
-        .ihdisi-glow td.durum-col {
-            border-left: 4px solid #9e9e9e;
-            box-shadow: inset 15px 0 20px -15px rgba(158, 158, 158, 0.5);
-        }
-
-        .ihdisi-glow .durum-text {
-            color: #9e9e9e;
-            text-shadow: 0 0 4px #9e9e9e;
-        }
-
-        /* Arama ve Araç Çubuğu */
-        .toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-            background: #2a2a35;
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        .search-box {
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #444;
-            background: #111;
-            color: #fff;
-        }
-
-        /* Manuel Kontrol */
-        .manual-ctrl {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-m {
-            background: #444;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            width: 26px;
-            height: 26px;
-            cursor: pointer;
-            font-weight: bold;
-            user-select: none;
-        }
-
-        .btn-m:hover {
-            background: #666;
-        }
-
-        .btn-m.plus {
-            background: #4caf50;
-        }
-
-        .btn-m.minus {
-            background: #f44336;
-        }
-
-        .manual-ctrl span {
-            min-width: 40px;
-            text-align: center;
-            font-size: 1.1em;
-        }
-
-        .lotto-ball {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #ffffff 0%, #d7e1ec 100%);
-            box-shadow:
-                0 4px 6px rgba(0, 0, 0, 0.5),
-                inset 0 3px 5px rgba(255, 255, 255, 0.9),
-                inset 0 -3px 6px rgba(0, 0, 0, 0.3);
-            color: #1a1a1a;
-            font-weight: 900;
-            font-size: 18px;
-            border: 2px solid #90a4ae;
-            text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8);
-            margin: 0 auto;
-        }
-
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            min-height: 60px;
-            background: #00d2ff;
-            color: #000;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        .btn:hover {
-            background: #0099cc;
-        }
-
-        .btn:active {
-            transform: scale(0.92);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-
-        /* Ayarlar Modal Ek CSS */
-        .setting-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #1a1a24;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #444;
-        }
-
-        .setting-row label {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #ddd;
-        }
-
-        .setting-row input {
-            background: #111;
-            color: #00d2ff;
-            border: 1px solid #444;
-            padding: 8px 12px;
-            width: 80px;
-            font-size: 1.2em;
-            text-align: center;
-            border-radius: 4px;
-            font-weight: bold;
-            -moz-appearance: textfield;
-            appearance: textfield;
-        }
-
-        .setting-row input::-webkit-inner-spin-button,
-        .setting-row input::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            appearance: none;
-            margin: 0;
-        }
-
-        /* Sayı Havuzu (Aşama 7) */
-        .pool-container {
-            background: #2a2a35;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #444;
-        }
-
-        .pool-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .pool-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-            gap: 8px;
-        }
-
-        .pool-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 6px;
-            padding: 5px;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.2s;
-        }
-
-        .pool-item:hover {
-            border-color: #666;
-        }
-
-        .pool-item.selected {
-            border-color: #00ff00;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-        }
-
-        .pool-item.selected .pool-no {
-            color: #00ff00;
-            text-shadow: 0 0 5px #00ff00;
-        }
-
-        .pool-no {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #ddd;
-        }
-
-        .pool-info {
-            font-size: 0.65em;
-            font-weight: bold;
-            margin-top: 2px;
-        }
-
-        .pool-joker {
-            color: #ff9800;
-            font-size: 0.7em;
-            font-weight: bold;
-            margin-top: 2px;
-        }
-
-        /* Modal Stilleri */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: #2b2b36;
-            border: 1px solid #555;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            width: 800px;
-            max-width: 95%;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        /* Sayı Listesi Modal & Zaman Makinesi */
-        .list-row {
-            display: flex;
-            align-items: center;
-            background: #111;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            border: 1px solid #333;
-        }
-
-        .list-label {
-            width: 180px;
-            font-weight: bold;
-            font-size: 1.1em;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .list-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            flex: 1;
-        }
-
-        .zm-group {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 10px;
-        }
-
-        .zm-header {
-            font-weight: bold;
-            font-size: 1.1em;
-            margin-bottom: 10px;
-            color: #ddd;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .zm-draws-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .zm-draw {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #000;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #222;
-        }
-
-        .zm-date {
-            width: 80px;
-            font-weight: bold;
-            color: #888;
-            font-size: 0.85em;
-        }
-
-        .zm-balls {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .zm-ball {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: #222;
-            padding: 6px;
-            border-radius: 6px;
-            border: 1px solid #444;
-            min-width: 32px;
-        }
-
-        .zm-ball.hit {
-            border-color: #4caf50;
-            background: #4caf50;
-        }
-
-        .zm-ball.hit .zm-no {
-            color: #fff;
-            text-shadow: none;
-            font-size: 1.1em;
-        }
-
-        .zm-no {
-            font-size: 1.0em;
-            font-weight: bold;
-            color: #ddd;
-        }
-
-        .zm-score {
-            font-size: 0.75em;
-            font-weight: bold;
-            margin-top: 3px;
-            color: #aaa;
-        }
-
-        .zm-ball.hit .zm-score {
-            color: #fff;
-        }
-        #kInfoOverlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.8); z-index: 9999; display: none;
-            justify-content: center; align-items: center;
-        }
-        #kInfoBox {
-            background: #111; color: #fff; border: 2px solid #00ff00;
-            box-shadow: 0 0 20px rgba(0,255,0,0.5); border-radius: 10px;
-            width: 500px; max-width: 90%; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        #kInfoBox h2 { color: #00ff00; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; text-align: center; }
-        .kinfo-section { margin-top: 15px; }
-        .kinfo-section h4 { color: #aaa; margin: 0 0 5px 0; font-size: 0.9em; display: flex; align-items: center; gap: 5px; }
-        .kinfo-section p { margin: 0; font-size: 0.95em; line-height: 1.4; color: #ddd; }
-        .kinfo-close-btn {
-            background: #f44336; color: #fff; border: none; padding: 10px 20px; font-weight: bold; font-size: 1em;
-            border-radius: 5px; cursor: pointer; width: 100%; margin-top: 20px;
-        }
-        .kinfo-close-btn:hover { background: #d32f2f; }
-        .clickable-th { cursor: pointer; transition: color 0.2s; }
-        .clickable-th:hover { color: #00ff00 !important; }
-    </style>
-</head>
-
-<body>
-
-    <div class="container">
-        <h1>Tarihsel Analiz Motoru - Zaman Makinesi V1</h1>
-
-        <div class="controls"
-            style="display: flex; gap: 20px; align-items: center; justify-content: center; background: #3a3a48; padding: 15px; border-radius: 8px; margin-bottom: 20px; flex-wrap: wrap;">
-            <span id="dataStatus" style="display:none;"></span>
-            <label style="font-weight: bold; color: #ddd; display:flex; align-items:center; gap:5px;">📊 Hedef Havuz
-                Boyutu:
-                <input type="number" id="havuzBoyutu" value="30"
-                    style="width: 60px; background: #111; color: #fff; border: 1px solid #444; padding: 5px; text-align: center; border-radius: 4px; font-weight: bold;">
-            </label>
-            <label style="font-weight: bold; color: #ddd; display:flex; align-items:center; gap:5px;">⏱️ Test Çekiliş
-                Sayısı:
-                <input type="number" id="testCekilisSayisi" value="15"
-                    style="width: 60px; background: #111; color: #fff; border: 1px solid #444; padding: 5px; text-align: center; border-radius: 4px; font-weight: bold;">
-            </label>
-            <label style="font-weight: bold; color: #ddd; display:flex; align-items:center; gap:5px;">⏳ Testin
-                Başlayacağı Tarih:
-                <input type="date" id="hedefTarih" onchange="currentSonuc = null; testCalistir();"
-                    style="width: 140px; background: #111; color: #fff; border: 1px solid #444; padding: 5px; text-align: center; border-radius: 4px; font-weight: bold;">
-            </label>
-        </div>
-
-        <div class="controls"
-            style="display: flex; gap: 15px; align-items: center; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
-            <button class="btn" onclick="testCalistir()"
-                style="background: #e67e22; flex:1; text-transform: uppercase;">🧠 Akıllı Havuz Oluştur</button>
-            <button class="btn" onclick="gecmisiTestEt()"
-                style="background: #2196F3; flex:1; text-transform: uppercase;">⏳ Geçmişi Test Et</button>
-            <button class="btn" onclick="openVeriEkleModal()"
-                style="background: #ff9800; flex:1; text-transform: uppercase;">📥 Yeni Çekiliş / Excel Yükle</button>
-            <button class="btn" onclick="openSayiListesi()"
-                style="background: #4caf50; flex:1; text-transform: uppercase;">📊 SAYI LİSTESİ</button>
-            <button class="btn" onclick="openDetayliTablo()"
-                style="background      d8b; flex:1; text-transform: uppercase;">📋 PUAN DETAYLARI</button>
-            <button class="btn" onclick="openSettings()"
-                style="background: #9c27b0; flex:1; text-transform: uppercase;">⚙️ AYARLAR</button>
-        </div>
-
-
-
-        <div class="panel">
-            <h3>Kurallar ve Ağırlıklar</h3>
-            <div class="slider-grid">
-                <div class="slider-row">
-                    <span class="slider-label" style="color: white;">K1 Çarpanı<br><span
-                            style="font-size: 0.85em; color: #bbb;">(Tüm Çekilişler)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k1_toggle" onclick="toggleRule('k1')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k1_val" value="100"
-                        onchange="syncInputToSlider('k1_val', 'k1_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k1_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k1_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k1_weight', 'k1_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k1_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k1_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-
-                <div class="slider-row">
-                    <span class="slider-label" style="color: white;">K2 Çarpanı<br><span
-                            style="font-size: 0.85em; color: #bbb;">(Son 50)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k2_toggle" onclick="toggleRule('k2')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k2_val" value="100"
-                        onchange="syncInputToSlider('k2_val', 'k2_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k2_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k2_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k2_weight', 'k2_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k2_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k2_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-
-                <div class="slider-row">
-                    <span class="slider-label" style="color: white;">K3 Çarpanı<br><span
-                            style="font-size: 0.85em; color: #bbb;">(Son 15)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k3_toggle" onclick="toggleRule('k3')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k3_val" value="100"
-                        onchange="syncInputToSlider('k3_val', 'k3_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k3_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k3_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k3_weight', 'k3_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k3_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k3_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-
-                <div class="slider-row">
-                    <span class="slider-label" style="color: white;">K4 Çarpanı<br><span
-                            style="font-size: 0.85em; color: #bbb;">(1. Halka)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k4_toggle" onclick="toggleRule('k4')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k4_val" value="100"
-                        onchange="syncInputToSlider('k4_val', 'k4_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k4_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k4_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k4_weight', 'k4_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k4_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k4_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-
-                <div class="slider-row">
-                    <span class="slider-label" style="color: white;">K5 Çarpanı<br><span
-                            style="font-size: 0.85em; color: #bbb;">(2. Halka)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k5_toggle" onclick="toggleRule('k5')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k5_val" value="100"
-                        onchange="syncInputToSlider('k5_val', 'k5_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k5_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k5_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k5_weight', 'k5_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k5_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k5_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-
-                <div class="slider-row">
-                    <span class="slider-label" style="color: white;">K6 Çarpanı<br><span
-                            style="font-size: 0.85em; color: #bbb;">(Son 15 Joker)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k6_toggle" onclick="toggleRule('k6')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k6_val" value="100"
-                        onchange="syncInputToSlider('k6_val', 'k6_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k6_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k6_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k6_weight', 'k6_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k6_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k6_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-
-                <div class="slider-row" style="border-left: 3px solid #ff5252;">
-                    <span class="slider-label" style="color: white;">K7 Çarpanı<br><span
-                            style="font-size: 0.85em; color: #bbb;">(Tekrar Cezası)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k7_toggle" onclick="toggleRule('k7')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k7_val" value="100"
-                        onchange="syncInputToSlider('k7_val', 'k7_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k7_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k7_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k7_weight', 'k7_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k7_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k7_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-
-                <div class="slider-row" style="border-left: 3px solid #ff9800;">
-                    <span class="slider-label" style="color: white;">K8 Çarpanı<br><span
-                            style="font-size: 0.85em; color: #bbb;">(Uyku Cezası)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k8_toggle" onclick="toggleRule('k8')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k8_val" value="100"
-                        onchange="syncInputToSlider('k8_val', 'k8_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k8_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k8_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k8_weight', 'k8_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k8_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k8_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-
-                <div class="slider-row" style="border-left: 3px solid #e91e63;">
-                    <span class="slider-label" style="color: white;">K9 Çarpanı<br><span
-                            style="font-size: 0.85em; color: #bbb;">(Son 4 Cezası)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k9_toggle" onclick="toggleRule('k9')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k9_val" value="100"
-                        onchange="syncInputToSlider('k9_val', 'k9_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k9_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k9_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k9_weight', 'k9_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k9_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k9_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-
-                <div class="slider-row" style="border-left: 3px solid #f44336;">
-                    <span class="slider-label" style="color: white;">K10 Çarpanı<br><span
-                            style="font-size: 0.85em; color: #bbb;">(Son 8 Cezası)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k10_toggle" onclick="toggleRule('k10')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k10_val" value="100"
-                        onchange="syncInputToSlider('k10_val', 'k10_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k10_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k10_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k10_weight', 'k10_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k10_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k10_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-
-                <div class="slider-row" style="border-left: 3px solid #ff5722;">
-                    <span class="slider-label" style="color: white;">K11 Çarpanı<br><span
-                            style="font-size: 0.85em; color: #bbb;">(Son 12 Cezası)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k11_toggle" onclick="toggleRule('k11')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k11_val" value="100"
-                        onchange="syncInputToSlider('k11_val', 'k11_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k11_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k11_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k11_weight', 'k11_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k11_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k11_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-
-                <div class="slider-row" style="border-left: 3px solid #795548;">
-                    <span class="slider-label" style="color: white;">K12 Çarpanı<br><span
-                            style="font-size: 0.85em; color: #bbb;">(Son 15 Cezası)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k12_toggle" onclick="toggleRule('k12')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k12_val" value="100"
-                        onchange="syncInputToSlider('k12_val', 'k12_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k12_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k12_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k12_weight', 'k12_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k12_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k12_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-
-                <div class="slider-row" style="border-left: 3px solid #00bcd4; margin-top: 15px;">
-                    <span class="slider-label" style="color: white;">K13 Çarpanı<br><span
-                            style="font-size: 0.85em; color: #bbb;">(Diriltme: Son 3)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k13_toggle" onclick="toggleRule('k13')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k13_val" value="100"
-                        onchange="syncInputToSlider('k13_val', 'k13_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k13_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k13_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k13_weight', 'k13_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k13_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k13_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-                <div class="slider-row">
-                    <span class="slider-label" style="color: white;">K14 Çarpanı <br><span
-                            style="font-size: 0.85em; color: #bbb;">(Son 3 Eleme)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k14_toggle" onclick="toggleRule('k14')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k14_val" value="100"
-                        onchange="syncInputToSlider('k14_val', 'k14_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k14_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k14_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k14_weight', 'k14_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k14_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k14_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-
-                <div class="slider-row">
-                    <span class="slider-label" style="color: white;">K15 Çarpanı <br><span
-                            style="font-size: 0.85em; color: #bbb;">(Son 10 Yankı)</span></span>
-                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k15_toggle" onclick="toggleRule('k15')">AÇIK</button>
-                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k15_val" value="100"
-                        onchange="syncInputToSlider('k15_val', 'k15_weight')">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k15_weight', -1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                    <input type="range" id="k15_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
-                        step="1" value="100" oninput="syncSlider('k15_weight', 'k15_val')" onchange="testCalistir()">
-                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k15_weight', 1)"
-                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k15_weight', 100)"
-                        title="Sıfırla">↺</button>
-                </div>
-            </div>
-
-            <!-- Sayı Listesi Modal'a Taşındı -->
-
-            <!-- Eski Arama ve Kaydet Butonu Kaldırıldı -->
-        </div>
-
-        <!-- Zaman Makinesi Buraya Taşındı -->
-        <div id="zamanMakinesiContainer"
-            style="display:none; margin-top: 20px; margin-bottom: 20px; background: #1a1a24; padding: 20px; border-radius: 8px; border: 1px solid #4caf50;">
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px;">
-                <h2 style="color: #4caf50; margin: 0; font-size: 1.5em;">⏳ ZAMAN MAKİNESİ SONUÇLARI</h2>
-                <span id="zmStats" style="font-size: 1em; color: #aaa; font-weight: bold;"></span>
-            </div>
-            <div id="zamanMakinesiSonuclari"
-                style="margin-top: 15px; display: flex; flex-direction: column; gap: 15px;">
-                <!-- JS ile doldurulacak -->
-            </div>
-        </div>
-
-        <!-- Detaylı Puan Tablosu Modal / Sayfa -->
-        <div class="modal-overlay" id="detayliTabloModal" style="background: #111; display: none;">
-            <div class="modal-content"
-                style="width: 95%; height: 95vh; max-width: 1700px; display: flex; flex-direction: column; overflow: hidden; padding: 0;">
-                <div class="modal-header"
-                    style="justify-content: space-between; position: sticky; top: 0; background: #1e1e2d; z-index: 100; padding: 15px 20px; border-bottom: 1px solid #333; margin: 0;">
-                    <h2 style="margin: 0;">📋 DETAYLI PUAN TABLOSU</h2>
-                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <input type="number" id="detayliSearchInput" class="search-box" placeholder="Sayı Bul (Örn: 45)"
-                            style="width: 150px; padding: 5px;"
-                            onkeypress="if(event.key==='Enter') searchDetayliNumber()">
-                        <button class="btn" style="background: #9c27b0; padding: 5px 15px;"
-                            onclick="searchDetayliNumber()">Bul</button>
-                        <button class="btn" style="background: #2196F3;" onclick="saveAndSortDetayliModal()">Kaydet ve
-                            Sırala</button>
-                        <button class="btn" style="background: #e67e22;" onclick="closeDetayliTablo()">Kapat</button>
-                    </div>
-                </div>
-                <div style="flex: 1; overflow-y: auto; padding: 20px;">
-                    <table id="resultsTable">
-                        <thead>
-                            <tr>
-                                <th style="padding: 4px; font-size: 0.85em;">Sayı</th>
-                                <th style="padding: 4px; font-size: 0.85em;">J/N</th>
-                                <th style="padding: 4px; font-size: 0.85em;">Durum</th>
-                                <th style="padding: 4px; font-size: 0.85em;">Toplam Puan</th>
-                                <th style="padding: 4px; font-size: 0.85em;">Manuel</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k1')" title="Bilgi için tıkla">K1 (Tüm Zamanlar)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k1')" title="Bilgi için tıkla">K1 Puanı</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k2')" title="Bilgi için tıkla">K2 (Son 50)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k2')" title="Bilgi için tıkla">K2 Puanı</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k3')" title="Bilgi için tıkla">K3 (Son 15)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k3')" title="Bilgi için tıkla">K3 Puanı</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k4')" title="Bilgi için tıkla">1. Halka Komşu</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k4')" title="Bilgi için tıkla">K4 Puan</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k5')" title="Bilgi için tıkla">2. Halka Komşu</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k5')" title="Bilgi için tıkla">K5 Puan</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k6')" title="Bilgi için tıkla">K6 (Joker)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k7')" title="Bilgi için tıkla">K7 (Ceza)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k8')" title="Bilgi için tıkla">Uyku (Çek.)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k8')" title="Bilgi için tıkla">K8 (Uyku Puan)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k9')" title="Bilgi için tıkla">K9 (Son 4)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k10')" title="Bilgi için tıkla">K10 (Son 8)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k11')" title="Bilgi için tıkla">K11 (Son 12)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;" onclick="showKInfo('k12')" title="Bilgi için tıkla">K12 (Son 15)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#00bcd4;" onclick="showKInfo('k13')" title="Bilgi için tıkla">K13 (Diriltme)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#f44336;" onclick="showKInfo('k14')" title="Bilgi i&#231;in t&#305;kla">K14 (Eleme)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#00bcd4;" onclick="showKInfo('k15')" title="Bilgi i&#231;in t&#305;kla">K15 (Yank&#305;)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                            <tr>
-                                <td colspan="19">Lütfen Excel yükleyip Motoru Çalıştırın...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Sayı Listesi Modal / Sayfa -->
-    <div class="modal-overlay" id="sayiListesiModal" style="background: #111;">
-        <div class="modal-content"
-            style="width: 95%; height: 95vh; max-width: 1700px; display: flex; flex-direction: column; overflow: hidden; padding: 0;">
-            <div class="modal-header"
-                style="justify-content: space-between; position: sticky; top: 0; background: #1e1e2d; z-index: 100; padding: 15px 20px; border-bottom: 1px solid #333; margin: 0;">
-                <h2 style="margin: 0;">📊 SAYI LİSTESİ VE HAVUZ</h2>
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <input type="number" id="modalSearchInput" class="search-box" placeholder="Sayı Ara (Örn: 45)"
-                        style="width: 150px; padding: 5px;">
-                    <button class="btn" style="background: #9c27b0; padding: 5px 15px;"
-                        onclick="searchModalNumber()">Sayı Bul</button>
-                    <button class="btn" style="background: #607d8b; padding: 5px 15px;"
-                        onclick="toggleModalGroups()">Grupları Kapat/Aç</button>
-                    <span style="color:#aaa; margin: 0 5px;">|</span>
-                    <button class="btn" style="background: #2196F3;" onclick="saveAndSortModal()">Kaydet ve
-                        Yenile</button>
-                    <button class="btn" style="background: #e67e22;" onclick="closeSayiListesi()">Ana Sayfaya
-                        Dön</button>
-                </div>
-            </div>
-            <div id="modalScrollBody" style="padding: 20px; overflow-y: auto; flex: 1;">
-                <div id="havuzContainer" style="margin-bottom: 30px;">
-                    <!-- JavaScript ile Toplar -->
-                </div>
-                <div id="sayiListesiContainer">
-                    <!-- JavaScript ile Tablo Doldurulacak -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Ayarlar Modalı -->
-    <div class="modal-overlay" id="settingsModal" onclick="closeSettings(event)">
-        <div class="modal-content" style="width: 1250px; max-width: 98vw;" onclick="event.stopPropagation()">
-            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px;">
-                <h3 style="font-size: 1.5em; margin: 0;">⚙️ Kuralların Taban Puanları</h3>
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" class="btn" onclick="closeSettings(event)" style="background: #f44336; min-height: 40px; padding: 0 15px; font-size: 14px; width: 160px; justify-content: center; color: white;">SAYFAYI KAPAT</button>
-                    <button type="button" class="btn" id="btnSaveSettings" onclick="saveSettings(event)" style="background: #00bcd4; min-height: 40px; padding: 0 15px; font-size: 14px; width: 160px; justify-content: center; color: white;">AYARLARI KAYDET</button>
-                </div>
-            </div>
-            <div id="settingsContainer">
-                <!-- JS ile doldurulacak -->
-            </div>
-            <!-- Butonlar yukarı taşındı -->
-        </div>
-    </div>
-
-    <!-- Veri Ekleme Modalı -->
-    <div class="modal-overlay" id="veriEkleModal">
-        <div class="modal-content" style="width: 700px; max-width: 95%;">
-            <div class="modal-header">
-                <h3>📥 Çekiliş Verisi Ekle & Güncelle</h3>
-                <button class="close-btn" onclick="closeVeriEkleModal()">&times;</button>
-            </div>
-
-            <div
-                style="padding: 15px; background: #222; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ff9800;">
-                <h4 style="margin-top: 0; color: #ff9800;">1. Seçenek: Hızlı Manuel Ekleme / Düzenleme</h4>
-                <p style="font-size: 0.9em; color: #aaa;">Dünkü çekilişi hızlıca ekleyebilir veya listeden seçtiğiniz çekilişi düzenleyebilirsiniz.</p>
-                <div style="display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap;">
-                    <input type="hidden" id="m_editIndex" value="-1">
-                    <input type="text" id="m_tarih" placeholder="Tarih (22.06.2026)" class="search-box" style="width: 130px; font-size: 13px;">
-                    <input type="number" id="m_s1" placeholder="S1" class="slider-val-box" style="width: 45px;" min="1" max="90">
-                    <input type="number" id="m_s2" placeholder="S2" class="slider-val-box" style="width: 45px;" min="1" max="90">
-                    <input type="number" id="m_s3" placeholder="S3" class="slider-val-box" style="width: 45px;" min="1" max="90">
-                    <input type="number" id="m_s4" placeholder="S4" class="slider-val-box" style="width: 45px;" min="1" max="90">
-                    <input type="number" id="m_s5" placeholder="S5" class="slider-val-box" style="width: 45px;" min="1" max="90">
-                    <input type="number" id="m_s6" placeholder="S6" class="slider-val-box" style="width: 45px;" min="1" max="90">
-                    <span style="color:#aaa; font-size:18px;">|</span>
-                    <input type="number" id="m_joker" placeholder="Jkr" class="slider-val-box" style="width: 50px; border-color: #f44336;" min="1" max="90">
-                    
-                    <button id="btnEkleGuncelle" class="btn" style="background: #4caf50; padding: 6px 12px; font-size: 13px;" onclick="manuelCekilisEkle()">+ YENİ EKLE</button>
-                    <button id="btnIptal" class="btn" style="background: #9e9e9e; padding: 6px 12px; font-size: 13px; display: none;" onclick="cancelEditCekilis()">İPTAL</button>
-                </div>
-            </div>
-
-            <div style="padding: 15px; background: #222; border-radius: 8px; border-left: 4px solid #9c27b0;">
-                <h4 style="margin-top: 0; color: #9c27b0;">3. Sistemdeki Çekilişler (Geçmiş)</h4>
-                <div id="gecmisCekilislerListesi" style="max-height: 60vh; overflow-y: auto; margin-top: 10px; border: 1px solid #444; border-radius: 4px; background: #1a1a24; padding: 5px;">
-                    <!-- JS ile doldurulacak -->
-                </div>
-            </div>
-
-            <div style="padding: 15px; background: #222; border-radius: 8px; border-left: 4px solid #2196F3; margin-top: 20px;">
-                <h4 style="margin-top: 0; color: #2196F3;">2. Seçenek: Güncel Excel Yükle</h4>
-                <p style="font-size: 0.9em; color: #aaa;">Kalıcı olarak excelinize girdiğiniz verileri sisteme tek tuşla
-                    yükleyebilirsiniz.</p>
-                <input type="file" id="excelFile" accept=".xlsx, .xls"
-                    style="background: #111; color: #fff; padding: 10px; border-radius: 4px; border: 1px solid #444; width: 100%;">
-                <button class="btn" style="background: #2196F3; margin-top: 10px; width: 100%;"
-                    onclick="loadExcelFile()">EXCEL'DEN GÜNCELLE</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="test_motor_v3.js?v=4"></script>
-    <script src="veri.js"></script>
-    <script>
         // --- Ayarlar ve Taban Puanlar ---
         const DEFAULTS = {
             K1_TABAN: 100,
@@ -1100,8 +16,8 @@
             K11_TABAN: -250, K11_SINIR: 12,
             K12_TABAN: -250, K12_SINIR: 15,
             K13_TABAN: 100, K13_ESIK_1: 2, K13_ESIK_2: 3, K13_UYKU_SINIRI: 10,
-            K14_TABAN: 100,
-            K15_TABAN: 100, K15_SON_X: 10
+            K14_TABAN: -250,
+            K15_TABAN: 200
         };
         let baseSettings = {};
         let unsavedSettings = false;
@@ -1244,43 +160,20 @@
                     </div>
                 </div>`;
 
-            
-            // K14 Özel Satır
+            // K14 Özel Sekme
             html += `
-            <div class="setting-row" style="align-items: center;">
-                <label style="min-width: 150px; flex-shrink: 0;">K14 (Eleme)</label>
-                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <label style="font-size: 0.8em; color: #aaa;">Taban:</label>
-                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K14_TABAN', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                        <input type="number" id="input_K14_TABAN" value="${baseSettings.K14_TABAN || 100}" style="width: 60px;" oninput="unsavedSettings = true;">
-                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K14_TABAN', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                        <button class="btn-reset" onclick="document.getElementById('input_K14_TABAN').value = 100; unsavedSettings = true;" title="Sıfırla">↺</button>
+                <div class="setting-row" style="align-items: center; background: rgba(255, 87, 34, 0.05); border-left: 3px solid #ff5722; min-height: 50px;">
+                    <label style="color: #ff5722; min-width: 130px; flex-shrink: 0;">K14 (Son 3 Eleme)</label>
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; overflow-x: auto;">
+                        <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
+                            <span style="font-size: 0.8em; color: #aaa; white-space:nowrap;">Taban Puan:</span>
+                            <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K14_TABAN', -10)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                            <input type="number" id="input_K14_TABAN" value="${baseSettings.K14_TABAN}" style="width: 55px;" oninput="unsavedSettings = true;">
+                            <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K14_TABAN', 10)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                            <button class="btn-reset" onclick="document.getElementById('input_K14_TABAN').value = ${DEFAULTS.K14_TABAN}; unsavedSettings = true;" title="Taban Sıfırla">↺</button>
+                        </div>
                     </div>
-                </div>
-            </div>`;
-
-            // K15 Özel Satır
-            html += `
-            <div class="setting-row" style="align-items: center;">
-                <label style="min-width: 150px; flex-shrink: 0;">K15 (Son X Yankı)</label>
-                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <label style="font-size: 0.8em; color: #aaa;">Son X:</label>
-                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K15_SON_X', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                        <input type="number" id="input_K15_SON_X" value="${baseSettings.K15_SON_X || 10}" style="width: 55px;" oninput="unsavedSettings = true;">
-                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K15_SON_X', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                        <button class="btn-reset" onclick="document.getElementById('input_K15_SON_X').value = 10; unsavedSettings = true;" title="Sıfırla">↺</button>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <label style="font-size: 0.8em; color: #aaa;">Taban:</label>
-                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K15_TABAN', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                        <input type="number" id="input_K15_TABAN" value="${baseSettings.K15_TABAN || 100}" style="width: 60px;" oninput="unsavedSettings = true;">
-                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K15_TABAN', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                        <button class="btn-reset" onclick="document.getElementById('input_K15_TABAN').value = 100; unsavedSettings = true;" title="Sıfırla">↺</button>
-                    </div>
-                </div>
-            </div>`;
+                </div>`;
 
             document.getElementById('settingsContainer').innerHTML = html;
         }
@@ -1408,25 +301,6 @@
             }
         }
 
-        
-        function toggleRule(kId) {
-            let btn = document.getElementById(kId + '_toggle');
-            if (btn.classList.contains('inactive')) {
-                btn.classList.remove('inactive');
-                btn.innerText = 'AÇIK';
-            } else {
-                btn.classList.add('inactive');
-                btn.innerText = 'KAPALI';
-            }
-            if (typeof testCalistir === 'function') testCalistir();
-        }
-
-        function getCarpan(kId) {
-            let toggle = document.getElementById(kId + '_toggle');
-            if (toggle && toggle.classList.contains('inactive')) return 0;
-            let weight = document.getElementById(kId + '_weight');
-            return weight ? parseInt(weight.value, 10) : 100;
-        }
         function syncSlider(sliderId, valId) {
             let s = document.getElementById(sliderId);
             let v = document.getElementById(valId);
@@ -1706,8 +580,6 @@
                     (currentSonuc.puanlar.k11 ? (currentSonuc.puanlar.k11[n] || 0) : 0) +
                     (currentSonuc.puanlar.k12 ? (currentSonuc.puanlar.k12[n] || 0) : 0) +
                     (currentSonuc.puanlar.k13 ? (currentSonuc.puanlar.k13[n] || 0) : 0) +
-                    (currentSonuc.puanlar.k14 ? (currentSonuc.puanlar.k14[n] || 0) : 0) +
-                    (currentSonuc.puanlar.k15 ? (currentSonuc.puanlar.k15[n] || 0) : 0) +
                     (manualScores[n] || 0)
             }));
             sorted.sort((a, b) => b.tp - a.tp);
@@ -1890,32 +762,31 @@
                 K13_ESIK_1: baseSettings.K13_ESIK_1,
                 K13_ESIK_2: baseSettings.K13_ESIK_2,
                 K13_UYKU_SINIRI: baseSettings.K13_UYKU_SINIRI,
-                K1_CARPAN: getCarpan('k1'),
-                K2_CARPAN: getCarpan('k2'),
-                K3_CARPAN: getCarpan('k3'),
-                K4_CARPAN: getCarpan('k4'),
-                K5_CARPAN: getCarpan('k5'),
-                K6_CARPAN: getCarpan('k6'),
-                K7_CARPAN: getCarpan('k7'),
-                K8_CARPAN: getCarpan('k8'),
-                K9_TABAN: baseSettings.K9_TABAN,
-                K9_SINIR: baseSettings.K9_SINIR,
-                K9_CARPAN: getCarpan('k9'),
-                K10_TABAN: baseSettings.K10_TABAN,
-                K10_SINIR: baseSettings.K10_SINIR,
-                K10_CARPAN: getCarpan('k10'),
-                K11_TABAN: baseSettings.K11_TABAN,
-                K11_SINIR: baseSettings.K11_SINIR,
-                K11_CARPAN: getCarpan('k11'),
-                K12_TABAN: baseSettings.K12_TABAN,
-                K12_SINIR: baseSettings.K12_SINIR,
-                K12_CARPAN: getCarpan('k12'),
-                K13_CARPAN: getCarpan('k13'),
                 K14_TABAN: baseSettings.K14_TABAN,
                 K15_TABAN: baseSettings.K15_TABAN,
-                K15_SON_X: baseSettings.K15_SON_X,
-                K14_CARPAN: getCarpan('k14'),
-                K15_CARPAN: getCarpan('k15')
+                K15_CARPAN: parseInt(document.getElementById('k15_weight') ? document.getElementById('k15_weight').value : 100, 10),
+                K1_CARPAN: parseInt(document.getElementById('k1_weight').value, 10),
+                K2_CARPAN: parseInt(document.getElementById('k2_weight').value, 10),
+                K3_CARPAN: parseInt(document.getElementById('k3_weight').value, 10),
+                K4_CARPAN: parseInt(document.getElementById('k4_weight').value, 10),
+                K5_CARPAN: parseInt(document.getElementById('k5_weight').value, 10),
+                K6_CARPAN: parseInt(document.getElementById('k6_weight').value, 10),
+                K7_CARPAN: parseInt(document.getElementById('k7_weight').value, 10),
+                K8_CARPAN: parseInt(document.getElementById('k8_weight').value, 10),
+                K9_TABAN: baseSettings.K9_TABAN,
+                K9_SINIR: baseSettings.K9_SINIR,
+                K9_CARPAN: parseInt(document.getElementById('k9_weight') ? document.getElementById('k9_weight').value : 100, 10),
+                K10_TABAN: baseSettings.K10_TABAN,
+                K10_SINIR: baseSettings.K10_SINIR,
+                K10_CARPAN: parseInt(document.getElementById('k10_weight') ? document.getElementById('k10_weight').value : 100, 10),
+                K11_TABAN: baseSettings.K11_TABAN,
+                K11_SINIR: baseSettings.K11_SINIR,
+                K11_CARPAN: parseInt(document.getElementById('k11_weight') ? document.getElementById('k11_weight').value : 100, 10),
+                K12_TABAN: baseSettings.K12_TABAN,
+                K12_SINIR: baseSettings.K12_SINIR,
+                K12_CARPAN: parseInt(document.getElementById('k12_weight') ? document.getElementById('k12_weight').value : 100, 10),
+                K13_CARPAN: parseInt(document.getElementById('k13_weight') ? document.getElementById('k13_weight').value : 100, 10),
+                K14_CARPAN: parseInt(document.getElementById('k14_weight') ? document.getElementById('k14_weight').value : 100, 10)
             };
 
             currentSonuc = motorAtesle(hedefCekilisler, hedefJokerler, ayarlar);
@@ -1941,12 +812,10 @@
                 let p11 = sonuc.puanlar.k11 ? (sonuc.puanlar.k11[i] || 0) : 0;
                 let p12 = sonuc.puanlar.k12 ? (sonuc.puanlar.k12[i] || 0) : 0;
                 let p13 = sonuc.puanlar.k13 ? (sonuc.puanlar.k13[i] || 0) : 0;
-                let p14 = sonuc.puanlar.k14 ? (sonuc.puanlar.k14[i] || 0) : 0;
-                let p15 = sonuc.puanlar.k15 ? (sonuc.puanlar.k15[i] || 0) : 0;
                 let uyku = sonuc.uykuSureleri ? (sonuc.uykuSureleri[i] || 0) : 0;
                 let man = manualScores[i] || 0;
-                let toplam = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + man;
-                siralama.push({ i: i, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, uyku, man, toplam });
+                let toplam = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + man;
+                siralama.push({ i: i, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, uyku, man, toplam });
             }
 
             siralama.sort((a, b) => b.toplam - a.toplam);
@@ -1999,8 +868,6 @@
                 <td style="color:${item.p11 < 0 ? '#f44336' : (item.p11 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p11}</td>
                 <td style="color:${item.p12 < 0 ? '#f44336' : (item.p12 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p12}</td>
                 <td style="color:${item.p13 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${item.p13}</td>
-                                <td style="color:${item.p14 !== 0 ? '#f44336' : '#888'}; font-weight:bold;">${item.p14}</td>
-                                <td style="color:${item.p15 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${item.p15}</td>
             </tr>`;
                 tbody.appendChild(tr);
             });
@@ -2038,10 +905,8 @@
                 let p11 = currentSonuc.puanlar.k11 ? (currentSonuc.puanlar.k11[num] || 0) : 0;
                 let p12 = currentSonuc.puanlar.k12 ? (currentSonuc.puanlar.k12[num] || 0) : 0;
                 let p13 = currentSonuc.puanlar.k13 ? (currentSonuc.puanlar.k13[num] || 0) : 0;
-                let p14 = currentSonuc.puanlar.k14 ? (currentSonuc.puanlar.k14[num] || 0) : 0;
-                let p15 = currentSonuc.puanlar.k15 ? (currentSonuc.puanlar.k15[num] || 0) : 0;
                 let man = manualScores[num] || 0;
-                siralama.push({ num: num, tp: p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + man });
+                siralama.push({ num: num, tp: p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + man });
             }
             siralama.sort((a, b) => b.tp - a.tp);
 
@@ -2104,8 +969,8 @@
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k11')" title="Bilgi için tıkla">K11 (Son 12)</th>
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k12')" title="Bilgi için tıkla">K12 (Son 15)</th>
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;" onclick="showKInfo('k13')" title="Bilgi için tıkla">K13 (Diriltme)</th>
-                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#f44336;" onclick="showKInfo('k14')" title="Bilgi i&#231;in t&#305;kla">K14 (Eleme)</th>
-                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;" onclick="showKInfo('k15')" title="Bilgi i&#231;in t&#305;kla">K15 (Yank&#305;)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#ff5722;" onclick="showKInfo('k14')" title="Bilgi için tıkla">K14 (Eleme)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#8bc34a;" onclick="showKInfo('k15')" title="Bilgi için tıkla">K15 (Yankı)</th>
                 </tr>
             </thead>
             <tbody>
@@ -2129,8 +994,6 @@
                 let p11 = currentSonuc.puanlar.k11 ? (currentSonuc.puanlar.k11[item.num] || 0) : 0;
                 let p12 = currentSonuc.puanlar.k12 ? (currentSonuc.puanlar.k12[item.num] || 0) : 0;
                 let p13 = currentSonuc.puanlar.k13 ? (currentSonuc.puanlar.k13[item.num] || 0) : 0;
-                let p14 = currentSonuc.puanlar.k14 ? (currentSonuc.puanlar.k14[item.num] || 0) : 0;
-                let p15 = currentSonuc.puanlar.k15 ? (currentSonuc.puanlar.k15[item.num] || 0) : 0;
                 let man = manualScores[item.num] || 0;
 
                 html += `
@@ -2156,8 +1019,6 @@
                 <td style="color:${p11 < 0 ? '#f44336' : (p11 > 0 ? '#fff' : '#888')}; font-weight:bold;">${p11}</td>
                 <td style="color:${p12 < 0 ? '#f44336' : (p12 > 0 ? '#fff' : '#888')}; font-weight:bold;">${p12}</td>
                 <td style="color:${p13 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${p13}</td>
-                <td style="color:${p14 !== 0 ? '#f44336' : '#888'}; font-weight:bold;">${p14}</td>
-                <td style="color:${p15 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${p15}</td>
             </tr>`;
             });
 
@@ -2356,36 +1217,35 @@
                 K8_TABAN: baseSettings.K8_TABAN,
                 K8_UYKU_SINIRI: baseSettings.K8_UYKU_SINIRI,
                 K8_ADIM_CEZASI: baseSettings.K8_ADIM_CEZASI,
-                K1_CARPAN: getCarpan('k1'),
-                K2_CARPAN: getCarpan('k2'),
-                K3_CARPAN: getCarpan('k3'),
-                K4_CARPAN: getCarpan('k4'),
-                K5_CARPAN: getCarpan('k5'),
-                K6_CARPAN: getCarpan('k6'),
-                K7_CARPAN: getCarpan('k7'),
-                K8_CARPAN: getCarpan('k8'),
+                K1_CARPAN: parseInt(document.getElementById('k1_weight').value, 10),
+                K2_CARPAN: parseInt(document.getElementById('k2_weight').value, 10),
+                K3_CARPAN: parseInt(document.getElementById('k3_weight').value, 10),
+                K4_CARPAN: parseInt(document.getElementById('k4_weight').value, 10),
+                K5_CARPAN: parseInt(document.getElementById('k5_weight').value, 10),
+                K6_CARPAN: parseInt(document.getElementById('k6_weight').value, 10),
+                K7_CARPAN: parseInt(document.getElementById('k7_weight').value, 10),
+                K8_CARPAN: parseInt(document.getElementById('k8_weight').value, 10),
                 K9_TABAN: baseSettings.K9_TABAN,
                 K9_SINIR: baseSettings.K9_SINIR,
-                K9_CARPAN: getCarpan('k9'),
+                K9_CARPAN: parseInt(document.getElementById('k9_weight') ? document.getElementById('k9_weight').value : 100, 10),
                 K10_TABAN: baseSettings.K10_TABAN,
                 K10_SINIR: baseSettings.K10_SINIR,
-                K10_CARPAN: getCarpan('k10'),
+                K10_CARPAN: parseInt(document.getElementById('k10_weight') ? document.getElementById('k10_weight').value : 100, 10),
                 K11_TABAN: baseSettings.K11_TABAN,
                 K11_SINIR: baseSettings.K11_SINIR,
-                K11_CARPAN: getCarpan('k11'),
+                K11_CARPAN: parseInt(document.getElementById('k11_weight') ? document.getElementById('k11_weight').value : 100, 10),
                 K12_TABAN: baseSettings.K12_TABAN,
                 K12_SINIR: baseSettings.K12_SINIR,
-                K12_CARPAN: getCarpan('k12'),
+                K12_CARPAN: parseInt(document.getElementById('k12_weight') ? document.getElementById('k12_weight').value : 100, 10),
                 K13_TABAN: baseSettings.K13_TABAN,
                 K13_ESIK_1: baseSettings.K13_ESIK_1,
                 K13_ESIK_2: baseSettings.K13_ESIK_2,
                 K13_UYKU_SINIRI: baseSettings.K13_UYKU_SINIRI,
-                K13_CARPAN: getCarpan('k13'),
                 K14_TABAN: baseSettings.K14_TABAN,
                 K15_TABAN: baseSettings.K15_TABAN,
-                K15_SON_X: baseSettings.K15_SON_X,
-                K14_CARPAN: getCarpan('k14'),
-                K15_CARPAN: getCarpan('k15')
+                K15_CARPAN: parseInt(document.getElementById('k15_weight') ? document.getElementById('k15_weight').value : 100, 10),
+                K13_CARPAN: parseInt(document.getElementById('k13_weight') ? document.getElementById('k13_weight').value : 100, 10),
+                K14_CARPAN: parseInt(document.getElementById('k14_weight') ? document.getElementById('k14_weight').value : 100, 10)
             };
 
             // Zaman Makinesini Çalıştır
@@ -2490,16 +1350,8 @@
             }
         }
 
-    </script>
+    
 
-    <!-- K Kural Açıklama Popup -->
-    <div id="kInfoOverlay" onclick="closeKInfo()">
-        <div id="kInfoBox" onclick="event.stopPropagation()">
-            <!-- İçerik JS ile buraya gelecek -->
-        </div>
-    </div>
-
-    <script>
         const K_RULE_INFO = {
             'k1': {
                 title: "K1 - Tüm Zamanlar Frekansı",
@@ -2591,6 +1443,20 @@
                 how: "Izgaradaki ısınan bölgelerin etrafındaki uyuyan sayıların, sıcaktan etkilenip uyanacağını varsayar.",
                 ex: "Makine 'Bu bölge çok ısındı, sıra hemen yanındaki uyuyan 22 sayısına geldi' der.",
                 eff: "Isınan bölgedeki uyuyan sayılara 'Diriltme' (can suyu) puanı verir."
+            },
+            'k14': {
+                title: "K14 - Dinamik Eleme (Son 3 Çekiliş)",
+                what: "Son 3 çekilişte çıkmış 'taze' sayıları istatistiksel filtreden geçirir.",
+                how: "Loto doğası gereği son 3 çekilişte çıkan ~18 sayının çoğu tekrar etmez. K14 kuralı bu sayıları 5 farklı modele (Taze/Bayat İndeksi, Bireysel Tekrar Huyu, Bölgesel Yığılma, İvme ve Çift/Tek Dengesi) göre analiz eder. Tüm bu modellerden düşük puan (eleme) alan sayıları havuz dışına atar.",
+                ex: "Örneğin, '22' sayısı son çekilişte çıkmış olabilir. Ancak aynı onluk gruptan 4 sayı daha çıkmışsa ve '22'nin tarihsel tekrar huyu zayıfsa, K14 devreye girip 22'ye eksi ceza verir.",
+                eff: "Sadece son 3 çekilişten gelen sayılara NEGATİF (ceza) etki eder. Yanlış pozitifleri (çıkmış ama bir daha çıkmayacak olanları) eler."
+            },
+            'k15': {
+                title: "K15 - Momentum ve Yankı Ödülü (Son 10 Çekiliş)",
+                what: "Son 10 çekilişte yeni uyanmış, 1-2 kez çıkmış sayıları karakter analiziyle inceler ve tekrar etme huyları yüksekse onlara ekstra ödül puanı verir.",
+                how: "Öncelikle son 10 çekilişte 1 veya 2 kez çıkan 'taze ve potansiyelli' sayıları bulur. Sonra bu sayıların bütün geçmişine bakar. Bu sayı geçmişte ne kadar aralıklarla uyumuş ve ne sıklıkla tekrar etmiş, bunu bulur. Şu anki uyku durumu geçmiş uyku ortalamasına uyuyorsa (sweet spot) ona ekstra artı (+) puan basar.",
+                ex: "Örneğin, 45 sayısı son 10 çekilişin 8. sırasında çıktı. Tüm geçmişine bakıldığında 45 sayısının ortalama 7-8 haftada bir geldiği görülüyor. Ayrıca 45 sayısı geldiğinde genelde ilk 10 hafta içinde bir daha tekrarlamayı seven yankılı bir sayıdır. Bu sayının durumu K15 için 'Mükemmel Kıvam' demektir ve +200 puana kadar ödül alır.",
+                eff: "Sadece son 10'da çıkan ancak aşırı doymamış sayılara POZİTİF (ödül) etki eder. Sayıların karakteristik tekrar huylarını kullanıp momentum kazanmasını sağlar."
             }
         };
 
@@ -2630,7 +1496,4 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeKInfo();
         });
-    </script>
-</body>
-
-</html>
+    

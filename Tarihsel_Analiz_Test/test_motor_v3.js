@@ -305,7 +305,8 @@ function canlandirmaCezasiHesapla(cekilisler, jokerler, tabanPuan, carpan, esik1
     if (!cekilisler || cekilisler.length === 0) return k13Puanlar;
 
     let safeTaban     = (!tabanPuan || isNaN(tabanPuan) || tabanPuan === 0) ? 100 : tabanPuan;
-    let safeCarpan    = (!carpan || isNaN(carpan))      ? 100 : carpan;
+    let safeCarpan    = (carpan === undefined || isNaN(carpan)) ? 100 : carpan;
+    if (safeCarpan === 0) return k13Puanlar;
     let safeEsik1     = (!esik1 || isNaN(esik1) || esik1 === 0)      ? 2  : esik1;
     let safeEsik2     = (!esik2 || isNaN(esik2) || esik2 === 0)      ? 3  : esik2;
     let safeUyku      = (!uykuSiniri || isNaN(uykuSiniri) || uykuSiniri === 0) ? 10 : uykuSiniri;
@@ -384,6 +385,123 @@ function canlandirmaCezasiHesapla(cekilisler, jokerler, tabanPuan, carpan, esik1
     return k13Puanlar;
 }
 
+// K14 (Dinamik Eleme - Son 3 Çekiliş)
+function k14ElemeHesapla(cekilisler, tabanPuan, carpan) {
+    let k14Puanlar = {};
+    for (let i = 1; i <= MAX_TOP; i++) k14Puanlar[i] = 0;
+    
+    let safeTaban = (!tabanPuan || isNaN(tabanPuan) || tabanPuan === 0) ? -250 : tabanPuan;
+    let safeCarpan = isNaN(carpan) ? 100 : carpan;
+    if (safeCarpan === 0) return k14Puanlar;
+
+    if (!cekilisler || cekilisler.length < 3) return k14Puanlar;
+
+    let t1 = cekilisler[0] || [];
+    let t2 = cekilisler[1] || [];
+    let t3 = cekilisler[2] || [];
+    let son3Sayilar = new Set([...t1, ...t2, ...t3]);
+    if (son3Sayilar.size === 0) return k14Puanlar;
+
+    // Her çıkan sayıya performansına göre ceza ver (Kullanıcı hepsinin ceza almasını istiyor)
+    son3Sayilar.forEach(n => {
+        let count = 0;
+        if (t1.includes(n)) count++;
+        if (t2.includes(n)) count++;
+        if (t3.includes(n)) count++;
+        
+        // Sadece 1 kez çıksa bile mutlaka ceza alacak.
+        // Eğer 2 veya 3 kez çıktıysa, cezası daha da artacak.
+        let cezaOrani = 1.0;
+        if (count === 2) cezaOrani = 1.5;
+        if (count >= 3) cezaOrani = 2.0;
+
+        let finalPuan = Math.round(safeTaban * cezaOrani * (safeCarpan / 100));
+        // K14 kesinlikle bir cezadır (Eleme). Yanlışlıkla pozitif çıkarsa (eksi çarpan vb. yüzünden), negatife çevir!
+        if (finalPuan > 0) finalPuan = -finalPuan;
+
+        k14Puanlar[n] = finalPuan;
+    });
+
+    return k14Puanlar;
+}
+
+// K15 (Momentum ve Yankı Ödülü) Hesabı
+function k15OdulHesapla(cekilisler, jokerler, tabanPuan, carpan, menzil) {
+    let k15Puanlar = {};
+    for (let i = 1; i <= MAX_TOP; i++) k15Puanlar[i] = 0;
+
+    let safeTaban = (!tabanPuan || isNaN(tabanPuan) || tabanPuan === 0) ? 200 : tabanPuan;
+    let safeCarpan = isNaN(carpan) ? 100 : carpan;
+    if (safeCarpan === 0) return k15Puanlar;
+
+    let safeMenzil = (menzil && !isNaN(menzil) && menzil >= 7 && menzil <= 15) ? parseInt(menzil, 10) : 10;
+
+    if (!cekilisler || cekilisler.length < (safeMenzil + 1)) return k15Puanlar;
+
+    let sonXFrekans = {};
+    for (let j = 0; j < safeMenzil; j++) {
+        let asilSayilar = cekilisler[j] || [];
+        asilSayilar.forEach(n => {
+            sonXFrekans[n] = (sonXFrekans[n] || 0) + 1;
+        });
+        if (jokerler && jokerler[j]) {
+            let jn = Number(jokerler[j]);
+            sonXFrekans[jn] = (sonXFrekans[jn] || 0) + 1;
+        }
+    }
+
+    let hedefSayilar = Object.keys(sonXFrekans).map(Number).filter(n => sonXFrekans[n] >= 1 && sonXFrekans[n] <= 2);
+    if (hedefSayilar.length === 0) return k15Puanlar;
+
+    let k15Potansiyel = {};
+    hedefSayilar.forEach(n => {
+        let cikisEndeksleri = [];
+        for (let j = 0; j < cekilisler.length; j++) {
+            let asil = cekilisler[j] || [];
+            if (asil.includes(n) || (jokerler && Number(jokerler[j]) === n)) {
+                cikisEndeksleri.push(j);
+            }
+        }
+        if (cikisEndeksleri.length < 2) {
+            k15Potansiyel[n] = 0.5; 
+            return;
+        }
+        let toplamUyku = 0;
+        let yankiSayisi = 0; 
+        for (let x = 0; x < cikisEndeksleri.length - 1; x++) {
+            let fark = cikisEndeksleri[x + 1] - cikisEndeksleri[x];
+            toplamUyku += fark;
+            if (fark <= 10) yankiSayisi++;
+        }
+        let ortalamaUyku = toplamUyku / (cikisEndeksleri.length - 1);
+        let yankiOrani = yankiSayisi / (cikisEndeksleri.length - 1); 
+        let mevcutUyku = cikisEndeksleri[0]; 
+        let uykuSapmasi = Math.abs(ortalamaUyku - mevcutUyku);
+        let uykuSkoru = Math.max(0, 1.0 - (uykuSapmasi / 15.0));
+        let seyreklikCarpani = (sonXFrekans[n] === 1) ? 1.2 : 1.0;
+        let potansiyel = ((yankiOrani * 0.5) + (uykuSkoru * 0.5)) * seyreklikCarpani;
+        k15Potansiyel[n] = potansiyel;
+    });
+
+    let minP = Math.min(...Object.values(k15Potansiyel));
+    let maxP = Math.max(...Object.values(k15Potansiyel));
+    let farkP = maxP - minP;
+    if (farkP === 0) farkP = 1;
+
+    hedefSayilar.forEach(n => {
+        let p = k15Potansiyel[n];
+        let normalized = (p - minP) / farkP; 
+        let odulOrani = 0.20 + (0.80 * normalized);
+        let anaOdul = safeTaban * (safeCarpan / 100);
+        let finalPuan = Math.round(anaOdul * odulOrani);
+        // K15 kesinlikle bir ödüldür. Negatif ise pozitif yap!
+        if (finalPuan < 0) finalPuan = -finalPuan;
+        k15Puanlar[n] = finalPuan;
+    });
+
+    return k15Puanlar;
+}
+
 // Dışarıya açılacak ana fonksiyon
 function motorAtesle(cekilisler, jokerler, ayarlar) {
     // Aşama 1: Frekansları Çıkar
@@ -430,6 +548,22 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
         ayarlar.K13_UYKU_SINIRI
     );
 
+    // Aşama 8: K14 (Dinamik Eleme)
+    let k14Puanlar = k14ElemeHesapla(
+        cekilisler, 
+        ayarlar.K14_TABAN, 
+        ayarlar.K14_CARPAN
+    );
+
+    // Aşama 9: K15 (Momentum ve Yankı Ödülü)
+    let k15Puanlar = k15OdulHesapla(
+        cekilisler,
+        jokerler,
+        ayarlar.K15_TABAN, 
+        ayarlar.K15_CARPAN,
+        ayarlar.K15_SON_X
+    );
+
     return {
         frekanslar: {
             tumu: frekansTumu,
@@ -451,7 +585,9 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
             k10: doygunluk.k10,
             k11: doygunluk.k11,
             k12: doygunluk.k12,
-            k13: k13Puanlar
+            k13: k13Puanlar,
+            k14: k14Puanlar,
+            k15: k15Puanlar
         },
         uykuSureleri: uykuSureleri,
         istatistikler: {
@@ -569,7 +705,9 @@ function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler,
                 (motorSonucu.puanlar.k10 ? (motorSonucu.puanlar.k10[num] || 0) : 0) +
                 (motorSonucu.puanlar.k11 ? (motorSonucu.puanlar.k11[num] || 0) : 0) +
                 (motorSonucu.puanlar.k12 ? (motorSonucu.puanlar.k12[num] || 0) : 0) +
-                (motorSonucu.puanlar.k13 ? (motorSonucu.puanlar.k13[num] || 0) : 0);
+                (motorSonucu.puanlar.k13 ? (motorSonucu.puanlar.k13[num] || 0) : 0) +
+                (motorSonucu.puanlar.k14 ? (motorSonucu.puanlar.k14[num] || 0) : 0) +
+                (motorSonucu.puanlar.k15 ? (motorSonucu.puanlar.k15[num] || 0) : 0);
             siralama.push({ num: num, toplam: toplam });
         }
         siralama.sort((a, b) => b.toplam - a.toplam);
