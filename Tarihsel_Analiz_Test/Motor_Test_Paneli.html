@@ -2707,6 +2707,20 @@
                 how: "Izgaradaki ısınan bölgelerin etrafındaki uyuyan sayıların, sıcaktan etkilenip uyanacağını varsayar.",
                 ex: "Makine 'Bu bölge çok ısındı, sıra hemen yanındaki uyuyan 22 sayısına geldi' der.",
                 eff: "Isınan bölgedeki uyuyan sayılara 'Diriltme' (can suyu) puanı verir."
+            },
+            'k14': {
+                title: "K14 - Dinamik Eleme (Son 3 Çekiliş)",
+                what: "Son 3 çekilişte çıkan TÜM sayılara (joker dahil) otomatik ceza keserek onları havuzdan eleme eğilimi gösterir.",
+                how: "Bir sayı son 3 çekilişte ne kadar çok çıkmışsa cezası o kadar ağır olur: 1 kez → 1x, 2 kez → 1.5x, 3 kez → 2x ceza.",
+                ex: "Makine 'Bu sayı geçen hafta da çıktı, bu hafta tekrar çıkma ihtimali düşük' der ve puanını negatife iter.",
+                eff: "Son 3 çekilişin 'taze' sayılarını aktif olarak eleyerek sıradaki çekilişte 'dinlenmiş' sayılara yönlendirir."
+            },
+            'k15': {
+                title: "K15 - Momentum ve Yankı Ödülü",
+                what: "Belirli bir pencerede (varsayılan son 10 çekiliş) 1-2 kez çıkmış sayıların tarihsel davranış kalıplarını analiz eder.",
+                how: "Her sayının ortalama uyku süresi, son çıkışından bu yana geçen süreyle karşılaştırılır. Zamanlaması gelenmiş ve 'yankı' örüntüsüne sahip sayılar ödüllendirilir.",
+                ex: "Makine 'Bu sayı tarihsel olarak 10-12 çekilişte bir çıkıyor ve son çıkışının üzerinden tam o kadar geçmiş' diyerek yüksek puan verir.",
+                eff: "Momentum kazanmış, zamanlaması gelmiş ve düzenli periyodik davranış gösteren sayılara bonus ödül puanı aktarır."
             }
         };
 
