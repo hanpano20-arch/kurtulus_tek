@@ -677,7 +677,7 @@ function k17BirliktelikHesapla(cekilisler, jokerler, tabanPuan, carpan, analizDe
 //   pencere     : Kaç çekilişe bakılacak (K18_PENCERE, varsayılan 8)
 // ============================================================
 // K18 (Tek/Çift Dengesizliği Düzeltmesi)
-function k18TekCiftDengesiHesapla(cekilisler, jokerler, komsuluk, tabanCeza, carpan, pencere) {
+function k18TekCiftDengesiHesapla(cekilisler, jokerler, komsuluk, tabanPuan, carpan, pencere) {
     let k18Puanlar = {};
     for (let i = 1; i <= MAX_TOP; i++) k18Puanlar[i] = 0;
 
