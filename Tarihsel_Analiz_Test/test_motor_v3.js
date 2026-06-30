@@ -801,8 +801,8 @@ function k19SonRakamDengesiHesapla(cekilisler, jokerler, komsuluk, tabanPuan, ca
     // Her rakam (0-9) için sapma (açlık) puanı hesapla
     let hamPuanlar = {};
     for (let r = 0; r <= 9; r++) {
-        let sapma = beklenen - sonRakamFrekans[r];
-        // Sapma pozitifse (aç kalmış), bonus. Sapma negatifse (çok çıkmış), ceza.
+        // MOMENTUM MODU: Sapma pozitifse (çok çıkmış, sıcak), bonus. Sapma negatifse (az çıkmış, soğuk), ceza.
+        let sapma = sonRakamFrekans[r] - beklenen;
         hamPuanlar[r] = sapma * (safeTaban / 10);
     }
 

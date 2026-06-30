@@ -1567,27 +1567,7 @@
                 </div>
             </div>`;
 
-            // K19 Özel Satır
-            html += `
-            <div class="setting-row" style="align-items: center; border-left: 3px solid #795548;">
-                <label style="min-width: 150px; flex-shrink: 0; color: #fff; font-weight: bold;">K19 (Son Rakam)</label>
-                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <label style="font-size: 0.8em; color: #aaa;">Pencere:</label>
-                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K19_PENCERE', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                        <input type="number" id="input_K19_PENCERE" value="${baseSettings.K19_PENCERE || 8}" style="width: 55px;" oninput="unsavedSettings = true;">
-                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K19_PENCERE', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                        <button class="btn-reset" onclick="document.getElementById('input_K19_PENCERE').value = 8; unsavedSettings = true;" title="Sıfırla">↺</button>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <label style="font-size: 0.8em; color: #aaa;">Taban:</label>
-                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K19_TABAN', -10)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                        <input type="number" id="input_K19_TABAN" value="${baseSettings.K19_TABAN || 100}" style="width: 60px;" oninput="unsavedSettings = true;">
-                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K19_TABAN', 10)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                        <button class="btn-reset" onclick="document.getElementById('input_K19_TABAN').value = 100; unsavedSettings = true;" title="Sıfırla">↺</button>
-                    </div>
-                </div>
-            </div>`;
+
 
             document.getElementById('settingsContainer').innerHTML = html;
         }
@@ -1633,7 +1613,10 @@
         function saveSettings(e) {
             if (e) e.preventDefault();
             for (let key in DEFAULTS) {
-                baseSettings[key] = parseInt(document.getElementById(`input_${key}`).value, 10) || DEFAULTS[key];
+                let el = document.getElementById(`input_${key}`);
+                if (el) {
+                    baseSettings[key] = parseInt(el.value, 10) || DEFAULTS[key];
+                }
             }
             localStorage.setItem('kurtulus_ayarlar', JSON.stringify(baseSettings));
             unsavedSettings = false;
@@ -2270,7 +2253,7 @@
                 let uyku = sonuc.uykuSureleri ? (sonuc.uykuSureleri[i] || 0) : 0;
                 let man = manualScores[i] || 0;
                 let toplam = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + p16 + p17 + p18 + p19 + man;
-                siralama.push({ i: i, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, uyku, man, toplam });
+                siralama.push({ i: i, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, uyku, man, toplam });
             }
 
             siralama.sort((a, b) => b.toplam - a.toplam);
@@ -2328,6 +2311,7 @@
                                 <td style="color:${item.p16 > 0 ? '#ff9800' : (item.p16 < 0 ? '#f44336' : '#888')}; font-weight:bold;">${item.p16}</td>
                                 <td style="color:${item.p17 > 0 ? '#8e24aa' : '#888'}; font-weight:bold;">${item.p17}</td>
                                 <td style="color:${item.p18 > 0 ? '#607d8b' : '#888'}; font-weight:bold;">${item.p18}</td>
+                                <td style="color:${item.p19 > 0 ? '#795548' : '#888'}; font-weight:bold;">${item.p19}</td>
             </tr>`;
                 tbody.appendChild(tr);
             });
@@ -2435,8 +2419,9 @@
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#f44336;" onclick="showKInfo('k14')" title="Bilgi i&#231;in t&#305;kla">K14 (Eleme)</th>
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;" onclick="showKInfo('k15')" title="Bilgi i&#231;in t&#305;kla">K15 (Yank&#305;)</th>
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#ff9800;" onclick="showKInfo('k16')" title="Bilgi i&#231;in t&#305;kla">K16 (B&ouml;lge)</th>
-                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#8e24aa;" onclick="showKInfo('k17')" title="Bilgi i&#231;in t&#305;kla">K17 (Kanka)</th>
-                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#607d8b;" onclick="showKInfo('k18')" title="Bilgi i&#231;in t&#305;kla">K18 (T/&Ccedil;)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#8e24aa;" onclick="showKInfo('k17')" title="Bilgi için tıkla">K17 (Kanka)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#607d8b;" onclick="showKInfo('k18')" title="Bilgi için tıkla">K18 (T/&Ccedil;)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#795548;" onclick="showKInfo('k19')" title="Bilgi için tıkla">K19 (Son R.)</th>
                 </tr>
             </thead>
             <tbody>
@@ -2465,6 +2450,7 @@
                 let p16 = currentSonuc.puanlar.k16 ? (currentSonuc.puanlar.k16[item.num] || 0) : 0;
                 let p17 = currentSonuc.puanlar.k17 ? (currentSonuc.puanlar.k17[item.num] || 0) : 0;
                 let p18 = currentSonuc.puanlar.k18 ? (currentSonuc.puanlar.k18[item.num] || 0) : 0;
+                let p19 = currentSonuc.puanlar.k19 ? (currentSonuc.puanlar.k19[item.num] || 0) : 0;
                 let man = manualScores[item.num] || 0;
 
                 html += `
@@ -2495,6 +2481,7 @@
                 <td style="color:${p16 > 0 ? '#ff9800' : (p16 < 0 ? '#f44336' : '#888')}; font-weight:bold;">${p16}</td>
                 <td style="color:${p17 > 0 ? '#8e24aa' : '#888'}; font-weight:bold;">${p17}</td>
                 <td style="color:${p18 > 0 ? '#607d8b' : '#888'}; font-weight:bold;">${p18}</td>
+                <td style="color:${p19 > 0 ? '#795548' : '#888'}; font-weight:bold;">${p19}</td>
             </tr>`;
             });
 
