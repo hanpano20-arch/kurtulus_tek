@@ -1025,6 +1025,23 @@
                     <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k18_weight', 100)"
                         title="Sıfırla">↺</button>
                 </div>
+
+                <div class="slider-row" style="border-left: 3px solid #795548;">
+                    <span class="slider-label" style="color: white; cursor:pointer;" onclick="showKInfo('k19')" title="Bilgi için tıkla">K19 Çarpanı <br><span
+                            style="font-size: 0.85em; color: #bbb;">(Son Rakam Dengesi)</span></span>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k19_toggle"
+                        onclick="toggleRule('k19')">AÇIK</button>
+                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k19_val" value="100"
+                        onchange="syncInputToSlider('k19_val', 'k19_weight')">
+                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k19_weight', -1)"
+                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                    <input type="range" id="k19_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
+                        step="1" value="100" oninput="syncSlider('k19_weight', 'k19_val')" onchange="testCalistir()">
+                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k19_weight', 1)"
+                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k19_weight', 100)"
+                        title="Sıfırla">↺</button>
+                </div>
             </div>
 
             <!-- Sayı Listesi Modal'a Taşındı -->
@@ -1121,6 +1138,8 @@
                                     onclick="showKInfo('k17')" title="Bilgi i&#231;in t&#305;kla">K17 (Kanka)</th>
                                 <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#607d8b;"
                                     onclick="showKInfo('k18')" title="Bilgi i&#231;in t&#305;kla">K18 (T/&Ccedil;)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#795548;"
+                                    onclick="showKInfo('k19')" title="Bilgi için tıkla">K19 (Son R.)</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
@@ -1277,7 +1296,8 @@
             K15_TABAN: 100, K15_SON_X: 10,
             K16_TABAN: 150, K16_PENCERE: 10,
             K17_TABAN: 100, K17_DERINLIK: 200,
-            K18_TABAN: 60, K18_PENCERE: 8
+            K18_TABAN: 60, K18_PENCERE: 8,
+            K19_TABAN: 100, K19_PENCERE: 8
         };
         let baseSettings = {};
         let unsavedSettings = false;
@@ -1521,6 +1541,50 @@
                         <input type="number" id="input_K18_TABAN" value="${baseSettings.K18_TABAN || 100}" style="width: 60px;" oninput="unsavedSettings = true;">
                         <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K18_TABAN', 10)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
                         <button class="btn-reset" onclick="document.getElementById('input_K18_TABAN').value = 100; unsavedSettings = true;" title="Sıfırla">↺</button>
+                    </div>
+                </div>
+            </div>`;
+
+            // K19 Özel Satır
+            html += `
+            <div class="setting-row" style="align-items: center; border-left: 3px solid #795548;">
+                <label style="min-width: 150px; flex-shrink: 0; color: #fff; font-weight: bold;">K19 (Son Rakam)</label>
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label style="font-size: 0.8em; color: #aaa;">Pencere:</label>
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K19_PENCERE', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                        <input type="number" id="input_K19_PENCERE" value="${baseSettings.K19_PENCERE || 8}" style="width: 55px;" oninput="unsavedSettings = true;">
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K19_PENCERE', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                        <button class="btn-reset" onclick="document.getElementById('input_K19_PENCERE').value = 8; unsavedSettings = true;" title="Sıfırla">↺</button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label style="font-size: 0.8em; color: #aaa;">Taban:</label>
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K19_TABAN', -10)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                        <input type="number" id="input_K19_TABAN" value="${baseSettings.K19_TABAN || 100}" style="width: 60px;" oninput="unsavedSettings = true;">
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K19_TABAN', 10)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                        <button class="btn-reset" onclick="document.getElementById('input_K19_TABAN').value = 100; unsavedSettings = true;" title="Sıfırla">↺</button>
+                    </div>
+                </div>
+            </div>`;
+
+            // K19 Özel Satır
+            html += `
+            <div class="setting-row" style="align-items: center; border-left: 3px solid #795548;">
+                <label style="min-width: 150px; flex-shrink: 0; color: #fff; font-weight: bold;">K19 (Son Rakam)</label>
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label style="font-size: 0.8em; color: #aaa;">Pencere:</label>
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K19_PENCERE', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                        <input type="number" id="input_K19_PENCERE" value="${baseSettings.K19_PENCERE || 8}" style="width: 55px;" oninput="unsavedSettings = true;">
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K19_PENCERE', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                        <button class="btn-reset" onclick="document.getElementById('input_K19_PENCERE').value = 8; unsavedSettings = true;" title="Sıfırla">↺</button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label style="font-size: 0.8em; color: #aaa;">Taban:</label>
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K19_TABAN', -10)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                        <input type="number" id="input_K19_TABAN" value="${baseSettings.K19_TABAN || 100}" style="width: 60px;" oninput="unsavedSettings = true;">
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K19_TABAN', 10)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                        <button class="btn-reset" onclick="document.getElementById('input_K19_TABAN').value = 100; unsavedSettings = true;" title="Sıfırla">↺</button>
                     </div>
                 </div>
             </div>`;
@@ -2168,7 +2232,10 @@
                 K17_CARPAN: getCarpan('k17'),
                 K18_TABAN: baseSettings.K18_TABAN,
                 K18_PENCERE: baseSettings.K18_PENCERE,
-                K18_CARPAN: getCarpan('k18')
+                K18_CARPAN: getCarpan('k18'),
+                K19_TABAN: baseSettings.K19_TABAN,
+                K19_PENCERE: baseSettings.K19_PENCERE,
+                K19_CARPAN: getCarpan('k19')
             };
 
             currentSonuc = motorAtesle(hedefCekilisler, hedefJokerler, ayarlar);
@@ -2199,9 +2266,10 @@
                 let p16 = sonuc.puanlar.k16 ? (sonuc.puanlar.k16[i] || 0) : 0;
                 let p17 = sonuc.puanlar.k17 ? (sonuc.puanlar.k17[i] || 0) : 0;
                 let p18 = sonuc.puanlar.k18 ? (sonuc.puanlar.k18[i] || 0) : 0;
+                let p19 = sonuc.puanlar.k19 ? (sonuc.puanlar.k19[i] || 0) : 0;
                 let uyku = sonuc.uykuSureleri ? (sonuc.uykuSureleri[i] || 0) : 0;
                 let man = manualScores[i] || 0;
-                let toplam = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + p16 + p17 + p18 + man;
+                let toplam = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + p16 + p17 + p18 + p19 + man;
                 siralama.push({ i: i, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, uyku, man, toplam });
             }
 
@@ -2663,7 +2731,10 @@
                 K17_CARPAN: getCarpan('k17'),
                 K18_TABAN: baseSettings.K18_TABAN,
                 K18_PENCERE: baseSettings.K18_PENCERE,
-                K18_CARPAN: getCarpan('k18')
+                K18_CARPAN: getCarpan('k18'),
+                K19_TABAN: baseSettings.K19_TABAN,
+                K19_PENCERE: baseSettings.K19_PENCERE,
+                K19_CARPAN: getCarpan('k19')
             };
 
             // Zaman Makinesini Çalıştır
@@ -2899,11 +2970,18 @@
                 eff: "Tekil frekansların ötesine geçerek sayıların birbiriyle olan ilişkisel bağlarını yakalar, başarıyı tesadüfün ötesine taşımayı hedefler."
             },
             'k18': {
-                title: "K18 - Tek/Çift ve Düşük/Yüksek Dengesi",
-                what: "Son 8 (K18_PENCERE) çekilişin ortalama tek/çift ve 1-45/46-90 oranlarına bakarak sapmaları tespit eder ve sıradaki çekilişte bu sapmayı dengeleyecek sayılara yönelir.",
-                how: "Örneğin, son zamanlarda sürekli tek sayılar çıkıyorsa, sistem çift sayıların 'birikmiş bir olasılık baskısı' altında olduğunu hesaplar ve çift sayılara K18_TABAN değerinde bonus uygular.",
-                ex: "Makine 'Son 8 çekilişte hep yüksek ve tek sayılar çıktı, artık düşük ve çift sayılar gelmeli' der.",
-                eff: "Tek-çift dengesini ve alt-üst yarım küre dengesini makro düzeyde takip ederek ekstrem durumlardan kaçınır ve ortalamaya dönme eğilimine oynar."
+                title: "K18 - Tek/Çift Denge Düzeltmesi (Keskin Nişancı)",
+                what: "Son 8 çekilişin (K18_PENCERE) tek/çift çıkma oranına bakar ve %50 beklentisinden sapan (az çıkan) gruba puan verir. Ancak bu puan sadece 'Son 3 Çekiliş' veya '1. Halka Komşuları' içindeki sayılara uygulanır.",
+                how: "Örneğin, son zamanlarda sürekli tek sayılar çıkıyorsa çift sayılar 'aç kalmış' sayılır. Sistem, sadece sıcak bölgedeki çift sayılara K18_TABAN değerinde bonus ekler.",
+                ex: "Makine 'Son 8 çekilişte hep tek sayılar çıktı, çift sayılar aç. Sıcak bölgedeki 22 ve 44 numaralı çift sayıların kazanma ihtimali yüksek' der.",
+                eff: "Ölü sayıları diriltmeden tek/çift dengesini düzelterek kazanma potansiyeli en yüksek sıcak sayılara odaklanmayı sağlar."
+            },
+            'k19': {
+                title: "K19 - Son Rakam (Birler Basamağı) Dengesi (Keskin Nişancı)",
+                what: "Son çekilişlerde (K19_PENCERE) birler basamağı (0-9) olan sayıların çıkma oranlarını tartar ve beklentiden sapan (az çıkan) basamaklara bonus verir. Puanlar sadece 'Sıcak Bölge'deki sayılara uygulanır.",
+                how: "Örneğin, sonu '7' olan sayılar (7, 17, 27 vb.) son 8 çekilişte hiç çıkmadıysa aç kalmıştır. Sistem, Sıcak Bölge (Son 3 + 1. Halka) içerisindeki sonu '7' ile biten sayılara ekstra K19_TABAN puanı verir.",
+                ex: "Makine 'Sonu 3 ile biten sayılar çok uzun süredir gelmiyor, bu basamak aç. Sıcak bölgede bekleyen 13 ve 43 numaralarına bonus vermeliyim' der.",
+                eff: "Bölge ve Tek/Çift kuralları gibi çoklu sayıları etkileyen kurallarda ölü sayıları eler, yalnızca çıkmaya en yakın sıcak sayıları öne çıkarır."
             }
         };
 

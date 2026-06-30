@@ -20,7 +20,8 @@
             K15_TABAN: 100, K15_SON_X: 10,
             K16_TABAN: 150, K16_PENCERE: 10,
             K17_TABAN: 100, K17_DERINLIK: 200,
-            K18_TABAN: 60, K18_PENCERE: 8
+            K18_TABAN: 60, K18_PENCERE: 8,
+            K19_TABAN: 100, K19_PENCERE: 8
         };
         let baseSettings = {};
         let unsavedSettings = false;

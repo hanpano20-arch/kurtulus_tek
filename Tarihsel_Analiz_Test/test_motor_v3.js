@@ -756,6 +756,80 @@ function k18TekCiftDengesiHesapla(cekilisler, jokerler, komsuluk, tabanPuan, car
     return k18Puanlar;
 }
 
+// ============================================================
+// K19 (Son Rakam / Birler Basamağı Dengesi)
+function k19SonRakamDengesiHesapla(cekilisler, jokerler, komsuluk, tabanPuan, carpan, pencere) {
+    let k19Puanlar = {};
+    for (let i = 1; i <= MAX_TOP; i++) k19Puanlar[i] = 0;
+
+    let safeTaban = (!tabanPuan || isNaN(tabanPuan) || tabanPuan === 0) ? 100 : tabanPuan;
+    let safeCarpan = (carpan === undefined || isNaN(carpan)) ? 100 : carpan;
+    if (safeCarpan === 0) return k19Puanlar;
+
+    let safePencere = (pencere && !isNaN(pencere) && pencere >= 1 && pencere <= 50) ? parseInt(pencere, 10) : 8;
+
+    if (!cekilisler || cekilisler.length < 1) return k19Puanlar;
+    let limit = Math.min(safePencere, cekilisler.length);
+
+    // Her birler basamağı (0-9) için frekansları tutacak dizi
+    let sonRakamFrekans = [0,0,0,0,0,0,0,0,0,0];
+    let toplamSayi = 0;
+
+    for (let i = 0; i < limit; i++) {
+        let asil = cekilisler[i] || [];
+        asil.forEach(n => {
+            if (n >= 1 && n <= MAX_TOP) {
+                sonRakamFrekans[n % 10]++;
+                toplamSayi++;
+            }
+        });
+        if (jokerler && jokerler[i]) {
+            let jn = Number(jokerler[i]);
+            if (jn >= 1 && jn <= MAX_TOP) {
+                sonRakamFrekans[jn % 10]++;
+                toplamSayi++;
+            }
+        }
+    }
+
+    if (toplamSayi === 0) return k19Puanlar;
+
+    // Normalde 90 topta her son rakamdan tam 9 tane vardır (tamamı eşit şansa sahip).
+    // Beklenen çıkma sayısı = Toplam çıkan sayı / 10
+    let beklenen = toplamSayi / 10;
+
+    // Her rakam (0-9) için sapma (açlık) puanı hesapla
+    let hamPuanlar = {};
+    for (let r = 0; r <= 9; r++) {
+        let sapma = beklenen - sonRakamFrekans[r];
+        // Sapma pozitifse (aç kalmış), bonus. Sapma negatifse (çok çıkmış), ceza.
+        hamPuanlar[r] = sapma * (safeTaban / 10);
+    }
+
+    // Sıcak Bölge Hedefleme (Son 3 Çekiliş Sayıları)
+    let son3teCikanlar = new Set();
+    let hotLimit = Math.min(3, cekilisler.length);
+    for (let i = 0; i < hotLimit; i++) {
+        let asil = cekilisler[i] || [];
+        asil.forEach(n => son3teCikanlar.add(n));
+        if (jokerler && jokerler[i]) {
+            son3teCikanlar.add(Number(jokerler[i]));
+        }
+    }
+
+    for (let n = 1; n <= MAX_TOP; n++) {
+        // Keskin Nişancı: Sadece Son 3 çekiliş sayıları ve 1. halka komşuları puan alır
+        if (son3teCikanlar.has(n) || (komsuluk && komsuluk.halka1 && komsuluk.halka1[n] > 0)) {
+            let sonRakam = n % 10;
+            k19Puanlar[n] = Math.round(hamPuanlar[sonRakam] * (safeCarpan / 100));
+        } else {
+            k19Puanlar[n] = 0;
+        }
+    }
+
+    return k19Puanlar;
+}
+
 // Dışarıya açılacak ana fonksiyon
 function motorAtesle(cekilisler, jokerler, ayarlar) {
     // Aşama 1: Frekansları Çıkar
@@ -847,6 +921,16 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
         ayarlar.K18_PENCERE
     );
 
+    // Aşama 13: K19 (Son Rakam Dengesi)
+    let k19Puanlar = k19SonRakamDengesiHesapla(
+        cekilisler,
+        jokerler,
+        komsuluk,
+        ayarlar.K19_TABAN,
+        ayarlar.K19_CARPAN,
+        ayarlar.K19_PENCERE
+    );
+
     return {
         frekanslar: {
             tumu: frekansTumu,
@@ -873,7 +957,8 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
             k15: k15Puanlar,
             k16: k16Puanlar,
             k17: k17Puanlar,
-            k18: k18Puanlar
+            k18: k18Puanlar,
+            k19: k19Puanlar
         },
         uykuSureleri: uykuSureleri,
         istatistikler: {
@@ -998,6 +1083,7 @@ function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler,
                 (motorSonucu.puanlar.k16 ? (motorSonucu.puanlar.k16[num] || 0) : 0) +
                 (motorSonucu.puanlar.k17 ? (motorSonucu.puanlar.k17[num] || 0) : 0) +
                 (motorSonucu.puanlar.k18 ? (motorSonucu.puanlar.k18[num] || 0) : 0) +
+                (motorSonucu.puanlar.k19 ? (motorSonucu.puanlar.k19[num] || 0) : 0) +
                 (manualScores[num] || 0);
             siralama.push({ num: num, toplam: toplam });
         }
