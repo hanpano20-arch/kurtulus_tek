@@ -105,7 +105,7 @@
 
 
         .rule-toggle-btn {
-            width: 50px;
+            min-width: 65px;
             padding: 2px 4px;
             border: 1px solid #4caf50;
             border-radius: 4px;
@@ -1042,6 +1042,40 @@
                     <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k19_weight', 100)"
                         title="Sıfırla">↺</button>
                 </div>
+
+                <div class="slider-row" style="border-left: 3px solid #ff5722;">
+                    <span class="slider-label" style="color: white; cursor:pointer;" onclick="showKInfo('k20')" title="Bilgi için tıkla">K20 Çarpanı <br><span
+                            style="font-size: 0.85em; color: #bbb;">(Uyuyan Komşu)</span></span>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k20_toggle"
+                        onclick="toggleRule('k20')">AÇIK</button>
+                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k20_val" value="100"
+                        onchange="syncInputToSlider('k20_val', 'k20_weight')">
+                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k20_weight', -1)"
+                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                    <input type="range" id="k20_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
+                        step="1" value="100" oninput="syncSlider('k20_weight', 'k20_val')" onchange="testCalistir()">
+                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k20_weight', 1)"
+                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k20_weight', 100)"
+                        title="Sıfırla">↺</button>
+                </div>
+
+                <div class="slider-row" style="border-left: 3px solid #00bcd4;">
+                    <span class="slider-label" style="color: white; cursor:pointer;" onclick="showKInfo('k21')" title="Bilgi için tıkla">K21 Çarpanı <br><span
+                            style="font-size: 0.85em; color: #bbb;">(Isınma Turu)</span></span>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k21_toggle"
+                        onclick="toggleRule('k21')">AÇIK</button>
+                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k21_val" value="100"
+                        onchange="syncInputToSlider('k21_val', 'k21_weight')">
+                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k21_weight', -1)"
+                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                    <input type="range" id="k21_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
+                        step="1" value="100" oninput="syncSlider('k21_weight', 'k21_val')" onchange="testCalistir()">
+                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k21_weight', 1)"
+                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k21_weight', 100)"
+                        title="Sıfırla">↺</button>
+                </div>
             </div>
 
             <!-- Sayı Listesi Modal'a Taşındı -->
@@ -1066,7 +1100,7 @@
         <!-- Detaylı Puan Tablosu Modal / Sayfa -->
         <div class="modal-overlay" id="detayliTabloModal" style="background: #111; display: none;">
             <div class="modal-content"
-                style="width: 95%; height: 95vh; max-width: 1700px; display: flex; flex-direction: column; overflow: hidden; padding: 0;">
+                style="width: 98%; height: 95vh; max-width: none; display: flex; flex-direction: column; overflow: hidden; padding: 0;">
                 <div class="modal-header"
                     style="justify-content: space-between; position: sticky; top: 0; background: #1e1e2d; z-index: 100; padding: 15px 20px; border-bottom: 1px solid #333; margin: 0;">
                     <h2 style="margin: 0;">📋 DETAYLI PUAN TABLOSU</h2>
@@ -1090,56 +1124,60 @@
                                 <th style="padding: 4px; font-size: 0.85em;">Durum</th>
                                 <th style="padding: 4px; font-size: 0.85em;">Toplam Puan</th>
                                 <th style="padding: 4px; font-size: 0.85em;">Manuel</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k1')" title="Bilgi için tıkla">K1 (Tüm Zamanlar)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k1')" title="Bilgi için tıkla">K1 Puanı</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k2')" title="Bilgi için tıkla">K2 (Son 50)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k2')" title="Bilgi için tıkla">K2 Puanı</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k3')" title="Bilgi için tıkla">K3 (Son 15)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k3')" title="Bilgi için tıkla">K3 Puanı</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k4')" title="Bilgi için tıkla">1. Halka Komşu</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k4')" title="Bilgi için tıkla">K4 Puan</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k5')" title="Bilgi için tıkla">2. Halka Komşu</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k5')" title="Bilgi için tıkla">K5 Puan</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k6')" title="Bilgi için tıkla">K6 (Joker)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k7')" title="Bilgi için tıkla">K7 (Ceza)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k8')" title="Bilgi için tıkla">Uyku (Çek.)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k8')" title="Bilgi için tıkla">K8 (Uyku Puan)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k9')" title="Bilgi için tıkla">K9 (Son 4)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k10')" title="Bilgi için tıkla">K10 (Son 8)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k11')" title="Bilgi için tıkla">K11 (Son 12)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
                                     onclick="showKInfo('k12')" title="Bilgi için tıkla">K12 (Son 15)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#00bcd4;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;"
                                     onclick="showKInfo('k13')" title="Bilgi için tıkla">K13 (Diriltme)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#f44336;"
-                                    onclick="showKInfo('k14')" title="Bilgi i&#231;in t&#305;kla">K14 (Eleme)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#00bcd4;"
-                                    onclick="showKInfo('k15')" title="Bilgi i&#231;in t&#305;kla">K15 (Yank&#305;)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#ff9800;"
-                                    onclick="showKInfo('k16')" title="Bilgi i&#231;in t&#305;kla">K16 (B&ouml;lge)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#8e24aa;"
-                                    onclick="showKInfo('k17')" title="Bilgi i&#231;in t&#305;kla">K17 (Kanka)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#607d8b;"
-                                    onclick="showKInfo('k18')" title="Bilgi i&#231;in t&#305;kla">K18 (T/&Ccedil;)</th>
-                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#795548;"
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#f44336;"
+                                    onclick="showKInfo('k14')" title="Bilgi için tıkla">K14 (Eleme)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;"
+                                    onclick="showKInfo('k15')" title="Bilgi için tıkla">K15 (Yankı)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#ff9800;"
+                                    onclick="showKInfo('k16')" title="Bilgi için tıkla">K16 (Bölge)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#8e24aa;"
+                                    onclick="showKInfo('k17')" title="Bilgi için tıkla">K17 (Kanka)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#607d8b;"
+                                    onclick="showKInfo('k18')" title="Bilgi için tıkla">K18 (T/Ç)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#795548;"
                                     onclick="showKInfo('k19')" title="Bilgi için tıkla">K19 (Son R.)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#ff5722;"
+                                    onclick="showKInfo('k20')" title="Bilgi için tıkla">K20 (Uyuyan)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;"
+                                    onclick="showKInfo('k21')" title="Bilgi için tıkla">K21 (Isınma)</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
@@ -1297,7 +1335,9 @@
             K16_TABAN: 150, K16_PENCERE: 10,
             K17_TABAN: 100, K17_DERINLIK: 200,
             K18_TABAN: 60, K18_PENCERE: 8,
-            K19_TABAN: 100, K19_PENCERE: 8
+            K19_TABAN: 100, K19_PENCERE: 8,
+            K20_TABAN: -500, // Uyuyan komşu cezası
+            K21_TABAN: 50 // Isınma Turu bonusu
         };
         let baseSettings = {};
         let unsavedSettings = false;
@@ -1563,6 +1603,34 @@
                         <input type="number" id="input_K19_TABAN" value="${baseSettings.K19_TABAN || 100}" style="width: 60px;" oninput="unsavedSettings = true;">
                         <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K19_TABAN', 10)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
                         <button class="btn-reset" onclick="document.getElementById('input_K19_TABAN').value = 100; unsavedSettings = true;" title="Sıfırla">↺</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- K20 Uyuyan Komşu -->
+            <div class="setting-row" style="align-items: center; border-left: 3px solid #ff5722;">
+                <label style="min-width: 150px; flex-shrink: 0; color: #fff; font-weight: bold;">K20 (Uyuyan Komşu)</label>
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label style="font-size: 0.8em; color: #aaa;">Ceza:</label>
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K20_TABAN', -50)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                        <input type="number" id="input_K20_TABAN" value="${baseSettings.K20_TABAN !== undefined ? baseSettings.K20_TABAN : -500}" style="width: 60px;" oninput="unsavedSettings = true;">
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K20_TABAN', 50)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                        <button class="btn-reset" onclick="document.getElementById('input_K20_TABAN').value = -500; unsavedSettings = true;" title="Sıfırla">↺</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- K21 Isınma Turu -->
+            <div class="setting-row" style="align-items: center; border-left: 3px solid #00bcd4;">
+                <label style="min-width: 150px; flex-shrink: 0; color: #fff; font-weight: bold;">K21 (Isınma Turu)</label>
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label style="font-size: 0.8em; color: #aaa;">Bonus:</label>
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K21_TABAN', -10)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                        <input type="number" id="input_K21_TABAN" value="${baseSettings.K21_TABAN !== undefined ? baseSettings.K21_TABAN : 50}" style="width: 60px;" oninput="unsavedSettings = true;">
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K21_TABAN', 10)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                        <button class="btn-reset" onclick="document.getElementById('input_K21_TABAN').value = 50; unsavedSettings = true;" title="Sıfırla">↺</button>
                     </div>
                 </div>
             </div>`;
@@ -1999,6 +2067,11 @@
                     (currentSonuc.puanlar.k14 ? (currentSonuc.puanlar.k14[n] || 0) : 0) +
                     (currentSonuc.puanlar.k15 ? (currentSonuc.puanlar.k15[n] || 0) : 0) +
                     (currentSonuc.puanlar.k16 ? (currentSonuc.puanlar.k16[n] || 0) : 0) +
+                    (currentSonuc.puanlar.k17 ? (currentSonuc.puanlar.k17[n] || 0) : 0) +
+                    (currentSonuc.puanlar.k18 ? (currentSonuc.puanlar.k18[n] || 0) : 0) +
+                    (currentSonuc.puanlar.k19 ? (currentSonuc.puanlar.k19[n] || 0) : 0) +
+                    (currentSonuc.puanlar.k20 ? (currentSonuc.puanlar.k20[n] || 0) : 0) +
+                    (currentSonuc.puanlar.k21 ? (currentSonuc.puanlar.k21[n] || 0) : 0) +
                     (manualScores[n] || 0)
             }));
             sorted.sort((a, b) => b.tp - a.tp);
@@ -2218,7 +2291,11 @@
                 K18_CARPAN: getCarpan('k18'),
                 K19_TABAN: baseSettings.K19_TABAN,
                 K19_PENCERE: baseSettings.K19_PENCERE,
-                K19_CARPAN: getCarpan('k19')
+                K19_CARPAN: getCarpan('k19'),
+                K20_TABAN: baseSettings.K20_TABAN,
+                K20_CARPAN: getCarpan('k20'),
+                K21_TABAN: baseSettings.K21_TABAN,
+                K21_CARPAN: getCarpan('k21')
             };
 
             currentSonuc = motorAtesle(hedefCekilisler, hedefJokerler, ayarlar);
@@ -2250,10 +2327,12 @@
                 let p17 = sonuc.puanlar.k17 ? (sonuc.puanlar.k17[i] || 0) : 0;
                 let p18 = sonuc.puanlar.k18 ? (sonuc.puanlar.k18[i] || 0) : 0;
                 let p19 = sonuc.puanlar.k19 ? (sonuc.puanlar.k19[i] || 0) : 0;
+                let p20 = sonuc.puanlar.k20 ? (sonuc.puanlar.k20[i] || 0) : 0;
+                let p21 = sonuc.puanlar.k21 ? (sonuc.puanlar.k21[i] || 0) : 0;
                 let uyku = sonuc.uykuSureleri ? (sonuc.uykuSureleri[i] || 0) : 0;
                 let man = manualScores[i] || 0;
-                let toplam = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + p16 + p17 + p18 + p19 + man;
-                siralama.push({ i: i, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, uyku, man, toplam });
+                let toplam = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + p16 + p17 + p18 + p19 + p20 + p21 + man;
+                siralama.push({ i: i, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, uyku, man, toplam });
             }
 
             siralama.sort((a, b) => b.toplam - a.toplam);
@@ -2306,12 +2385,14 @@
                 <td style="color:${item.p11 < 0 ? '#f44336' : (item.p11 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p11}</td>
                 <td style="color:${item.p12 < 0 ? '#f44336' : (item.p12 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p12}</td>
                 <td style="color:${item.p13 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${item.p13}</td>
-                                <td style="color:${item.p14 !== 0 ? '#f44336' : '#888'}; font-weight:bold;">${item.p14}</td>
-                                <td style="color:${item.p15 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${item.p15}</td>
-                                <td style="color:${item.p16 > 0 ? '#ff9800' : (item.p16 < 0 ? '#f44336' : '#888')}; font-weight:bold;">${item.p16}</td>
-                                <td style="color:${item.p17 > 0 ? '#8e24aa' : '#888'}; font-weight:bold;">${item.p17}</td>
-                                <td style="color:${item.p18 > 0 ? '#607d8b' : '#888'}; font-weight:bold;">${item.p18}</td>
-                                <td style="color:${item.p19 > 0 ? '#795548' : '#888'}; font-weight:bold;">${item.p19}</td>
+                <td style="color:${item.p14 !== 0 ? '#f44336' : '#888'}; font-weight:bold;">${item.p14}</td>
+                <td style="color:${item.p15 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${item.p15}</td>
+                <td style="color:${item.p16 > 0 ? '#ff9800' : (item.p16 < 0 ? '#f44336' : '#888')}; font-weight:bold;">${item.p16}</td>
+                <td style="color:${item.p17 > 0 ? '#8e24aa' : '#888'}; font-weight:bold;">${item.p17}</td>
+                <td style="color:${item.p18 > 0 ? '#607d8b' : '#888'}; font-weight:bold;">${item.p18}</td>
+                <td style="color:${item.p19 > 0 ? '#795548' : '#888'}; font-weight:bold;">${item.p19}</td>
+                <td style="color:${item.p20 < 0 ? '#ff5722' : '#888'}; font-weight:bold;">${item.p20}</td>
+                <td style="color:${item.p21 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${item.p21}</td>
             </tr>`;
                 tbody.appendChild(tr);
             });
@@ -2352,8 +2433,13 @@
                 let p14 = currentSonuc.puanlar.k14 ? (currentSonuc.puanlar.k14[num] || 0) : 0;
                 let p15 = currentSonuc.puanlar.k15 ? (currentSonuc.puanlar.k15[num] || 0) : 0;
                 let p16 = currentSonuc.puanlar.k16 ? (currentSonuc.puanlar.k16[num] || 0) : 0;
+                let p17 = currentSonuc.puanlar.k17 ? (currentSonuc.puanlar.k17[num] || 0) : 0;
+                let p18 = currentSonuc.puanlar.k18 ? (currentSonuc.puanlar.k18[num] || 0) : 0;
+                let p19 = currentSonuc.puanlar.k19 ? (currentSonuc.puanlar.k19[num] || 0) : 0;
+                let p20 = currentSonuc.puanlar.k20 ? (currentSonuc.puanlar.k20[num] || 0) : 0;
+                let p21 = currentSonuc.puanlar.k21 ? (currentSonuc.puanlar.k21[num] || 0) : 0;
                 let man = manualScores[num] || 0;
-                siralama.push({ num: num, tp: p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + p16 + man });
+                siralama.push({ num: num, tp: p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + p16 + p17 + p18 + p19 + p20 + p21 + man });
             }
             siralama.sort((a, b) => b.tp - a.tp);
 
@@ -2422,6 +2508,8 @@
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#8e24aa;" onclick="showKInfo('k17')" title="Bilgi için tıkla">K17 (Kanka)</th>
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#607d8b;" onclick="showKInfo('k18')" title="Bilgi için tıkla">K18 (T/&Ccedil;)</th>
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#795548;" onclick="showKInfo('k19')" title="Bilgi için tıkla">K19 (Son R.)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#ff5722;" onclick="showKInfo('k20')" title="Bilgi için tıkla">K20 (Uyku)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;" onclick="showKInfo('k21')" title="Bilgi için tıkla">K21 (Isınma)</th>
                 </tr>
             </thead>
             <tbody>
@@ -2451,6 +2539,8 @@
                 let p17 = currentSonuc.puanlar.k17 ? (currentSonuc.puanlar.k17[item.num] || 0) : 0;
                 let p18 = currentSonuc.puanlar.k18 ? (currentSonuc.puanlar.k18[item.num] || 0) : 0;
                 let p19 = currentSonuc.puanlar.k19 ? (currentSonuc.puanlar.k19[item.num] || 0) : 0;
+                let p20 = currentSonuc.puanlar.k20 ? (currentSonuc.puanlar.k20[item.num] || 0) : 0;
+                let p21 = currentSonuc.puanlar.k21 ? (currentSonuc.puanlar.k21[item.num] || 0) : 0;
                 let man = manualScores[item.num] || 0;
 
                 html += `
@@ -2482,6 +2572,8 @@
                 <td style="color:${p17 > 0 ? '#8e24aa' : '#888'}; font-weight:bold;">${p17}</td>
                 <td style="color:${p18 > 0 ? '#607d8b' : '#888'}; font-weight:bold;">${p18}</td>
                 <td style="color:${p19 > 0 ? '#795548' : '#888'}; font-weight:bold;">${p19}</td>
+                <td style="color:${p20 < 0 ? '#ff5722' : '#888'}; font-weight:bold;">${p20}</td>
+                <td style="color:${p21 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${p21}</td>
             </tr>`;
             });
 
@@ -2721,7 +2813,11 @@
                 K18_CARPAN: getCarpan('k18'),
                 K19_TABAN: baseSettings.K19_TABAN,
                 K19_PENCERE: baseSettings.K19_PENCERE,
-                K19_CARPAN: getCarpan('k19')
+                K19_CARPAN: getCarpan('k19'),
+                K20_TABAN: baseSettings.K20_TABAN,
+                K20_CARPAN: getCarpan('k20'),
+                K21_TABAN: baseSettings.K21_TABAN,
+                K21_CARPAN: getCarpan('k21')
             };
 
             // Zaman Makinesini Çalıştır
@@ -2969,6 +3065,20 @@
                 how: "Örneğin, sonu '7' olan sayılar (7, 17, 27 vb.) son 8 çekilişte hiç çıkmadıysa aç kalmıştır. Sistem, Sıcak Bölge (Son 3 + 1. Halka) içerisindeki sonu '7' ile biten sayılara ekstra K19_TABAN puanı verir.",
                 ex: "Makine 'Sonu 3 ile biten sayılar çok uzun süredir gelmiyor, bu basamak aç. Sıcak bölgede bekleyen 13 ve 43 numaralarına bonus vermeliyim' der.",
                 eff: "Bölge ve Tek/Çift kuralları gibi çoklu sayıları etkileyen kurallarda ölü sayıları eler, yalnızca çıkmaya en yakın sıcak sayıları öne çıkarır."
+            },
+            'k20': {
+                title: "K20 - Uyuyan Komşu Elemesi",
+                what: "Birinci derece komşu olup da çok uzun süredir çıkmayan (uyuyan) sayıları havuzdan eler.",
+                how: "Sistem, komşu sayıların son çıkma zamanlarını kontrol eder. Eğer bir sayı son 10 veya daha fazla çekilişte hiç çıkmamışsa, bu sayıya ciddi bir eksi puan (ceza) verir.",
+                ex: "Makine 'Bu sayı birinci halkada ama son 12 çekiliştir hiç yüzünü göstermedi, demek ki hala uykuda, bunu havuzun dibine atmalıyım' der.",
+                eff: "Komşu olmasına rağmen tarihsel olarak şansı düşük olan 'ölü' sayıları temizleyerek havuz verimliliğini artırır."
+            },
+            'k21': {
+                title: "K21 - Isınma Turu Bonusu",
+                what: "Birinci derece komşular arasında, dinlenmesini tamamlamış ve yeniden çıkma ihtimali en yüksek olan sayılara ekstra puan verir.",
+                how: "Analizlere göre komşu sayıların en verimli oldukları aralık 4. ile 10. çekiliş arasıdır. Sistem bu aralıkta olan komşulara artı bonus puan (K21_TABAN) verir.",
+                ex: "Makine 'Bu sayı 6 çekiliş önce çıkmıştı, dinlenmesini tamamladı ve şimdi tam çıkma zamanı, buna bonus puan vermeliyim' der.",
+                eff: "Sıcak havuzdaki sayılar içerisinde tarihsel döngüsüne sadık kalan ve 'patlamaya hazır' sayılara avantaj sağlar."
             }
         };
 

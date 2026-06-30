@@ -830,6 +830,57 @@ function k19SonRakamDengesiHesapla(cekilisler, jokerler, komsuluk, tabanPuan, ca
     return k19Puanlar;
 }
 
+// Aşama 14: K20 (Uyuyan Komşu) ve K21 (Isınma Turu)
+function k20Ve21UyuyanVeIsinmaHesapla(cekilisler, jokerler, komsuluk, ayarlar) {
+    let puanlar = { k20: {}, k21: {} };
+    for (let i = 1; i <= 90; i++) {
+        puanlar.k20[i] = 0;
+        puanlar.k21[i] = 0;
+    }
+    let k20Taban = (ayarlar.K20_TABAN !== undefined && !isNaN(ayarlar.K20_TABAN)) ? Number(ayarlar.K20_TABAN) : -500;
+    let k21Taban = (ayarlar.K21_TABAN !== undefined && !isNaN(ayarlar.K21_TABAN)) ? Number(ayarlar.K21_TABAN) : 50;
+    let k20Carpan = (ayarlar.K20_CARPAN !== undefined && !isNaN(ayarlar.K20_CARPAN)) ? Number(ayarlar.K20_CARPAN) : 100;
+    let k21Carpan = (ayarlar.K21_CARPAN !== undefined && !isNaN(ayarlar.K21_CARPAN)) ? Number(ayarlar.K21_CARPAN) : 100;
+
+    if (!cekilisler || cekilisler.length === 0) return puanlar;
+    if (k20Carpan === 0 && k21Carpan === 0) return puanlar;
+
+    let k20Puan = Math.round(k20Taban * (k20Carpan / 100));
+    let k21Puan = Math.round(k21Taban * (k21Carpan / 100));
+
+    let komsularSet = new Set();
+    for (let i = 1; i <= 90; i++) {
+        if (komsuluk.halka1[i] > 0 || (komsuluk.cikanSayilar && komsuluk.cikanSayilar.has(i))) {
+            komsularSet.add(i);
+        }
+    }
+
+    let beklemeSureleri = {};
+    for (let i = 1; i <= 90; i++) beklemeSureleri[i] = 999;
+    
+    let limit = Math.min(50, cekilisler.length);
+    for (let j = 0; j < limit; j++) {
+        let asil = cekilisler[j] || [];
+        let jkr = jokerler ? Number(jokerler[j]) : -1;
+        asil.forEach(n => {
+            if (beklemeSureleri[n] === 999) beklemeSureleri[n] = j;
+        });
+        if (jkr > 0 && beklemeSureleri[jkr] === 999) beklemeSureleri[jkr] = j;
+    }
+
+    komsularSet.forEach(n => {
+        let bekleme = beklemeSureleri[n];
+        if (bekleme >= 10 && k20Carpan !== 0) {
+            puanlar.k20[n] = k20Puan;
+        }
+        if (bekleme >= 3 && bekleme <= 9 && k21Carpan !== 0) {
+            puanlar.k21[n] = k21Puan;
+        }
+    });
+
+    return puanlar;
+}
+
 // Dışarıya açılacak ana fonksiyon
 function motorAtesle(cekilisler, jokerler, ayarlar) {
     // Aşama 1: Frekansları Çıkar
@@ -931,6 +982,14 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
         ayarlar.K19_PENCERE
     );
 
+    // Aşama 14: K20 ve K21
+    let k20k21Puanlar = k20Ve21UyuyanVeIsinmaHesapla(
+        cekilisler,
+        jokerler,
+        komsuluk,
+        ayarlar
+    );
+
     return {
         frekanslar: {
             tumu: frekansTumu,
@@ -958,7 +1017,9 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
             k16: k16Puanlar,
             k17: k17Puanlar,
             k18: k18Puanlar,
-            k19: k19Puanlar
+            k19: k19Puanlar,
+            k20: k20k21Puanlar.k20,
+            k21: k20k21Puanlar.k21
         },
         uykuSureleri: uykuSureleri,
         istatistikler: {
@@ -1084,6 +1145,8 @@ function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler,
                 (motorSonucu.puanlar.k17 ? (motorSonucu.puanlar.k17[num] || 0) : 0) +
                 (motorSonucu.puanlar.k18 ? (motorSonucu.puanlar.k18[num] || 0) : 0) +
                 (motorSonucu.puanlar.k19 ? (motorSonucu.puanlar.k19[num] || 0) : 0) +
+                (motorSonucu.puanlar.k20 ? (motorSonucu.puanlar.k20[num] || 0) : 0) +
+                (motorSonucu.puanlar.k21 ? (motorSonucu.puanlar.k21[num] || 0) : 0) +
                 (manualScores[num] || 0);
             siralama.push({ num: num, toplam: toplam });
         }
