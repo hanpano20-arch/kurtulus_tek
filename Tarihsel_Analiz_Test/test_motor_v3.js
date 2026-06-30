@@ -583,6 +583,86 @@ function k16BolgeRotasyonHesapla(cekilisler, jokerler, tabanPuan, carpan, pencer
     return k16Puanlar;
 }
 
+// ============================================================
+// K17 - Kanka Sayılar (İkili Birliktelik / Markov)
+// Amaç: Son çekilişte çıkan sayıların tarihsel olarak peşinden
+//       en çok sürüklediği sayıları (kankaları) tespit edip bonus vermek.
+// Parametreler:
+//   cekilisler    : Tüm çekiliş geçmişi (index 0 = en son)
+//   jokerler      : Joker geçmişi
+//   tabanPuan     : Temel puan (ayarlardan K17_TABAN)
+//   carpan        : Slider çarpanı (%)
+//   analizDerinligi: Geçmişe ne kadar gidilecek (K17_DERINLIK)
+// ============================================================
+function k17BirliktelikHesapla(cekilisler, jokerler, tabanPuan, carpan, analizDerinligi) {
+    let k17Puanlar = {};
+    for (let i = 1; i <= MAX_TOP; i++) k17Puanlar[i] = 0;
+
+    let safeTaban = (!tabanPuan || isNaN(tabanPuan) || tabanPuan === 0) ? 150 : tabanPuan;
+    let safeCarpan = (carpan === undefined || isNaN(carpan)) ? 100 : carpan;
+    if (safeCarpan === 0) return k17Puanlar;
+
+    let safeDerinlik = (analizDerinligi && !isNaN(analizDerinligi) && analizDerinligi > 10) 
+        ? parseInt(analizDerinligi, 10) 
+        : 200;
+
+    if (!cekilisler || cekilisler.length < 2) return k17Puanlar; // En az 2 çekiliş lazım
+
+    // Son çekiliş sayıları (hedef tarihten hemen önceki)
+    let sonCekilis = [...(cekilisler[0] || [])];
+    if (jokerler && jokerler[0]) sonCekilis.push(Number(jokerler[0]));
+    
+    // Geçerli sayılar
+    sonCekilis = sonCekilis.filter(n => n >= 1 && n <= MAX_TOP);
+    if (sonCekilis.length === 0) return k17Puanlar;
+
+    // Geçmişte aranacak aralık
+    let limit = Math.min(safeDerinlik, cekilisler.length);
+    let takipEdenSayilar = new Array(MAX_TOP + 1).fill(0);
+
+    // Kankaları bul: i=1'den başla (çünkü i=0 son çekiliş)
+    // Her i için, eğer cekilisler[i] (veya joker) içinde sonCekilis'ten bir sayı varsa
+    // bir SONRAKİ çekiliş (zaman olarak daha yeni olan) cekilisler[i-1]'dir.
+    for (let i = 1; i < limit; i++) {
+        let gecmisCekilis = [...(cekilisler[i] || [])];
+        if (jokerler && jokerler[i]) gecmisCekilis.push(Number(jokerler[i]));
+        
+        // Bu geçmiş çekilişte son çekilişten ortak bir sayı var mı?
+        let ortakSayisi = 0;
+        for (let num of sonCekilis) {
+            if (gecmisCekilis.includes(num)) {
+                ortakSayisi++;
+            }
+        }
+
+        if (ortakSayisi > 0) {
+            // Varsa, bir sonraki çekilişe (i-1) bak ve o sayılara "kanka" oyu ver
+            let sonrakiCekilis = [...(cekilisler[i - 1] || [])];
+            if (jokerler && jokerler[i - 1]) sonrakiCekilis.push(Number(jokerler[i - 1]));
+            
+            for (let sn of sonrakiCekilis) {
+                if (sn >= 1 && sn <= MAX_TOP) {
+                    takipEdenSayilar[sn] += ortakSayisi; // Ortak sayı fazlaysa etkisi artsın
+                }
+            }
+        }
+    }
+
+    let maxFrekans = Math.max(...takipEdenSayilar.slice(1));
+    if (maxFrekans === 0) return k17Puanlar;
+
+    // Puanla
+    for (let n = 1; n <= MAX_TOP; n++) {
+        if (takipEdenSayilar[n] > 0) {
+            let normalized = takipEdenSayilar[n] / maxFrekans;
+            let hamPuan = normalized * safeTaban;
+            k17Puanlar[n] = Math.round(hamPuan * (safeCarpan / 100));
+        }
+    }
+
+    return k17Puanlar;
+}
+
 // Dışarıya açılacak ana fonksiyon
 function motorAtesle(cekilisler, jokerler, ayarlar) {
     // Aşama 1: Frekansları Çıkar
@@ -655,6 +735,15 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
         ayarlar.K16_PENCERE
     );
 
+    // Aşama 11: K17 (Kanka Sayılar / İkili Birliktelik)
+    let k17Puanlar = k17BirliktelikHesapla(
+        cekilisler,
+        jokerler,
+        ayarlar.K17_TABAN,
+        ayarlar.K17_CARPAN,
+        ayarlar.K17_DERINLIK
+    );
+
     return {
         frekanslar: {
             tumu: frekansTumu,
@@ -679,7 +768,8 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
             k13: k13Puanlar,
             k14: k14Puanlar,
             k15: k15Puanlar,
-            k16: k16Puanlar
+            k16: k16Puanlar,
+            k17: k17Puanlar
         },
         uykuSureleri: uykuSureleri,
         istatistikler: {

@@ -17,8 +17,9 @@
             K12_TABAN: -250, K12_SINIR: 15,
             K13_TABAN: 100, K13_ESIK_1: 2, K13_ESIK_2: 3, K13_UYKU_SINIRI: 10,
             K14_TABAN: -250,
-            K15_TABAN: 200,
-            K16_TABAN: 150, K16_PENCERE: 9
+            K15_TABAN: 200, K15_SON_X: 10,
+            K16_TABAN: 150, K16_PENCERE: 10,
+            K17_TABAN: 150, K17_DERINLIK: 200
         };
         let baseSettings = {};
         let unsavedSettings = false;
