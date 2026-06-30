@@ -1237,7 +1237,7 @@
             K13_TABAN: 100, K13_ESIK_1: 2, K13_ESIK_2: 3, K13_UYKU_SINIRI: 10,
             K14_TABAN: -250,
             K15_TABAN: 200, K15_SON_X: 10,
-            K16_TABAN: 150, K16_PENCERE: 9
+            K16_TABAN: 150, K16_PENCERE: 10
         };
         let baseSettings = {};
         let unsavedSettings = false;
@@ -1427,9 +1427,9 @@
                     <div style="display: flex; align-items: center; gap: 5px;">
                         <label style="font-size: 0.8em; color: #aaa;">Pencere (Çekiliş):</label>
                         <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K16_PENCERE', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
-                        <input type="number" id="input_K16_PENCERE" value="${baseSettings.K16_PENCERE || 9}" style="width: 55px;" oninput="unsavedSettings = true;">
+                        <input type="number" id="input_K16_PENCERE" value="${baseSettings.K16_PENCERE || 10}" style="width: 55px;" oninput="unsavedSettings = true;">
                         <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K16_PENCERE', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
-                        <button class="btn-reset" onclick="document.getElementById('input_K16_PENCERE').value = 9; unsavedSettings = true;" title="Sıfırla">↺</button>
+                        <button class="btn-reset" onclick="document.getElementById('input_K16_PENCERE').value = 10; unsavedSettings = true;" title="Sıfırla">↺</button>
                     </div>
                     <div style="display: flex; align-items: center; gap: 5px;">
                         <label style="font-size: 0.8em; color: #aaa;">Taban:</label>
