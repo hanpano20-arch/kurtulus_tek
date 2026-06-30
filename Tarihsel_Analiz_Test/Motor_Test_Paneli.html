@@ -1246,7 +1246,8 @@
             let stored = localStorage.getItem('kurtulus_ayarlar');
             if (stored) {
                 try {
-                    baseSettings = JSON.parse(stored);
+                    let parsed = JSON.parse(stored);
+                    baseSettings = { ...DEFAULTS, ...parsed };
                 } catch (e) {
                     baseSettings = { ...DEFAULTS };
                 }
@@ -2073,8 +2074,11 @@
                 K14_TABAN: baseSettings.K14_TABAN,
                 K15_TABAN: baseSettings.K15_TABAN,
                 K15_SON_X: baseSettings.K15_SON_X,
+                K16_TABAN: baseSettings.K16_TABAN,
+                K16_PENCERE: baseSettings.K16_PENCERE,
                 K14_CARPAN: getCarpan('k14'),
-                K15_CARPAN: getCarpan('k15')
+                K15_CARPAN: getCarpan('k15'),
+                K16_CARPAN: getCarpan('k16')
             };
 
             currentSonuc = motorAtesle(hedefCekilisler, hedefJokerler, ayarlar);
@@ -2549,8 +2553,11 @@
                 K14_TABAN: baseSettings.K14_TABAN,
                 K15_TABAN: baseSettings.K15_TABAN,
                 K15_SON_X: baseSettings.K15_SON_X,
+                K16_TABAN: baseSettings.K16_TABAN,
+                K16_PENCERE: baseSettings.K16_PENCERE,
                 K14_CARPAN: getCarpan('k14'),
-                K15_CARPAN: getCarpan('k15')
+                K15_CARPAN: getCarpan('k15'),
+                K16_CARPAN: getCarpan('k16')
             };
 
             // Zaman Makinesini Çalıştır
