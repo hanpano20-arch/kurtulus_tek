@@ -663,8 +663,6 @@ function k17BirliktelikHesapla(cekilisler, jokerler, tabanPuan, carpan, analizDe
     return k17Puanlar;
 }
 
-}
-
 // ============================================================
 // K18 - Tek/Çift Dengeleyici (Ortalamaya Dönüş - Regression to Mean)
 // Amaç: Son K18_PENCERE çekilişinde (joker dahil) çıkan sayılarda
