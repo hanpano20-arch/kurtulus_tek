@@ -676,7 +676,8 @@ function k17BirliktelikHesapla(cekilisler, jokerler, tabanPuan, carpan, analizDe
 //   carpan      : Slider çarpanı (%)
 //   pencere     : Kaç çekilişe bakılacak (K18_PENCERE, varsayılan 8)
 // ============================================================
-function k18TekCiftDengesiHesapla(cekilisler, jokerler, tabanPuan, carpan, pencere) {
+// K18 (Tek/Çift Dengesizliği Düzeltmesi)
+function k18TekCiftDengesiHesapla(cekilisler, jokerler, komsuluk, tabanCeza, carpan, pencere) {
     let k18Puanlar = {};
     for (let i = 1; i <= MAX_TOP; i++) k18Puanlar[i] = 0;
 
@@ -728,11 +729,27 @@ function k18TekCiftDengesiHesapla(cekilisler, jokerler, tabanPuan, carpan, pence
     let tekHamPuan = tekSapma * (safeTaban / 10);
     let ciftHamPuan = ciftSapma * (safeTaban / 10);
 
+    // Sıcak Bölge Hedefleme (Son 3 Çekiliş Sayıları)
+    let son3teCikanlar = new Set();
+    let hotLimit = Math.min(3, cekilisler.length);
+    for (let i = 0; i < hotLimit; i++) {
+        let asil = cekilisler[i] || [];
+        asil.forEach(n => son3teCikanlar.add(n));
+        if (jokerler && jokerler[i]) {
+            son3teCikanlar.add(Number(jokerler[i]));
+        }
+    }
+
     for (let n = 1; n <= MAX_TOP; n++) {
-        if (n % 2 === 0) { // Çift sayı
-            k18Puanlar[n] = Math.round(ciftHamPuan * (safeCarpan / 100));
-        } else { // Tek sayı
-            k18Puanlar[n] = Math.round(tekHamPuan * (safeCarpan / 100));
+        // Hedefleme (Keskin Nişancı): Sadece Son 3 çekiliş sayıları ve 1. halka komşuları puan alır
+        if (son3teCikanlar.has(n) || (komsuluk && komsuluk.halka1 && komsuluk.halka1[n] > 0)) {
+            if (n % 2 === 0) { // Çift sayı
+                k18Puanlar[n] = Math.round(ciftHamPuan * (safeCarpan / 100));
+            } else { // Tek sayı
+                k18Puanlar[n] = Math.round(tekHamPuan * (safeCarpan / 100));
+            }
+        } else {
+            k18Puanlar[n] = 0; // Soğuk veya 2. halka sayılara K18 etki etmez
         }
     }
 
@@ -824,6 +841,7 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
     let k18Puanlar = k18TekCiftDengesiHesapla(
         cekilisler,
         jokerler,
+        komsuluk,
         ayarlar.K18_TABAN,
         ayarlar.K18_CARPAN,
         ayarlar.K18_PENCERE
