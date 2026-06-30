@@ -663,6 +663,86 @@ function k17BirliktelikHesapla(cekilisler, jokerler, tabanPuan, carpan, analizDe
     return k17Puanlar;
 }
 
+}
+
+// ============================================================
+// K18 - Tek/Çift Dengeleyici (Ortalamaya Dönüş - Regression to Mean)
+// Amaç: Son K18_PENCERE çekilişinde (joker dahil) çıkan sayılarda
+//       Tek ve Çift sayıların dağılımını ölçer. 
+//       Doğal oran (50/50) üzerinden sapmayı hesaplayıp,
+//       Aç kalan (az çıkan) gruba bonus, çok çıkan (tok) gruba ceza verir.
+// Parametreler:
+//   cekilisler  : Tüm çekiliş geçmişi (index 0 = en son)
+//   jokerler    : Joker geçmişi
+//   tabanPuan   : Temel puan (ayarlardan K18_TABAN)
+//   carpan      : Slider çarpanı (%)
+//   pencere     : Kaç çekilişe bakılacak (K18_PENCERE, varsayılan 8)
+// ============================================================
+function k18TekCiftDengesiHesapla(cekilisler, jokerler, tabanPuan, carpan, pencere) {
+    let k18Puanlar = {};
+    for (let i = 1; i <= MAX_TOP; i++) k18Puanlar[i] = 0;
+
+    let safeTaban = (!tabanPuan || isNaN(tabanPuan) || tabanPuan === 0) ? 100 : tabanPuan;
+    let safeCarpan = (carpan === undefined || isNaN(carpan)) ? 100 : carpan;
+    if (safeCarpan === 0) return k18Puanlar;
+
+    let safePencere = (pencere && !isNaN(pencere) && pencere >= 1 && pencere <= 50) ? parseInt(pencere, 10) : 8;
+
+    if (!cekilisler || cekilisler.length < 1) return k18Puanlar;
+    let limit = Math.min(safePencere, cekilisler.length);
+
+    let tekSayisi = 0;
+    let ciftSayisi = 0;
+
+    // Pencere içindeki tek ve çift sayıları say (Joker dahil)
+    for (let i = 0; i < limit; i++) {
+        let asil = cekilisler[i] || [];
+        asil.forEach(n => {
+            if (n >= 1 && n <= MAX_TOP) {
+                if (n % 2 === 0) ciftSayisi++;
+                else tekSayisi++;
+            }
+        });
+        if (jokerler && jokerler[i]) {
+            let jn = Number(jokerler[i]);
+            if (jn >= 1 && jn <= MAX_TOP) {
+                if (jn % 2 === 0) ciftSayisi++;
+                else tekSayisi++;
+            }
+        }
+    }
+
+    let toplamSayi = tekSayisi + ciftSayisi;
+    if (toplamSayi === 0) return k18Puanlar;
+
+    let beklenen = toplamSayi / 2; // Normalde %50 tek, %50 çift olmalı
+
+    // Açlık/Tokluk sapması:
+    // Örneğin 40 toptan 25'i çift, 15'i tek çıktıysa
+    // Tek için sapma: Beklenen (20) - Gerçekleşen (15) = +5 (Aç, Bonus verilmeli)
+    // Çift için sapma: Beklenen (20) - Gerçekleşen (25) = -5 (Tok, Ceza verilmeli)
+    
+    let tekSapma = beklenen - tekSayisi; 
+    let ciftSapma = beklenen - ciftSayisi;
+
+    // Normalize et: Maksimum sapma ihtimali (tamamı tek veya tamamı çift ise) 'beklenen' kadardır.
+    let tekNormalized = tekSapma / beklenen; // Örn: +5 / 20 = +0.25 (Bonus oranı)
+    let ciftNormalized = ciftSapma / beklenen; // Örn: -5 / 20 = -0.25 (Ceza oranı)
+
+    let tekHamPuan = tekNormalized * safeTaban;
+    let ciftHamPuan = ciftNormalized * safeTaban;
+
+    for (let n = 1; n <= MAX_TOP; n++) {
+        if (n % 2 === 0) { // Çift sayı
+            k18Puanlar[n] = Math.round(ciftHamPuan * (safeCarpan / 100));
+        } else { // Tek sayı
+            k18Puanlar[n] = Math.round(tekHamPuan * (safeCarpan / 100));
+        }
+    }
+
+    return k18Puanlar;
+}
+
 // Dışarıya açılacak ana fonksiyon
 function motorAtesle(cekilisler, jokerler, ayarlar) {
     // Aşama 1: Frekansları Çıkar
@@ -744,6 +824,15 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
         ayarlar.K17_DERINLIK
     );
 
+    // Aşama 12: K18 (Tek/Çift Dengeleyici)
+    let k18Puanlar = k18TekCiftDengesiHesapla(
+        cekilisler,
+        jokerler,
+        ayarlar.K18_TABAN,
+        ayarlar.K18_CARPAN,
+        ayarlar.K18_PENCERE
+    );
+
     return {
         frekanslar: {
             tumu: frekansTumu,
@@ -769,7 +858,8 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
             k14: k14Puanlar,
             k15: k15Puanlar,
             k16: k16Puanlar,
-            k17: k17Puanlar
+            k17: k17Puanlar,
+            k18: k18Puanlar
         },
         uykuSureleri: uykuSureleri,
         istatistikler: {
