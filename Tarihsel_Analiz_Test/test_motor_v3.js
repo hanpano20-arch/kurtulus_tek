@@ -723,12 +723,10 @@ function k18TekCiftDengesiHesapla(cekilisler, jokerler, tabanPuan, carpan, pence
     let tekSapma = beklenen - tekSayisi; 
     let ciftSapma = beklenen - ciftSayisi;
 
-    // Normalize et: Maksimum sapma ihtimali (tamamı tek veya tamamı çift ise) 'beklenen' kadardır.
-    let tekNormalized = tekSapma / beklenen; // Örn: +5 / 20 = +0.25 (Bonus oranı)
-    let ciftNormalized = ciftSapma / beklenen; // Örn: -5 / 20 = -0.25 (Ceza oranı)
-
-    let tekHamPuan = tekNormalized * safeTaban;
-    let ciftHamPuan = ciftNormalized * safeTaban;
+    // Öneri 1: Doğrusal Sapma Çarpanı
+    // Sapma başına, Taban Puan'ın %10'u kadar bir kuvvet uyguluyoruz.
+    let tekHamPuan = tekSapma * (safeTaban / 10);
+    let ciftHamPuan = ciftSapma * (safeTaban / 10);
 
     for (let n = 1; n <= MAX_TOP; n++) {
         if (n % 2 === 0) { // Çift sayı
@@ -980,6 +978,8 @@ function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler,
                 (motorSonucu.puanlar.k14 ? (motorSonucu.puanlar.k14[num] || 0) : 0) +
                 (motorSonucu.puanlar.k15 ? (motorSonucu.puanlar.k15[num] || 0) : 0) +
                 (motorSonucu.puanlar.k16 ? (motorSonucu.puanlar.k16[num] || 0) : 0) +
+                (motorSonucu.puanlar.k17 ? (motorSonucu.puanlar.k17[num] || 0) : 0) +
+                (motorSonucu.puanlar.k18 ? (motorSonucu.puanlar.k18[num] || 0) : 0) +
                 (manualScores[num] || 0);
             siralama.push({ num: num, toplam: toplam });
         }
