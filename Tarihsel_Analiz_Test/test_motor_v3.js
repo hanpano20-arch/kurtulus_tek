@@ -512,6 +512,77 @@ function k15OdulHesapla(cekilisler, jokerler, tabanPuan, carpan, menzil) {
     return k15Puanlar;
 }
 
+// ============================================================
+// K16 - Onluk Bölge Açlık/Tokluk Dengesi (Bölge Rotasyon Kuralı)
+// Amaç: 90 sayıyı 9 onluğa böler (1-10, 11-20, ..., 81-90).
+//        Son K16_PENCERE çekilişte hangi onluklar aşırı temsil edildiğine bakar.
+//        Az çıkan (aç kalan) onluktaki sayılara bonus, çok çıkan (tok) onluktakilere ceza verir.
+// Parametreler:
+//   cekilisler  : Tüm çekiliş geçmişi dizisi (index 0 = en son)
+//   jokerler    : Tüm joker geçmişi dizisi (joker 7. sayı sayılır)
+//   tabanPuan   : Temel puan (ayarlardan K16_TABAN)
+//   carpan      : Slider çarpa nı (%)
+//   pencere     : Kaç çekilişe bakacağız (K16_PENCERE, varsayılan 9)
+// ============================================================
+function k16BolgeRotasyonHesapla(cekilisler, jokerler, tabanPuan, carpan, pencere) {
+    let k16Puanlar = {};
+    for (let i = 1; i <= MAX_TOP; i++) k16Puanlar[i] = 0;
+
+    let safeTaban = (!tabanPuan || isNaN(tabanPuan) || tabanPuan === 0) ? 150 : tabanPuan;
+    let safeCarpan = (carpan === undefined || isNaN(carpan)) ? 100 : carpan;
+    if (safeCarpan === 0) return k16Puanlar;
+
+    let safePencere = (pencere && !isNaN(pencere) && pencere >= 3 && pencere <= 30)
+        ? parseInt(pencere, 10)
+        : 9;
+
+    if (!cekilisler || cekilisler.length < 1) return k16Puanlar;
+    let limit = Math.min(safePencere, cekilisler.length);
+
+    // ADIM 1: Her onluğun kaç sayı çıkardığını say (joker dahil)
+    // 9 onluk: index 0 = 1-10, index 1 = 11-20, ... index 8 = 81-90
+    let bolgeTemsil = new Array(9).fill(0);
+
+    for (let j = 0; j < limit; j++) {
+        let asil = cekilisler[j] || [];
+        asil.forEach(n => {
+            if (n >= 1 && n <= MAX_TOP) {
+                let bolge = Math.floor((n - 1) / 10); // 0-8 arasi
+                bolgeTemsil[bolge]++;
+            }
+        });
+        if (jokerler && jokerler[j]) {
+            let jn = Number(jokerler[j]);
+            if (jn >= 1 && jn <= MAX_TOP) {
+                let bolge = Math.floor((jn - 1) / 10);
+                bolgeTemsil[bolge]++;
+            }
+        }
+    }
+
+    // ADIM 2: Beklenen temsil sayısını hesapla
+    // Her çekilişte 7 sayı (6+joker) çıkıyor, 9 bölgeye eşit dağılırsa:
+    let toplamCikan = bolgeTemsil.reduce((a, b) => a + b, 0);
+    let beklenen = toplamCikan / 9; // Her bölgenin beklenen payı
+
+    // ADIM 3: Sapma hesapla ve normalize et
+    let sapmalar = bolgeTemsil.map(t => beklenen - t); // Pozitif = açlık, Negatif = tokluk
+    let maxSapma = Math.max(...sapmalar.map(Math.abs));
+    if (maxSapma === 0) return k16Puanlar; // Tüm bölgeler eşit çıkmış, hiç puan verme
+
+    // ADIM 4: Her sayıya bölgesinin sapma puanını ver
+    for (let n = 1; n <= MAX_TOP; n++) {
+        let bolge = Math.floor((n - 1) / 10);
+        let sapma = sapmalar[bolge]; // Pozitif: aç -> bonus; Negatif: tok -> ceza
+        // Laplace yumulatmalı normalize: [-1, +1] aralığına sıkıştır
+        let normalized = sapma / maxSapma; // [-1.0, +1.0]
+        let hamPuan = normalized * safeTaban;
+        k16Puanlar[n] = Math.round(hamPuan * (safeCarpan / 100));
+    }
+
+    return k16Puanlar;
+}
+
 // Dışarıya açılacak ana fonksiyon
 function motorAtesle(cekilisler, jokerler, ayarlar) {
     // Aşama 1: Frekansları Çıkar
@@ -575,6 +646,15 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
         ayarlar.K15_SON_X
     );
 
+    // Aşama 10: K16 (Onluk Bölge Rotasyon Dengesi)
+    let k16Puanlar = k16BolgeRotasyonHesapla(
+        cekilisler,
+        jokerler,
+        ayarlar.K16_TABAN,
+        ayarlar.K16_CARPAN,
+        ayarlar.K16_PENCERE
+    );
+
     return {
         frekanslar: {
             tumu: frekansTumu,
@@ -598,7 +678,8 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
             k12: doygunluk.k12,
             k13: k13Puanlar,
             k14: k14Puanlar,
-            k15: k15Puanlar
+            k15: k15Puanlar,
+            k16: k16Puanlar
         },
         uykuSureleri: uykuSureleri,
         istatistikler: {
@@ -720,6 +801,7 @@ function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler,
                 (motorSonucu.puanlar.k13 ? (motorSonucu.puanlar.k13[num] || 0) : 0) +
                 (motorSonucu.puanlar.k14 ? (motorSonucu.puanlar.k14[num] || 0) : 0) +
                 (motorSonucu.puanlar.k15 ? (motorSonucu.puanlar.k15[num] || 0) : 0) +
+                (motorSonucu.puanlar.k16 ? (motorSonucu.puanlar.k16[num] || 0) : 0) +
                 (manualScores[num] || 0);
             siralama.push({ num: num, toplam: toplam });
         }

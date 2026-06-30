@@ -974,6 +974,23 @@
                     <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k15_weight', 100)"
                         title="Sıfırla">↺</button>
                 </div>
+
+                <div class="slider-row" style="border-left: 3px solid #ff9800;">
+                    <span class="slider-label" style="color: white; cursor:pointer;" onclick="showKInfo('k16')" title="Bilgi için tıkla">K16 Çarpanı <br><span
+                            style="font-size: 0.85em; color: #bbb;">(Bölge Rotasyon)</span></span>
+                    <button class="rule-toggle-btn manual-ctrl-ignore" id="k16_toggle"
+                        onclick="toggleRule('k16')">AÇIK</button>
+                    <input type="number" class="slider-val-box manual-ctrl-ignore" id="k16_val" value="100"
+                        onchange="syncInputToSlider('k16_val', 'k16_weight')">
+                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k16_weight', -1)"
+                        onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                    <input type="range" id="k16_weight" class="slider-input manual-ctrl-ignore" min="-200" max="200"
+                        step="1" value="100" oninput="syncSlider('k16_weight', 'k16_val')" onchange="testCalistir()">
+                    <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSlider, 'k16_weight', 1)"
+                        onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                    <button class="btn-reset manual-ctrl-ignore" onclick="resetSlider('k16_weight', 100)"
+                        title="Sıfırla">↺</button>
+                </div>
             </div>
 
             <!-- Sayı Listesi Modal'a Taşındı -->
@@ -1064,6 +1081,8 @@
                                     onclick="showKInfo('k14')" title="Bilgi i&#231;in t&#305;kla">K14 (Eleme)</th>
                                 <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#00bcd4;"
                                     onclick="showKInfo('k15')" title="Bilgi i&#231;in t&#305;kla">K15 (Yank&#305;)</th>
+                                <th class="clickable-th" style="padding: 4px; font-size: 0.85em; color:#ff9800;"
+                                    onclick="showKInfo('k16')" title="Bilgi i&#231;in t&#305;kla">K16 (B&ouml;lge)</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
@@ -1217,7 +1236,8 @@
             K12_TABAN: -250, K12_SINIR: 15,
             K13_TABAN: 100, K13_ESIK_1: 2, K13_ESIK_2: 3, K13_UYKU_SINIRI: 10,
             K14_TABAN: -250,
-            K15_TABAN: 200, K15_SON_X: 10
+            K15_TABAN: 200, K15_SON_X: 10,
+            K16_TABAN: 150, K16_PENCERE: 9
         };
         let baseSettings = {};
         let unsavedSettings = false;
@@ -1394,6 +1414,28 @@
                         <input type="number" id="input_K15_TABAN" value="${baseSettings.K15_TABAN || 100}" style="width: 60px;" oninput="unsavedSettings = true;">
                         <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K15_TABAN', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
                         <button class="btn-reset" onclick="document.getElementById('input_K15_TABAN').value = 100; unsavedSettings = true;" title="Sıfırla">↺</button>
+                    </div>
+                </div>
+            </div>`;
+
+            // K16 Özel Satır
+            html += `
+            <div class="setting-row" style="align-items: center; border-left: 3px solid #ff9800;">
+                <label style="min-width: 150px; flex-shrink: 0; color: #ff9800;">K16 (Bölge Rotasyon)</label>
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label style="font-size: 0.8em; color: #aaa;">Pencere (Çekiliş):</label>
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K16_PENCERE', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                        <input type="number" id="input_K16_PENCERE" value="${baseSettings.K16_PENCERE || 9}" style="width: 55px;" oninput="unsavedSettings = true;">
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K16_PENCERE', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                        <button class="btn-reset" onclick="document.getElementById('input_K16_PENCERE').value = 9; unsavedSettings = true;" title="Sıfırla">↺</button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label style="font-size: 0.8em; color: #aaa;">Taban:</label>
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K16_TABAN', -1)" onmouseup="stopHold()" onmouseleave="stopHold()">◀</button>
+                        <input type="number" id="input_K16_TABAN" value="${baseSettings.K16_TABAN || 150}" style="width: 60px;" oninput="unsavedSettings = true;">
+                        <button class="h-arrow manual-ctrl-ignore" onmousedown="startHold(adjSetting, 'K16_TABAN', 1)" onmouseup="stopHold()" onmouseleave="stopHold()">▶</button>
+                        <button class="btn-reset" onclick="document.getElementById('input_K16_TABAN').value = 150; unsavedSettings = true;" title="Sıfırla">↺</button>
                     </div>
                 </div>
             </div>`;
@@ -1824,6 +1866,7 @@
                     (currentSonuc.puanlar.k13 ? (currentSonuc.puanlar.k13[n] || 0) : 0) +
                     (currentSonuc.puanlar.k14 ? (currentSonuc.puanlar.k14[n] || 0) : 0) +
                     (currentSonuc.puanlar.k15 ? (currentSonuc.puanlar.k15[n] || 0) : 0) +
+                    (currentSonuc.puanlar.k16 ? (currentSonuc.puanlar.k16[n] || 0) : 0) +
                     (manualScores[n] || 0)
             }));
             sorted.sort((a, b) => b.tp - a.tp);
@@ -2059,10 +2102,11 @@
                 let p13 = sonuc.puanlar.k13 ? (sonuc.puanlar.k13[i] || 0) : 0;
                 let p14 = sonuc.puanlar.k14 ? (sonuc.puanlar.k14[i] || 0) : 0;
                 let p15 = sonuc.puanlar.k15 ? (sonuc.puanlar.k15[i] || 0) : 0;
+                let p16 = sonuc.puanlar.k16 ? (sonuc.puanlar.k16[i] || 0) : 0;
                 let uyku = sonuc.uykuSureleri ? (sonuc.uykuSureleri[i] || 0) : 0;
                 let man = manualScores[i] || 0;
-                let toplam = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + man;
-                siralama.push({ i: i, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, uyku, man, toplam });
+                let toplam = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + p16 + man;
+                siralama.push({ i: i, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, uyku, man, toplam });
             }
 
             siralama.sort((a, b) => b.toplam - a.toplam);
@@ -2117,6 +2161,7 @@
                 <td style="color:${item.p13 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${item.p13}</td>
                                 <td style="color:${item.p14 !== 0 ? '#f44336' : '#888'}; font-weight:bold;">${item.p14}</td>
                                 <td style="color:${item.p15 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${item.p15}</td>
+                                <td style="color:${item.p16 > 0 ? '#ff9800' : (item.p16 < 0 ? '#f44336' : '#888')}; font-weight:bold;">${item.p16}</td>
             </tr>`;
                 tbody.appendChild(tr);
             });
@@ -2156,8 +2201,9 @@
                 let p13 = currentSonuc.puanlar.k13 ? (currentSonuc.puanlar.k13[num] || 0) : 0;
                 let p14 = currentSonuc.puanlar.k14 ? (currentSonuc.puanlar.k14[num] || 0) : 0;
                 let p15 = currentSonuc.puanlar.k15 ? (currentSonuc.puanlar.k15[num] || 0) : 0;
+                let p16 = currentSonuc.puanlar.k16 ? (currentSonuc.puanlar.k16[num] || 0) : 0;
                 let man = manualScores[num] || 0;
-                siralama.push({ num: num, tp: p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + man });
+                siralama.push({ num: num, tp: p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + p16 + man });
             }
             siralama.sort((a, b) => b.tp - a.tp);
 
@@ -2222,6 +2268,7 @@
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;" onclick="showKInfo('k13')" title="Bilgi için tıkla">K13 (Diriltme)</th>
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#f44336;" onclick="showKInfo('k14')" title="Bilgi i&#231;in t&#305;kla">K14 (Eleme)</th>
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;" onclick="showKInfo('k15')" title="Bilgi i&#231;in t&#305;kla">K15 (Yank&#305;)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#ff9800;" onclick="showKInfo('k16')" title="Bilgi i&#231;in t&#305;kla">K16 (B&ouml;lge)</th>
                 </tr>
             </thead>
             <tbody>
@@ -2247,6 +2294,7 @@
                 let p13 = currentSonuc.puanlar.k13 ? (currentSonuc.puanlar.k13[item.num] || 0) : 0;
                 let p14 = currentSonuc.puanlar.k14 ? (currentSonuc.puanlar.k14[item.num] || 0) : 0;
                 let p15 = currentSonuc.puanlar.k15 ? (currentSonuc.puanlar.k15[item.num] || 0) : 0;
+                let p16 = currentSonuc.puanlar.k16 ? (currentSonuc.puanlar.k16[item.num] || 0) : 0;
                 let man = manualScores[item.num] || 0;
 
                 html += `
@@ -2274,6 +2322,7 @@
                 <td style="color:${p13 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${p13}</td>
                 <td style="color:${p14 !== 0 ? '#f44336' : '#888'}; font-weight:bold;">${p14}</td>
                 <td style="color:${p15 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${p15}</td>
+                <td style="color:${p16 > 0 ? '#ff9800' : (p16 < 0 ? '#f44336' : '#888')}; font-weight:bold;">${p16}</td>
             </tr>`;
             });
 
@@ -2721,6 +2770,13 @@
                 how: "Her sayının ortalama uyku süresi, son çıkışından bu yana geçen süreyle karşılaştırılır. Zamanlaması gelenmiş ve 'yankı' örüntüsüne sahip sayılar ödüllendirilir.",
                 ex: "Makine 'Bu sayı tarihsel olarak 10-12 çekilişte bir çıkıyor ve son çıkışının üzerinden tam o kadar geçmiş' diyerek yüksek puan verir.",
                 eff: "Momentum kazanmış, zamanlaması gelmiş ve düzenli periyodik davranış gösteren sayılara bonus ödül puanı aktarır."
+            },
+            'k16': {
+                title: "K16 - Onluk Bölge Rotasyon (Açlık/Tokluk Dengesi)",
+                what: "90 sayıyı 9 onluğa böler (1-10, 11-20, ..., 81-90). Son K16_PENCERE çekilişte her bölgenin ne kadar temsil edildiğini ölçer.",
+                how: "Az çıkan (aç kalan) bölgelerdeki sayılara bonus puan, fazla çıkan (tok) bölgelerdeki sayılara ceza puanı verir. Sapma, Laplace yumuşatmalı normalize formülle hesaplanır.",
+                ex: "Son 9 çekilişte 81-90 aralığından hiç sayı çıkmadıysa, bu bölge 'aç' sayılır. 81-90 arasındaki tüm sayılar K16'dan yüksek bonus alır.",
+                eff: "Tarihsel olarak 'ihmal edilmiş' bölgeleri tespit edip onları öne çıkarır. Çekilişlerin bölgesel döngü davranışını yakalamaya çalışır."
             }
         };
 

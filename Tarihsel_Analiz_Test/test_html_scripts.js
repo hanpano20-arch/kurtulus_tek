@@ -17,7 +17,8 @@
             K12_TABAN: -250, K12_SINIR: 15,
             K13_TABAN: 100, K13_ESIK_1: 2, K13_ESIK_2: 3, K13_UYKU_SINIRI: 10,
             K14_TABAN: -250,
-            K15_TABAN: 200
+            K15_TABAN: 200,
+            K16_TABAN: 150, K16_PENCERE: 9
         };
         let baseSettings = {};
         let unsavedSettings = false;
@@ -765,6 +766,9 @@
                 K14_TABAN: baseSettings.K14_TABAN,
                 K15_TABAN: baseSettings.K15_TABAN,
                 K15_CARPAN: parseInt(document.getElementById('k15_weight') ? document.getElementById('k15_weight').value : 100, 10),
+                K16_TABAN: baseSettings.K16_TABAN,
+                K16_PENCERE: baseSettings.K16_PENCERE,
+                K16_CARPAN: parseInt(document.getElementById('k16_weight') ? document.getElementById('k16_weight').value : 100, 10),
                 K1_CARPAN: parseInt(document.getElementById('k1_weight').value, 10),
                 K2_CARPAN: parseInt(document.getElementById('k2_weight').value, 10),
                 K3_CARPAN: parseInt(document.getElementById('k3_weight').value, 10),
@@ -812,10 +816,13 @@
                 let p11 = sonuc.puanlar.k11 ? (sonuc.puanlar.k11[i] || 0) : 0;
                 let p12 = sonuc.puanlar.k12 ? (sonuc.puanlar.k12[i] || 0) : 0;
                 let p13 = sonuc.puanlar.k13 ? (sonuc.puanlar.k13[i] || 0) : 0;
+                let p14 = sonuc.puanlar.k14 ? (sonuc.puanlar.k14[i] || 0) : 0;
+                let p15 = sonuc.puanlar.k15 ? (sonuc.puanlar.k15[i] || 0) : 0;
+                let p16 = sonuc.puanlar.k16 ? (sonuc.puanlar.k16[i] || 0) : 0;
                 let uyku = sonuc.uykuSureleri ? (sonuc.uykuSureleri[i] || 0) : 0;
                 let man = manualScores[i] || 0;
-                let toplam = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + man;
-                siralama.push({ i: i, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, uyku, man, toplam });
+                let toplam = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + p16 + man;
+                siralama.push({ i: i, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, uyku, man, toplam });
             }
 
             siralama.sort((a, b) => b.toplam - a.toplam);
@@ -868,6 +875,9 @@
                 <td style="color:${item.p11 < 0 ? '#f44336' : (item.p11 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p11}</td>
                 <td style="color:${item.p12 < 0 ? '#f44336' : (item.p12 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p12}</td>
                 <td style="color:${item.p13 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${item.p13}</td>
+                <td style="color:${item.p14 !== 0 ? '#f44336' : '#888'}; font-weight:bold;">${item.p14}</td>
+                <td style="color:${item.p15 > 0 ? '#8bc34a' : '#888'}; font-weight:bold;">${item.p15}</td>
+                <td style="color:${item.p16 > 0 ? '#ff9800' : (item.p16 < 0 ? '#f44336' : '#888')}; font-weight:bold;">${item.p16}</td>
             </tr>`;
                 tbody.appendChild(tr);
             });
@@ -905,8 +915,11 @@
                 let p11 = currentSonuc.puanlar.k11 ? (currentSonuc.puanlar.k11[num] || 0) : 0;
                 let p12 = currentSonuc.puanlar.k12 ? (currentSonuc.puanlar.k12[num] || 0) : 0;
                 let p13 = currentSonuc.puanlar.k13 ? (currentSonuc.puanlar.k13[num] || 0) : 0;
+                let p14 = currentSonuc.puanlar.k14 ? (currentSonuc.puanlar.k14[num] || 0) : 0;
+                let p15 = currentSonuc.puanlar.k15 ? (currentSonuc.puanlar.k15[num] || 0) : 0;
+                let p16 = currentSonuc.puanlar.k16 ? (currentSonuc.puanlar.k16[num] || 0) : 0;
                 let man = manualScores[num] || 0;
-                siralama.push({ num: num, tp: p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + man });
+                siralama.push({ num: num, tp: p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13 + p14 + p15 + p16 + man });
             }
             siralama.sort((a, b) => b.tp - a.tp);
 
@@ -971,6 +984,7 @@
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;" onclick="showKInfo('k13')" title="Bilgi için tıkla">K13 (Diriltme)</th>
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#ff5722;" onclick="showKInfo('k14')" title="Bilgi için tıkla">K14 (Eleme)</th>
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#8bc34a;" onclick="showKInfo('k15')" title="Bilgi için tıkla">K15 (Yankı)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#ff9800;" onclick="showKInfo('k16')" title="Bilgi için tıkla">K16 (Bölge)</th>
                 </tr>
             </thead>
             <tbody>
@@ -994,6 +1008,9 @@
                 let p11 = currentSonuc.puanlar.k11 ? (currentSonuc.puanlar.k11[item.num] || 0) : 0;
                 let p12 = currentSonuc.puanlar.k12 ? (currentSonuc.puanlar.k12[item.num] || 0) : 0;
                 let p13 = currentSonuc.puanlar.k13 ? (currentSonuc.puanlar.k13[item.num] || 0) : 0;
+                let p14 = currentSonuc.puanlar.k14 ? (currentSonuc.puanlar.k14[item.num] || 0) : 0;
+                let p15 = currentSonuc.puanlar.k15 ? (currentSonuc.puanlar.k15[item.num] || 0) : 0;
+                let p16 = currentSonuc.puanlar.k16 ? (currentSonuc.puanlar.k16[item.num] || 0) : 0;
                 let man = manualScores[item.num] || 0;
 
                 html += `
@@ -1019,6 +1036,9 @@
                 <td style="color:${p11 < 0 ? '#f44336' : (p11 > 0 ? '#fff' : '#888')}; font-weight:bold;">${p11}</td>
                 <td style="color:${p12 < 0 ? '#f44336' : (p12 > 0 ? '#fff' : '#888')}; font-weight:bold;">${p12}</td>
                 <td style="color:${p13 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${p13}</td>
+                <td style="color:${p14 !== 0 ? '#f44336' : '#888'}; font-weight:bold;">${p14}</td>
+                <td style="color:${p15 > 0 ? '#8bc34a' : '#888'}; font-weight:bold;">${p15}</td>
+                <td style="color:${p16 > 0 ? '#ff9800' : (p16 < 0 ? '#f44336' : '#888')}; font-weight:bold;">${p16}</td>
             </tr>`;
             });
 
@@ -1244,6 +1264,9 @@
                 K14_TABAN: baseSettings.K14_TABAN,
                 K15_TABAN: baseSettings.K15_TABAN,
                 K15_CARPAN: parseInt(document.getElementById('k15_weight') ? document.getElementById('k15_weight').value : 100, 10),
+                K16_TABAN: baseSettings.K16_TABAN,
+                K16_PENCERE: baseSettings.K16_PENCERE,
+                K16_CARPAN: parseInt(document.getElementById('k16_weight') ? document.getElementById('k16_weight').value : 100, 10),
                 K13_CARPAN: parseInt(document.getElementById('k13_weight') ? document.getElementById('k13_weight').value : 100, 10),
                 K14_CARPAN: parseInt(document.getElementById('k14_weight') ? document.getElementById('k14_weight').value : 100, 10)
             };
