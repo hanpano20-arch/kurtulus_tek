@@ -990,6 +990,23 @@ function motorAtesle(cekilisler, jokerler, ayarlar) {
         ayarlar
     );
 
+    // --- VIP KALKANI V3 (SÜPER JOKER KORUMASI) ---
+    for (let i = 1; i <= MAX_TOP; i++) {
+        let isJoker = (k6Puanlar[i] || 0) > 0;
+        let isHalka2 = (k5Puanlar[i] || 0) > 0;
+        let isYanki = (k15Puanlar[i] || 0) > 0;
+        let isKanka = (k17Puanlar[i] || 0) > 0;
+        
+        if (isJoker && isHalka2 && isYanki && isKanka) {
+            // Eğer sayı Süper Joker ise (K6, K5, K15, K17 > 0), eksileri sıfırla.
+            if (k1Sonuc.puanlar[i] !== undefined && k1Sonuc.puanlar[i] < 0) k1Sonuc.puanlar[i] = 0;
+            if (k16Puanlar[i] !== undefined && k16Puanlar[i] < 0) k16Puanlar[i] = 0;
+            if (k18Puanlar[i] !== undefined && k18Puanlar[i] < 0) k18Puanlar[i] = 0;
+            if (k19Puanlar[i] !== undefined && k19Puanlar[i] < 0) k19Puanlar[i] = 0;
+        }
+    }
+    // ---------------------------------------------
+
     return {
         frekanslar: {
             tumu: frekansTumu,
@@ -1126,24 +1143,6 @@ function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler,
 
         let siralama = [];
         for (let num = 1; num <= 90; num++) {
-            // --- VIP KALKANI V2 (SÜPER JOKER KORUMASI) ---
-            let k16Puan = motorSonucu.puanlar.k16 ? (motorSonucu.puanlar.k16[num] || 0) : 0;
-            let k19Puan = motorSonucu.puanlar.k19 ? (motorSonucu.puanlar.k19[num] || 0) : 0;
-
-            let k6Score = motorSonucu.puanlar.k6[num] || 0; // K6'dan puan aldıysa Son 15 Joker'den biridir
-            let k4Score = motorSonucu.puanlar.k4[num] || 0;
-            let k5Score = motorSonucu.puanlar.k5[num] || 0;
-
-            let isSuperJoker = (k6Score > 0 && k4Score > 0 && k5Score > 0);
-
-            if (isSuperJoker) {
-                // Eğer süper joker ise ve aldığı puan EKSİ (-) ise, bu cezayı affet (0 yap).
-                // Eğer ARTI (+) bir bonus almışsa DOKUNMA.
-                if (k16Puan < 0) k16Puan = 0;
-                if (k19Puan < 0) k19Puan = 0;
-            }
-            // ---------------------------------------------
-
             let toplam = (motorSonucu.puanlar.k1[num] || 0) +
                 (motorSonucu.puanlar.k2[num] || 0) +
                 (motorSonucu.puanlar.k3[num] || 0) +
@@ -1159,10 +1158,10 @@ function zamanMakinesiTesti(tarihStr, testSayisi, havuzBoyutu, globalCekilisler,
                 (motorSonucu.puanlar.k13 ? (motorSonucu.puanlar.k13[num] || 0) : 0) +
                 (motorSonucu.puanlar.k14 ? (motorSonucu.puanlar.k14[num] || 0) : 0) +
                 (motorSonucu.puanlar.k15 ? (motorSonucu.puanlar.k15[num] || 0) : 0) +
-                k16Puan + // Güncellenmiş veya orijinal K16
+                (motorSonucu.puanlar.k16 ? (motorSonucu.puanlar.k16[num] || 0) : 0) +
                 (motorSonucu.puanlar.k17 ? (motorSonucu.puanlar.k17[num] || 0) : 0) +
                 (motorSonucu.puanlar.k18 ? (motorSonucu.puanlar.k18[num] || 0) : 0) +
-                k19Puan + // Güncellenmiş veya orijinal K19
+                (motorSonucu.puanlar.k19 ? (motorSonucu.puanlar.k19[num] || 0) : 0) +
                 (motorSonucu.puanlar.k20 ? (motorSonucu.puanlar.k20[num] || 0) : 0) +
                 (motorSonucu.puanlar.k21 ? (motorSonucu.puanlar.k21[num] || 0) : 0) +
                 (manualScores[num] || 0);
