@@ -1,46 +1,31 @@
-# Devir Teslim Dosyası - Zaman Makinesi V1 (K1-K15 Kuralları)
+# Devir Teslim Dosyası - Zaman Makinesi V1 (K1-K21 Kuralları)
 
-Bu dosya, önceki yapay zeka oturumundan bir sonraki oturuma projeyi eksiksiz devretmek için hazırlanmıştır. 
+Bu dosya, önceki yapay zeka oturumundan bir sonraki oturuma projeyi eksiksiz devretmek için hazırlanmıştır. Kullanıcı son oturumda bazı kuralların sonuçlarından memnun kalmadığı için sistemi temiz bir "kayıt noktasına" (git restore) döndürmüş ve yeni bir ajanla taze bir başlangıç yapmak istemiştir. Yeni ajan bu notları ÇOK DİKKATLİ okumalıdır.
 
 ## Proje Durumu ve Son Yapılanlar
 
-- **K1'den K15'e Kadar Kurallar Tamamlandı:** Toplam 15 kuralın tamamı sisteme entegre edildi. Son olarak **K14 (Eleme)** ve **K15 (Yankı)** kuralları hesaplama motoruna ve arayüze bağlandı.
-- **Tüm Kurallara Açık/Kapalı Butonu:** Ana ekrandaki kaydırma çubuklarının (slider) yanına her kural için "AÇIK/KAPALI" özelliği (toggleRule) eklendi. Butonlar aktifken yeşil ve "AÇIK", pasifken kırmızı ve "KAPALI" olarak gözükür. Kurallar kapatıldığında hesaplamada "0" puan üretir.
-- **Tabloların Güncellenmesi:** `Sayı Listesi ve Havuz` tablosu ile `Detaylı Puan Tablosu` modülüne K13, K14 ve K15 kurallarının özel puan sütunları eklendi.
-- **Hesaplama Motoru Hata Düzeltmeleri:** K14 ve K15 kurallarının `testCalistir`'dan `motorAtesle`'ye gönderilmediği hata düzeltildi (`ayarlar` nesnesine eklendi). Puanların tablolar üzerinde sabit kalması sorunu aşıldı.
-- **Yeşil Çerçeve (Havuz Seçimi) Optimizasyonu:** `inFinalPool` fonksiyonundaki toplam puan (tp) formülüne K14 ve K15 puanları da dahil edildi. Böylece havuz seçimi artık tamamen doğru sıradan (hedef havuz boyutu adedince) seçim yapmaktadır.
-- **Ayarlar Modülü Tasarımı:** Ayarlar simgesine tıklandığında açılan menünün başlık kısmı yeniden tasarlandı. Sol tarafta "⚙️ Kuralların Taban Puanları", sağ tarafta ise aynı hizada kırmızı renkli **SAYFAYI KAPAT** ve mavi renkli **AYARLARI KAYDET** butonları konumlandırıldı. Değişiklik yapılıp kaydedilmeden çıkılmak istendiğinde uyarı verme sistemi aktif edildi.
+- **K16 - K21 Kuralları Eklendi:** K15'ten sonra gelen K16 (Bölge Rotasyon), K17 (Kanka/Birliktelik), K18 (Tek/Çift-Düşük/Yüksek Dengesi + Keskin Nişancı Filtresi), K19 (Son Rakam Dengesi - Momentum Modu), K20 (Uyuyan Komşu) ve K21 (Isınma Turu) kuralları sisteme entegre edildi.
+- **K19 Momentum Modu:** Kullanıcının talebi üzerine K19 kuralı "çok çıkan son rakama çok puan (bonus), az çıkana eksi puan (ceza)" verecek şekilde Momentum Moduna çevrildi.
+- **UI Geliştirmeleri:** 
+  - `Motor_Test_Paneli.html` içindeki "Puan Detayları" tablosunun başlıkları dikey (`transform: rotate(-90deg)`) yapılarak yerden tasarruf edildi.
+  - Puan listesi modal penceresi genişletildi (`95vw`), alt scroll çubuğu gizlendi.
+- **K20 ve K21 Durumu:** K20 ve K21 sisteme ve arayüze eklendi, ancak kullanıcı şu an için bu kuralları manuel olarak `KAPALI` (veya çarpanı 0) tutarak test etmeyi tercih ediyor.
 
-## 2026-06-28 Tarihli Bug Fix Paketi
+## ⚠️ SON OTURUMDAKİ KRİTİK İPTAL (Geri Alınan İşlemler)
 
-- **K14 Joker Dahil:** `k14ElemeHesapla(cekilisler, jokerler, ...)` — Fonksiyona `jokerler` parametresi eklendi. Son 3 çekilişin joker sayıları da `son3Sayilar` setine dahil ediliyor. Joker artık K14 eleme cezasını ATLAYAMIYOR.
-- **K9-K12 Joker Tip Uyumsuzluğu Giderildi:** `doygunlukCezalariHesapla` içinde `Number(jokerler[j]) === i` olarak düzeltildi. Önceden `jokerler[j] === i` (string vs number karşılaştırması) yapıldığından jokerler K9-K12 cezalarına yansımıyordu.
-- **K14_TABAN DEFAULTS -250 Oldu:** Önceden `100` (pozitif) yazılıydı, bu motor hesabını bozuyordu. Doğrusu `-250`.
-- **K15_TABAN DEFAULTS 200 Oldu:** Önceden `100` yazılıydı, motorun `safe fallback` değeriyle tutarsızdı. Doğrusu `200`.
-- **Zaman Makinesi manualScores Eklendi:** `zamanMakinesiTesti` fonksiyonuna `manualScores` parametresi eklendi. Artık manuel puanlar ZM tarihsel testine de yansıyor.
-- **K8 Uyku Renk Eşiği Dinamik Oldu:** Tablodaki uyku süresi rengi artık sabit `25` yerine `baseSettings.K8_UYKU_SINIRI` değerini kullanıyor.
+- **İptal Edilen Geliştirme (VIP Muafiyeti ve K6 Şişme Önleyici):** Kullanıcı Joker (K6) kuralında çok çıkan sayıların puanını %65 ile tırpanlamak istemişti. Ayrıca K4, K5 ve K6'dan aynı anda puan alan "VIP Sayıların" K16 ve K19 cezalarından muaf tutulması için bir "Kalkan" geliştirilmişti. 
+- **Neden İptal Edildi?** Kullanıcı, 26-06-2024 (veya 2026) tarihi için test yaparken 7 ve 69 gibi daha önce joker olmayan sayıların toplam puanlarında ~100 puanlık açıklanamayan ani düşüşler yaşadı. Sistemin ayarlarını bozduğuna kanaat getirdiği için **işlem `git restore test_motor_v3.js` ile tamamen geri alındı.**
+- **Şu Anki Durum:** `test_motor_v3.js` ve `Motor_Test_Paneli.html` dosyaları, GitHub'daki en son başarılı commit olan `3854782` (Salı akşamı) durumuna birebir geri döndürülmüştür. VIP kalkanı ve K6 tırpanlama kuralı ŞU AN KODDA YOKTUR.
 
 ## Mevcut Çalışma Yapısı
-- **Ana Dosya:** `Motor_Test_Paneli.html` (Arayüz ve veri trafiği)
+- **Ana Dosya:** `Motor_Test_Paneli.html` (Arayüz ve veri trafiği, sliderlar ve toggle butonları)
 - **Motor Dosyası:** `test_motor_v3.js` (Kuralların asıl hesaplamalarının yapıldığı mantık dosyası)
-- Değişiklik yaparken lütfen `Motor_Test_Paneli.html` dosyasındaki JS fonksiyonlarını (`testCalistir`, `renderTable`, `inFinalPool`, `showSayiListesiModal`) ve `test_motor_v3.js` dosyasındaki (`motorAtesle`) veri alma/gönderme formatlarını bozmamaya dikkat et.
+- Yeni bir kural (K22 vb.) eklenecekse hem `test_motor_v3.js` içindeki `motorAtesle`'ye, hem `zamanMakinesiTesti` puan hesaplama toplamlarına, hem de `Motor_Test_Paneli.html`'deki UI kaydırıcılarına ve tablolara eksiksiz eklenmelidir.
 
-## Joker Kuralı — Önemli Not
-**Joker sayısı, 6 sayıyla AYNI GÜNDE AYNI KÜREDEN çıkan 7. sayıdır.** Tüm kurallarda (K1-K15) joker bu mantıkla dahil edilmiştir:
-- K1, K2, K3 → `frekansHesapla` içinde joker sayılıyor ✅
-- K4, K5 → `komsulukHesapla` içinde joker sayılıyor ✅
-- K6 → Joker'in kendi kuralı ✅
-- K7 → `Number(jokerler[j]) === i` ile sayılıyor ✅
-- K8 → `Number(jokerler[j]) === i` ile sayılıyor ✅
-- K9-K12 → `Number(jokerler[j]) === i` ile sayılıyor ✅ (2026-06-28 fix)
-- K13 → joker `son3Sayilar` ve `uyuyanSet`'e dahil ✅
-- K14 → joker `son3Sayilar`'a dahil ✅ (2026-06-28 fix)
-- K15 → joker `sonXFrekans` ve `cikisEndeksleri`'ne dahil ✅
+## Yeni Ajan İçin Kritik Tavsiyeler
+1. **Kullanıcı Çok Hassastır:** Test sonuçlarında 1 puanlık bir sapma bile kullanıcının test analizlerini alt üst edebilir. Herhangi bir kuralda (özellikle ceza/bonus mantıklarında) "+" ve "-" işaretlerine veya array indexlerine ÇOK dikkat et. 
+2. **"Çuval İncir Berbat Oldu" Uyarısı:** Kullanıcı bir puan düşüşü yaşadığında, kodun başka bir yerine dokunmuş olma ihtimalini her zaman değerlendir (Örn: Javascript objelerinde pass-by-reference hataları veya default ayar çakışmaları).
+3. **60 Sayılık Süper Loto Planı:** Kullanıcı ilerleyen aşamalarda 90 sayılık bu sistemi 60 sayılık (Süper Loto) sisteme adapte etmek isteyecek. Kodun tepesindeki `MAX_TOP = 90` sabiti bu yüzden çok önemlidir. 
+4. **Onay Almadan Büyük Revizyon Yapma:** Her zaman `implementation_plan.md` kullanarak kodu revize etmeden önce mantığı kullanıcıya sun ve onayını al.
 
-## İleriye Yönelik Notlar / Kullanıcıdan Gelen Geri Bildirimler
-- Kullanıcı arayüzde bir tasarım değişikliği istediğinde **(örneğin bir butonun yerini değiştirmek)**, var olan mantık döngüsünü (tabloları ve slider kurgusunu) kesinlikle değiştirmeden **yalnızca CSS veya HTML düzenlemesi yapmaya** özen göster.
-- K14 ve K15 için tabloda renk formatları `p14` (Eleme - Kırmızı ağırlıklı), `p15` (Yankı - Mavi ağırlıklı) olarak ayarlandı.
-- K9-K12 kümülatif ceza sistemi **kasıtlıdır** — kullanıcı aynı sayıya birden fazla pencerede ceza verebilmek istiyor.
-- Github reposu son başarılı haliyle güncellenmelidir.
-
-Lütfen işleme başlamadan önce bu dosyayı referans al. Kolay gelsin!
+Yeni oturumda başarılar dilerim. Lütfen kullanıcıyı dikkatle dinleyerek ve her adımda emin olarak ilerle!
