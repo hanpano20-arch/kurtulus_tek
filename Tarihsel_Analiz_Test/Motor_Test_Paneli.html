@@ -1137,6 +1137,15 @@
                     </div>
                 </div>
                 <div style="flex: 1; overflow-y: auto; padding: 20px;">
+                    <style>
+                        #resultsTable th {
+                            color: #fff !important;
+                            transition: color 0.2s ease;
+                        }
+                        #resultsTable th:hover {
+                            color: #4caf50 !important;
+                        }
+                    </style>
                     <table id="resultsTable">
                         <thead>
                             <tr>
@@ -1145,87 +1154,33 @@
                                 <th style="padding: 4px; font-size: 0.85em;">Durum</th>
                                 <th style="padding: 4px; font-size: 0.85em;">Toplam Puan</th>
                                 <th style="padding: 4px; font-size: 0.85em;">Manuel</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k1')" title="Bilgi için tıkla">K1 (Tüm Zamanlar)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k1')" title="Bilgi için tıkla">K1 Puanı</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k2')" title="Bilgi için tıkla">K2 (Son 50)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k2')" title="Bilgi için tıkla">K2 Puanı</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k3')" title="Bilgi için tıkla">K3 (Son 15)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k3')" title="Bilgi için tıkla">K3 Puanı</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k4')" title="Bilgi için tıkla">1. Halka Komşu</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k4')" title="Bilgi için tıkla">K4 Puan</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k5')" title="Bilgi için tıkla">2. Halka Komşu</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k5')" title="Bilgi için tıkla">K5 Puan</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k6')" title="Bilgi için tıkla">K6 (Joker)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k7')" title="Bilgi için tıkla">K7 (Ceza)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k8')" title="Bilgi için tıkla">Uyku (Çek.)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k8')" title="Bilgi için tıkla">K8 (Uyku Puan)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k9')" title="Bilgi için tıkla">K9 (Son 4)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k10')" title="Bilgi için tıkla">K10 (Son 8)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k11')" title="Bilgi için tıkla">K11 (Son 12)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);"
-                                    onclick="showKInfo('k12')" title="Bilgi için tıkla">K12 (Son 15)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;"
-                                    onclick="showKInfo('k13')" title="Bilgi için tıkla">K13 (Diriltme)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#f44336;"
-                                    onclick="showKInfo('k14')" title="Bilgi için tıkla">K14 (Eleme)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;"
-                                    onclick="showKInfo('k15')" title="Bilgi için tıkla">K15 (Yankı)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#ff9800;"
-                                    onclick="showKInfo('k16')" title="Bilgi için tıkla">K16 (Bölge)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#8e24aa;"
-                                    onclick="showKInfo('k17')" title="Bilgi için tıkla">K17 (Kanka)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#607d8b;"
-                                    onclick="showKInfo('k18')" title="Bilgi için tıkla">K18 (T/Ç)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#795548;"
-                                    onclick="showKInfo('k19')" title="Bilgi için tıkla">K19 (Son R.)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#ff5722;"
-                                    onclick="showKInfo('k20')" title="Bilgi için tıkla">K20 (Uyuyan)</th>
-                                <th class="clickable-th"
-                                    style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;"
-                                    onclick="showKInfo('k21')" title="Bilgi için tıkla">K21 (Isınma)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k1')" title="Bilgi için tıkla">K1 (Tüm Zamanlar)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k1')" title="Bilgi için tıkla">K1 Puanı</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k2')" title="Bilgi için tıkla">K2 (Son 50)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k2')" title="Bilgi için tıkla">K2 Puanı</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k3')" title="Bilgi için tıkla">K3 (Son 15)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k3')" title="Bilgi için tıkla">K3 Puanı</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k4')" title="Bilgi için tıkla">1. Halka Komşu</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k4')" title="Bilgi için tıkla">K4 Puan</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k5')" title="Bilgi için tıkla">2. Halka Komşu</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k5')" title="Bilgi için tıkla">K5 Puan</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k6')" title="Bilgi için tıkla">K6 (Joker)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k7')" title="Bilgi için tıkla">K7 (Ceza)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k8')" title="Bilgi için tıkla">Uyku (Çek.)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k8')" title="Bilgi için tıkla">K8 (Uyku Puan)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k9')" title="Bilgi için tıkla">K9 (Son 4)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k10')" title="Bilgi için tıkla">K10 (Son 8)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k11')" title="Bilgi için tıkla">K11 (Son 12)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k12')" title="Bilgi için tıkla">K12 (Son 15)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k13')" title="Bilgi için tıkla">K13 (Diriltme)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k14')" title="Bilgi için tıkla">K14 (Eleme)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k15')" title="Bilgi için tıkla">K15 (Yankı)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k16')" title="Bilgi için tıkla">K16 (Bölge)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k17')" title="Bilgi için tıkla">K17 (Kanka)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k18')" title="Bilgi için tıkla">K18 (T/Ç)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k19')" title="Bilgi için tıkla">K19 (Son R.)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k20')" title="Bilgi için tıkla">K20 (Uyuyan)</th>
+                                <th class="clickable-th" style="padding: 2px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k21')" title="Bilgi için tıkla">K21 (Isınma)</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
@@ -2350,6 +2305,12 @@
             renderTable(currentSonuc);
         }
 
+        function getColColor(val) {
+            if (val > 0) return '#fff';
+            if (val < 0) return '#f44336';
+            return '#888'; // zero is gray
+        }
+
         function renderTable(sonuc) {
             let tbody = document.getElementById("tableBody");
             tbody.innerHTML = "";
@@ -2415,32 +2376,32 @@
                     <button class="btn-m plus manual-ctrl-ignore" onmousedown="startHold(changeManualScore, ${i}, 1)" onmouseup="stopHold()" onmouseleave="stopHold()">+</button>
                 </td>
                 <td>${sonuc.frekanslar.tumu[i]}</td>
-                <td style="color:${item.p1 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p1}</td>
+                <td style="color:${getColColor(item.p1)}; font-weight:bold;">${item.p1}</td>
                 <td>${sonuc.frekanslar.son50[i]}</td>
-                <td style="color:${item.p2 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p2}</td>
+                <td style="color:${getColColor(item.p2)}; font-weight:bold;">${item.p2}</td>
                 <td>${sonuc.frekanslar.son15[i]}</td>
-                <td style="color:${item.p3 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p3}</td>
+                <td style="color:${getColColor(item.p3)}; font-weight:bold;">${item.p3}</td>
                 <td>${sonuc.frekanslar.halka1[i]}</td>
-                <td style="color:${item.p4 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p4}</td>
+                <td style="color:${getColColor(item.p4)}; font-weight:bold;">${item.p4}</td>
                 <td>${sonuc.frekanslar.halka2[i]}</td>
-                <td style="color:${item.p5 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p5}</td>
-                <td style="color:${item.p6 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p6}</td>
-                <td style="color:${item.p7 < 0 ? '#f44336' : '#fff'}; font-weight:bold;">${item.p7}</td>
+                <td style="color:${getColColor(item.p5)}; font-weight:bold;">${item.p5}</td>
+                <td style="color:${getColColor(item.p6)}; font-weight:bold;">${item.p6}</td>
+                <td style="color:${getColColor(item.p7)}; font-weight:bold;">${item.p7}</td>
                 <td style="color:${item.uyku >= (baseSettings.K8_UYKU_SINIRI || 25) ? '#ff9800' : '#fff'};">${item.uyku}</td>
-                <td style="color:${item.p8 < 0 ? '#ff9800' : '#fff'}; font-weight:bold;">${item.p8}</td>
-                <td style="color:${item.p9 < 0 ? '#f44336' : (item.p9 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p9}</td>
-                <td style="color:${item.p10 < 0 ? '#f44336' : (item.p10 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p10}</td>
-                <td style="color:${item.p11 < 0 ? '#f44336' : (item.p11 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p11}</td>
-                <td style="color:${item.p12 < 0 ? '#f44336' : (item.p12 > 0 ? '#fff' : '#888')}; font-weight:bold;">${item.p12}</td>
-                <td style="color:${item.p13 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${item.p13}</td>
-                <td style="color:${item.p14 !== 0 ? '#f44336' : '#888'}; font-weight:bold;">${item.p14}</td>
-                <td style="color:${item.p15 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${item.p15}</td>
-                <td style="color:${item.p16 > 0 ? '#ff9800' : (item.p16 < 0 ? '#f44336' : '#888')}; font-weight:bold;">${item.p16}</td>
-                <td style="color:${item.p17 > 0 ? '#8e24aa' : '#888'}; font-weight:bold;">${item.p17}</td>
-                <td style="color:${item.p18 > 0 ? '#607d8b' : '#888'}; font-weight:bold;">${item.p18}</td>
-                <td style="color:${item.p19 > 0 ? '#795548' : '#888'}; font-weight:bold;">${item.p19}</td>
-                <td style="color:${item.p20 < 0 ? '#ff5722' : '#888'}; font-weight:bold;">${item.p20}</td>
-                <td style="color:${item.p21 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${item.p21}</td>
+                <td style="color:${getColColor(item.p8)}; font-weight:bold;">${item.p8}</td>
+                <td style="color:${getColColor(item.p9)}; font-weight:bold;">${item.p9}</td>
+                <td style="color:${getColColor(item.p10)}; font-weight:bold;">${item.p10}</td>
+                <td style="color:${getColColor(item.p11)}; font-weight:bold;">${item.p11}</td>
+                <td style="color:${getColColor(item.p12)}; font-weight:bold;">${item.p12}</td>
+                <td style="color:${getColColor(item.p13)}; font-weight:bold;">${item.p13}</td>
+                <td style="color:${getColColor(item.p14)}; font-weight:bold;">${item.p14}</td>
+                <td style="color:${getColColor(item.p15)}; font-weight:bold;">${item.p15}</td>
+                <td style="color:${getColColor(item.p16)}; font-weight:bold;">${item.p16}</td>
+                <td style="color:${getColColor(item.p17)}; font-weight:bold;">${item.p17}</td>
+                <td style="color:${getColColor(item.p18)}; font-weight:bold;">${item.p18}</td>
+                <td style="color:${getColColor(item.p19)}; font-weight:bold;">${item.p19}</td>
+                <td style="color:${getColColor(item.p20)}; font-weight:bold;">${item.p20}</td>
+                <td style="color:${getColColor(item.p21)}; font-weight:bold;">${item.p21}</td>
             </tr>`;
                 tbody.appendChild(tr);
             });
@@ -2530,6 +2491,15 @@
 
             // --- TABLO OLUŞTURMA ---
             let html = `
+        <style>
+            #sayiListesiTable th {
+                color: #fff !important;
+                transition: color 0.2s ease;
+            }
+            #sayiListesiTable th:hover {
+                color: #4caf50 !important;
+            }
+        </style>
         <table id="sayiListesiTable">
             <thead style="position: sticky; top: 0; z-index: 10; background: #333; box-shadow: 0 2px 2px -1px rgba(0,0,0,0.5);">
                 <tr>
@@ -2549,19 +2519,21 @@
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k10')" title="Bilgi için tıkla">K10 (Son 8)</th>
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k11')" title="Bilgi için tıkla">K11 (Son 12)</th>
                     <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k12')" title="Bilgi için tıkla">K12 (Son 15)</th>
-                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;" onclick="showKInfo('k13')" title="Bilgi için tıkla">K13 (Diriltme)</th>
-                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#f44336;" onclick="showKInfo('k14')" title="Bilgi i&#231;in t&#305;kla">K14 (Eleme)</th>
-                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;" onclick="showKInfo('k15')" title="Bilgi i&#231;in t&#305;kla">K15 (Yank&#305;)</th>
-                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#ff9800;" onclick="showKInfo('k16')" title="Bilgi i&#231;in t&#305;kla">K16 (B&ouml;lge)</th>
-                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#8e24aa;" onclick="showKInfo('k17')" title="Bilgi için tıkla">K17 (Kanka)</th>
-                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#607d8b;" onclick="showKInfo('k18')" title="Bilgi için tıkla">K18 (T/&Ccedil;)</th>
-                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#795548;" onclick="showKInfo('k19')" title="Bilgi için tıkla">K19 (Son R.)</th>
-                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#ff5722;" onclick="showKInfo('k20')" title="Bilgi için tıkla">K20 (Uyku)</th>
-                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg); color:#00bcd4;" onclick="showKInfo('k21')" title="Bilgi için tıkla">K21 (Isınma)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k13')" title="Bilgi için tıkla">K13 (Diriltme)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k14')" title="Bilgi için tıkla">K14 (Eleme)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k15')" title="Bilgi için tıkla">K15 (Yankı)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k16')" title="Bilgi için tıkla">K16 (Bölge)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k17')" title="Bilgi için tıkla">K17 (Kanka)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k18')" title="Bilgi için tıkla">K18 (T/Ç)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k19')" title="Bilgi için tıkla">K19 (Son R.)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k20')" title="Bilgi için tıkla">K20 (Uyku)</th>
+                    <th class="clickable-th" style="padding: 4px; font-size: 0.85em; writing-mode: vertical-rl; transform: rotate(180deg);" onclick="showKInfo('k21')" title="Bilgi için tıkla">K21 (Isınma)</th>
                 </tr>
             </thead>
             <tbody>
         `;
+
+            const getColColor = (val) => val > 0 ? '#fff' : (val < 0 ? '#f44336' : '#888');
 
             siralama.forEach((item, index) => {
                 let isSelected = inFinalPool(item.num);
@@ -2598,30 +2570,30 @@
                 <td style="font-size:1.2em; font-weight:bold; color:${item.tp < 0 ? '#f44336' : '#fff'};">${item.tp}</td>
                 <td class="manual-ctrl">
                     <button class="btn-m minus manual-ctrl-ignore" onmousedown="startHold(changeManualScore, ${item.num}, -1)" onmouseup="stopHold()" onmouseleave="stopHold()">-</button>
-                    <span class="man-val-${item.num}" style="font-weight:bold; color:${man < 0 ? '#f44336' : (man > 0 ? '#4caf50' : '#fff')}">${man}</span>
+                    <span class="man-val-${item.num}" style="font-weight:bold; color:${man < 0 ? '#f44336' : (man > 0 ? '#4caf50' : '#888')}">${man}</span>
                     <button class="btn-m plus manual-ctrl-ignore" onmousedown="startHold(changeManualScore, ${item.num}, 1)" onmouseup="stopHold()" onmouseleave="stopHold()">+</button>
                 </td>
-                <td style="color:${p1 < 0 ? '#f44336' : '#fff'}">${p1}</td>
-                <td style="color:${p2 < 0 ? '#f44336' : '#fff'}">${p2}</td>
-                <td style="color:${p3 < 0 ? '#f44336' : '#fff'}">${p3}</td>
-                <td style="color:${p4 < 0 ? '#f44336' : '#fff'}">${p4}</td>
-                <td style="color:${p5 < 0 ? '#f44336' : '#fff'}">${p5}</td>
-                <td style="color:${p6 < 0 ? '#f44336' : '#fff'}">${p6}</td>
-                <td style="color:#f44336; font-weight:bold;">${p7}</td>
-                <td style="color:${p8 < 0 ? '#ff9800' : '#fff'}; font-weight:bold;">${p8}</td>
-                <td style="color:${p9 < 0 ? '#f44336' : (p9 > 0 ? '#fff' : '#888')}; font-weight:bold;">${p9}</td>
-                <td style="color:${p10 < 0 ? '#f44336' : (p10 > 0 ? '#fff' : '#888')}; font-weight:bold;">${p10}</td>
-                <td style="color:${p11 < 0 ? '#f44336' : (p11 > 0 ? '#fff' : '#888')}; font-weight:bold;">${p11}</td>
-                <td style="color:${p12 < 0 ? '#f44336' : (p12 > 0 ? '#fff' : '#888')}; font-weight:bold;">${p12}</td>
-                <td style="color:${p13 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${p13}</td>
-                <td style="color:${p14 !== 0 ? '#f44336' : '#888'}; font-weight:bold;">${p14}</td>
-                <td style="color:${p15 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${p15}</td>
-                <td style="color:${p16 > 0 ? '#ff9800' : (p16 < 0 ? '#f44336' : '#888')}; font-weight:bold;">${p16}</td>
-                <td style="color:${p17 > 0 ? '#8e24aa' : '#888'}; font-weight:bold;">${p17}</td>
-                <td style="color:${p18 > 0 ? '#607d8b' : '#888'}; font-weight:bold;">${p18}</td>
-                <td style="color:${p19 > 0 ? '#795548' : '#888'}; font-weight:bold;">${p19}</td>
-                <td style="color:${p20 < 0 ? '#ff5722' : '#888'}; font-weight:bold;">${p20}</td>
-                <td style="color:${p21 > 0 ? '#00bcd4' : '#888'}; font-weight:bold;">${p21}</td>
+                <td style="color:${getColColor(p1)}">${p1}</td>
+                <td style="color:${getColColor(p2)}">${p2}</td>
+                <td style="color:${getColColor(p3)}">${p3}</td>
+                <td style="color:${getColColor(p4)}">${p4}</td>
+                <td style="color:${getColColor(p5)}">${p5}</td>
+                <td style="color:${getColColor(p6)}">${p6}</td>
+                <td style="color:${getColColor(p7)}; font-weight:bold;">${p7}</td>
+                <td style="color:${getColColor(p8)}; font-weight:bold;">${p8}</td>
+                <td style="color:${getColColor(p9)}; font-weight:bold;">${p9}</td>
+                <td style="color:${getColColor(p10)}; font-weight:bold;">${p10}</td>
+                <td style="color:${getColColor(p11)}; font-weight:bold;">${p11}</td>
+                <td style="color:${getColColor(p12)}; font-weight:bold;">${p12}</td>
+                <td style="color:${getColColor(p13)}; font-weight:bold;">${p13}</td>
+                <td style="color:${getColColor(p14)}; font-weight:bold;">${p14}</td>
+                <td style="color:${getColColor(p15)}; font-weight:bold;">${p15}</td>
+                <td style="color:${getColColor(p16)}; font-weight:bold;">${p16}</td>
+                <td style="color:${getColColor(p17)}; font-weight:bold;">${p17}</td>
+                <td style="color:${getColColor(p18)}; font-weight:bold;">${p18}</td>
+                <td style="color:${getColColor(p19)}; font-weight:bold;">${p19}</td>
+                <td style="color:${getColColor(p20)}; font-weight:bold;">${p20}</td>
+                <td style="color:${getColColor(p21)}; font-weight:bold;">${p21}</td>
             </tr>`;
             });
 
